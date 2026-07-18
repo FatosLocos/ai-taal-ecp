@@ -924,3 +924,71 @@ validation plateau at the unchanged learning rate `0.001`. A future ECP7-B14 may
 keep the complete B10 design and learning rate through step 5,000, then decay
 only that rate linearly to `0.0001` at step 15,000. Temperature, utilization,
 architecture, duration, data, translator and thresholds must remain unchanged.
+
+## Batch 14 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `15,000`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Learning rate: `0.001` through step `5,000`, then linear to `0.0001` at step `15,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B14-I keeps every Batch 10 model, loss and training setting except the late
+learning-rate schedule. The optimizer rate remains identical through the
+original 5,000-step horizon, then decays tenfold. The unchanged positive control
+is rerun, and no alternative schedule or accompanying intervention is admitted
+into this batch.
+
+## Batch 14 results
+
+Positive-control run: `runs/ecp7-batch14-control-development/20260718T132929Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch14-intervention-development/20260718T132929Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B14-I |
+|---|---:|---:|
+| Population train, mean | 100% | 79.1321% |
+| Population train, worst link | 100% | 77.7902% |
+| Population validation, mean | 100% | 65.4907% |
+| Population validation, worst link | 100% | 63.1836% |
+| Universal translator, validation | 100% | 71.0205% |
+| Exact sender-message agreement | 100% | 89.04% |
+| Unique messages per sender | 15,360 | 11,961–12,280 |
+| Collision meanings per sender | 0 | 3,080–3,399 |
+| Message entropy | 13.91 bits | 13.43–13.48 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B14-I retained a passing
+translator score, but failed train, validation and injectivity. It does not
+authorize confirmatory access.
+
+Relative to B10, late learning-rate decay reduced train exactness from 82.0836%
+to 79.1321%, validation from 72.9797% to 65.4907%, and translator validation from
+75.1465% to 71.0205%. Sender agreement and code use also fell. Smaller late
+updates therefore did not stabilize the B10 refinement trajectory.
+
+Population validation factor accuracies were
+`[87.10%, 91.46%, 98.44%, 86.36%]`; universal-translator factor accuracies were
+`[87.21%, 98.34%, 98.44%, 85.35%]`.
+
+The selected checkpoint was step 14,800, where learning rate had decayed to
+`0.000118`. Task loss was `0.0868` and utilization loss was `-0.7330`. The final
+step at learning rate `0.0001` was slightly worse on validation.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 14 decision
+
+ECP7-B14-I is rejected. Constant late learning rate is beneficial relative to
+decay, and Batch 10 remains the strongest weak-structure base. The confirmatory
+split remains sealed.
+
+B10 selected its final 15,000-step checkpoint and B14 shows that shrinking late
+updates is harmful. A future ECP7-B15 may therefore keep the exact B10
+architecture, losses, constant learning rate and temperature endpoint, then
+extend only the maximum population horizon to 30,000 steps with minimum
+selection step 15,000 and patience 5,000. No other setting may change.

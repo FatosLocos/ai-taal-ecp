@@ -591,3 +591,38 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative sender depth,
 activation, width, residual connection, decoder, loss, duration, optimizer or
 seed may be tried inside Batch 13.
+
+## Batch 14 preregistration — Late learning-rate decay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b14-development.yaml`<br>
+Raw configuration SHA-256: `867e42a0a8c530a4bd1d42be68f2846b66ce368644e993be67f82b39c8caec04`<br>
+Effective configuration SHA-256: `f44a36695c59bd532d7372c6cb3fb5b6eeed06b5bc10f04e96603926f7a9f37e`
+
+Batches 12 and 13 rejected additional generic decoder and sender depth. Batch
+11 rejected reducing late utilization pressure. Batch 10 remains the base: it
+continued to improve late, but its validation score fluctuated around a plateau
+while AdamW retained learning rate `0.001` through step 15,000.
+
+Batch 14 tests one optimization-stability hypothesis: smaller late parameter
+updates can refine the established high-entropy code without changing its
+architecture, temperature or objective balance.
+
+ECP7-B14-I keeps the complete B10 model, losses, optimizer type, data,
+temperature schedule, duration, selection window and translator. Learning rate
+remains exactly `0.001` through step 5,000, then decays linearly to `0.0001` at
+step 15,000. No other AdamW or training setting changes.
+
+This reproduces the full B9 trajectory before the learning-rate schedules
+diverge. Smoke runs are mechanical only and may not authorize tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B14-I with late learning-rate decay on the B10 base.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative final rate, decay
+shape, decay boundary, architecture, loss, duration, optimizer or seed may be
+tried inside Batch 14.

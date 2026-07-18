@@ -93,6 +93,9 @@ def train_communication_system(
 
     for step in range(1, max_steps + 1):
         system.train()
+        learning_rate = _scheduled_learning_rate(training, step)
+        for parameter_group in optimizer.param_groups:
+            parameter_group["lr"] = learning_rate
         indices = torch.randint(
             len(train_values), (batch_size,), generator=generator, device="cpu"
         ).to(device)
@@ -113,6 +116,7 @@ def train_communication_system(
         record: dict[str, float | int] = {
             "step": step,
             "loss": float(loss.detach().cpu()),
+            "learning_rate": float(learning_rate),
             "temperature": float(temperature),
             "train_exact": train_metrics["exact_match"],
             "validation_exact": validation_metrics["exact_match"],
@@ -246,6 +250,9 @@ def train_population_system(
 
     for step in range(1, max_steps + 1):
         population.train()
+        learning_rate = _scheduled_learning_rate(training, step)
+        for parameter_group in optimizer.param_groups:
+            parameter_group["lr"] = learning_rate
         indices = torch.randint(
             len(train_values),
             (training["batch_size"],),
@@ -443,6 +450,7 @@ def train_population_system(
                 "sender_message_consensus_weight": float(
                     sender_consensus_weight
                 ),
+                "learning_rate": float(learning_rate),
                 "temperature": float(temperature),
                 "train_mean_exact": train_metrics["mean_exact_match"],
                 "train_worst_pair_exact": train_metrics["worst_pair_exact_match"],
@@ -1021,6 +1029,25 @@ def _scheduled_temperature(
     return _geometric_schedule(
         training["temperature_start"], training["temperature_end"], progress
     )
+
+
+def _scheduled_learning_rate(training: dict[str, Any], step: int) -> float:
+    initial_learning_rate = float(training["learning_rate"])
+    decay = training.get("learning_rate_decay", {})
+    if not decay.get("enabled", False):
+        return initial_learning_rate
+
+    start_step = int(decay["start_step"])
+    if step <= start_step:
+        return initial_learning_rate
+    end_step = int(decay["end_step"])
+    final_learning_rate = float(decay["final_learning_rate"])
+    if step >= end_step:
+        return final_learning_rate
+    progress = (step - start_step) / (end_step - start_step)
+    return initial_learning_rate + (
+        final_learning_rate - initial_learning_rate
+    ) * progress
 
 
 def _scheduled_code_utilization_weight(

@@ -139,6 +139,29 @@ def validate_config(config: dict[str, Any]) -> None:
         if temperature_schedule_steps > training["max_steps"]:
             raise ConfigError("Temperature schedule steps cannot exceed max_steps.")
 
+    learning_rate_decay = training.get("learning_rate_decay", {})
+    if learning_rate_decay.get("enabled", False):
+        start_step = learning_rate_decay.get("start_step", 0)
+        end_step = learning_rate_decay.get("end_step", 0)
+        final_learning_rate = learning_rate_decay.get("final_learning_rate", 0)
+        if not isinstance(start_step, int) or isinstance(start_step, bool):
+            raise ConfigError("Learning-rate decay start must be an integer.")
+        if not isinstance(end_step, int) or isinstance(end_step, bool):
+            raise ConfigError("Learning-rate decay end must be an integer.")
+        if start_step < 1:
+            raise ConfigError("Learning-rate decay start must be positive.")
+        if end_step <= start_step or end_step > training["max_steps"]:
+            raise ConfigError(
+                "Learning-rate decay end must follow its start and fit max_steps."
+            )
+        if (
+            final_learning_rate <= 0
+            or final_learning_rate >= training["learning_rate"]
+        ):
+            raise ConfigError(
+                "Final learning rate must be positive and below its initial value."
+            )
+
     utilization = training.get("code_utilization", {})
     if utilization.get("enabled", False):
         if utilization.get("weight", -1) < 0:

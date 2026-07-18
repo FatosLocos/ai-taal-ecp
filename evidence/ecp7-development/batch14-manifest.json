@@ -1,0 +1,44 @@
+{
+  "batch": "ECP7-B14",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "a7bccd464704ce71e3e8baa7508883f2512c0dd202d5a0f735ca1b5d9011f7ae",
+      "seed-11/metrics.json": "96bbb66b3561ad9f051a8ff6680ef1950488c6ba59aa755365e8e94be8468e01",
+      "summary.json": "69f46e4b77edadb7186f2dba02283945bae97e6f66aff80b39d1f868496c3737"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T132929Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "c6f581a77ca83bea6b0703ef6a58fc9081dfcbaf4c2af5e1cd94fbb85eff2185",
+      "posthoc-analysis.json": "1b7010c1487517868fb782cec2eb42dcb39adef33e8ceb005ac467982a0dd852",
+      "seed-11/metrics.json": "31383793df7c77b6fa85f8d7a7748c6a4d88d7d42690f329eed6e35b9a5913a3",
+      "summary.json": "e63674150ff7fd0503460b7e018357e9e2f5478ead2db4a8a896fdde379854ab"
+    },
+    "best_code_utilization_loss": -0.733005940914154,
+    "best_learning_rate": 0.00011800000000000005,
+    "best_step": 14800,
+    "collision_meanings_per_sender": [3080, 3081, 3399, 3297],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.890407986111111,
+    "message_entropy_bits_per_sender": [13.479958807644351, 13.479892430690663, 13.425251135080563, 13.449829537426103],
+    "population_train_mean_exact_match": 0.79132080078125,
+    "population_train_worst_link_exact_match": 0.7779017857142857,
+    "population_validation_factor_accuracy": [0.87103271484375, 0.91461181640625, 0.984375, 0.8636474609375],
+    "population_validation_mean_exact_match": 0.6549072265625,
+    "population_validation_worst_link_exact_match": 0.6318359375,
+    "run_id": "20260718T132929Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.710205078125,
+    "unique_messages_per_sender": [12280, 12279, 11961, 12063]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

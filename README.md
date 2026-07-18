@@ -26,7 +26,7 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first thirteen sealed batches are valid
+one-factor-per-slot architecture. Its first fourteen sealed batches are valid
 development results but none passes the full gate. Batch 10 remains strongest,
 extending the position-aware design to 15,000 optimization steps. It reaches
 82.08% train exactness, 72.98% validation and 75.15% translator validation while
@@ -34,8 +34,8 @@ using 12,358–12,906 hard messages per sender. The translator threshold now pas
 but the registered train, validation and injectivity thresholds do not. Batch
 11's utilization-weight decay regressed all principal measures, and Batch 12's
 deeper decoder regressed further. Batch 13's deeper sender collapsed almost
-completely. The ECP-6 positive controls remain perfect and the ECP-7
-confirmatory test remains sealed. See
+completely, and Batch 14's late learning-rate decay also regressed. The ECP-6
+positive controls remain perfect and the ECP-7 confirmatory test remains sealed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -89,6 +89,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b11-development.yaml`](config/ecp7-b11-development.yaml) — late utilization-weight decay on the Batch 10 base.
 - [`config/ecp7-b12-development.yaml`](config/ecp7-b12-development.yaml) — one additional generic shared decoder layer on the Batch 10 base.
 - [`config/ecp7-b13-development.yaml`](config/ecp7-b13-development.yaml) — one additional generic shared sender layer on the Batch 10 base.
+- [`config/ecp7-b14-development.yaml`](config/ecp7-b14-development.yaml) — late learning-rate decay on the Batch 10 base.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

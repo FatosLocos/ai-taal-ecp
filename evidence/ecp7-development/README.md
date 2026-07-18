@@ -73,6 +73,11 @@ exactness, 0.32% validation, 0.61% translator validation and only 694–831
 messages. Sender depth is therefore also rejected. Exact identities and hashes
 are in `batch13-manifest.json`.
 
+Batch 14 decayed learning rate after step 5,000. It regressed to 79.13% train
+exactness, 65.49% validation and 71.02% translator validation. Constant late
+learning rate is therefore retained. Exact identities and hashes are in
+`batch14-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

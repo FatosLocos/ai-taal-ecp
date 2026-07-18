@@ -1,0 +1,16 @@
+extends: ecp7-b10-development.yaml
+
+experiment:
+  title: ECP-7 extended optimization with late learning-rate decay
+  arm: extended_optimization_learning_rate_decay
+  objective: >-
+    Test whether reducing optimizer step size after the original 5,000-step
+    horizon stabilizes refinement of the strongest weak-structure protocol
+    without changing its architecture, losses, or temperature schedule.
+
+training:
+  learning_rate_decay:
+    enabled: true
+    start_step: 5000
+    end_step: 15000
+    final_learning_rate: 0.0001
