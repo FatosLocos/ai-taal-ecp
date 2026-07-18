@@ -755,3 +755,44 @@ sealed-test requirement fails. No alternative mining source, refresh interval,
 pair batch size, temperature, weight, warmup, architecture, duration, optimizer,
 data, translator or seed may be tried inside Batch 17. Failure is recorded
 without confirmatory test access.
+
+## Batch 18 preregistration — Attenuated collision replay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 14:53:31 UTC<br>
+Configuration: `config/ecp7-b18-development.yaml`<br>
+Raw configuration SHA-256: `a9da48a2c76fd01a9f2889050c347ed9fcf616389297424f156e9f2d8489e59f`<br>
+Effective configuration SHA-256: `21d76380640738ee98ddbdb7ae88c6a1d3185add860b96f1fe9c5c83a782d757`
+
+Batch 17 established that global training-codebook mining produces a usable
+collision signal and modestly improves hard code use. Its replay weight rose to
+`0.24` at the selected checkpoint, where replay loss `0.83844` contributed
+approximately `0.201` to the objective versus task loss `0.07453`. Higher
+weights then caused collision churn, validation regression and early stopping.
+
+Batch 18 tests only whether coefficient scale caused that failure. ECP7-B18-I
+inherits the complete B17 mining algorithm, training-only pair source,
+seed-derived sampler, 32-pair sender batches, 200-step refresh interval, relaxed
+temperature `1.0`, architecture, base losses, optimizer, data, 30,000-step
+duration, selection window, translator and thresholds. The sole change is:
+
+- replay weight remains `0` through step `15,000`;
+- replay weight rises linearly to `0.1` over steps `15,000–20,000`;
+- replay weight remains `0.1` through step `30,000`.
+
+For an initially near-one replay loss, full weight `0.1` is comparable to the
+remaining B15 task-loss scale instead of several times larger. The task-batch
+trajectory and all random sampling through step 15,000 must again match B15
+exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B18-I with attenuated late global collision-pair replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative coefficient, schedule, mining
+source, pair sampler, refresh, temperature, architecture, duration, optimizer,
+data, translator or seed may be tried inside Batch 18. Failure is recorded
+without confirmatory test access.

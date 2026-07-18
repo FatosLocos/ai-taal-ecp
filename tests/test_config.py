@@ -615,3 +615,17 @@ def test_global_collision_replay_parameters_are_bounded(ecp7_b17_config):
     ] = 0
     with pytest.raises(ConfigError, match="temperature must be positive"):
         validate_config(invalid_temperature)
+
+
+def test_ecp7_b18_changes_only_the_collision_replay_weight(
+    ecp7_b17_config, ecp7_b18_config
+):
+    assert ecp7_b18_config["world"] == ecp7_b17_config["world"]
+    assert ecp7_b18_config["dataset"] == ecp7_b17_config["dataset"]
+    assert ecp7_b18_config["channel"] == ecp7_b17_config["channel"]
+    assert ecp7_b18_config["agents"] == ecp7_b17_config["agents"]
+    b17_training = deepcopy(ecp7_b17_config["training"])
+    b18_training = deepcopy(ecp7_b18_config["training"])
+    assert b17_training["global_collision_replay"].pop("weight") == 1.0
+    assert b18_training["global_collision_replay"].pop("weight") == 0.1
+    assert b18_training == b17_training

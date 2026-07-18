@@ -449,6 +449,17 @@ def test_late_collision_replay_weight_starts_warms_and_holds():
     assert _scheduled_collision_replay_weight(schedule, 30000) == 1.0
 
 
+def test_attenuated_collision_replay_weight_stays_at_task_scale(
+    ecp7_b18_config,
+):
+    schedule = ecp7_b18_config["training"]["global_collision_replay"]
+
+    assert _scheduled_collision_replay_weight(schedule, 15000) == 0.0
+    assert _scheduled_collision_replay_weight(schedule, 17500) == 0.05
+    assert _scheduled_collision_replay_weight(schedule, 20000) == 0.1
+    assert _scheduled_collision_replay_weight(schedule, 30000) == 0.1
+
+
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
     receiver = FactorizedPermutationSlotReceiver(ModelSpec.from_config(ecp4_config))
     meanings = torch.tensor(
