@@ -353,3 +353,41 @@ def test_ecp7_b9_changes_only_the_shared_decoder_family(
     assert b7_translator.pop("family") == "sequence_encoder_multihead_classifier"
     assert b9_translator.pop("family") == "position_aware_mlp_receiver"
     assert b9_translator == b7_translator
+
+
+def test_ecp7_b10_changes_only_the_population_optimization_horizon(
+    ecp7_b9_config, ecp7_b10_config
+):
+    assert ecp7_b10_config["world"] == ecp7_b9_config["world"]
+    assert ecp7_b10_config["dataset"] == ecp7_b9_config["dataset"]
+    assert ecp7_b10_config["channel"] == ecp7_b9_config["channel"]
+    assert ecp7_b10_config["agents"] == ecp7_b9_config["agents"]
+    b9_training = deepcopy(ecp7_b9_config["training"])
+    b10_training = deepcopy(ecp7_b10_config["training"])
+    assert b9_training.pop("max_steps") == 5000
+    assert b10_training.pop("max_steps") == 15000
+    assert b9_training.pop("minimum_steps") == 2000
+    assert b10_training.pop("minimum_steps") == 5000
+    assert b9_training.pop("patience_steps") == 1600
+    assert b10_training.pop("patience_steps") == 3000
+    assert b10_training.pop("temperature_schedule_steps") == 5000
+    assert b10_training == b9_training
+
+
+def test_temperature_schedule_steps_must_fit_the_training_horizon(
+    ecp7_b10_config,
+):
+    invalid_type = deepcopy(ecp7_b10_config)
+    invalid_type["training"]["temperature_schedule_steps"] = 1.5
+    with pytest.raises(ConfigError, match="integer of at least 2"):
+        validate_config(invalid_type)
+
+    invalid_short = deepcopy(ecp7_b10_config)
+    invalid_short["training"]["temperature_schedule_steps"] = 1
+    with pytest.raises(ConfigError, match="integer of at least 2"):
+        validate_config(invalid_short)
+
+    invalid_long = deepcopy(ecp7_b10_config)
+    invalid_long["training"]["temperature_schedule_steps"] = 15001
+    with pytest.raises(ConfigError, match="cannot exceed max_steps"):
+        validate_config(invalid_long)

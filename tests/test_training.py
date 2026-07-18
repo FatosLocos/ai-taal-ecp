@@ -11,6 +11,7 @@ from ai_taal.models import (
     Sender,
 )
 from ai_taal.training import (
+    _scheduled_temperature,
     algebraic_consistency_loss,
     atom_code_consensus_loss,
     build_algebraic_quadruples,
@@ -37,6 +38,26 @@ def test_two_training_steps_complete(config):
     assert result.best_step in {1, 2}
     assert 0.0 <= result.best_validation_exact <= 1.0
     assert system.sender.spec.message_length == 4
+
+
+def test_extended_horizon_preserves_then_holds_the_registered_temperature(
+    ecp7_b9_config, ecp7_b10_config
+):
+    for step in (1, 200, 2000, 5000):
+        assert _scheduled_temperature(
+            ecp7_b10_config["training"], step, 15000
+        ) == _scheduled_temperature(ecp7_b9_config["training"], step, 5000)
+
+    final_temperature = ecp7_b9_config["training"]["temperature_end"]
+    assert _scheduled_temperature(ecp7_b10_config["training"], 5000, 15000) == (
+        final_temperature
+    )
+    assert _scheduled_temperature(ecp7_b10_config["training"], 10000, 15000) == (
+        final_temperature
+    )
+    assert _scheduled_temperature(ecp7_b10_config["training"], 15000, 15000) == (
+        final_temperature
+    )
 
 
 def test_algebraic_quadruples_use_only_training_meanings_and_same_transition(

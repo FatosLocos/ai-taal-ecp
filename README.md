@@ -26,13 +26,14 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first nine sealed batches are valid
-development results but none passes the full gate. Batch 9 is a major advance:
-a parallel joint-context sender plus generic position-aware decoder reaches
-71.27% train exactness, 52.39% validation and 54.81% translator validation while
-using about 11,000 hard messages per sender. It still misses the registered
-97/95%, 80%, 70% and injectivity thresholds. The ECP-6 positive controls remain
-perfect and the ECP-7 confirmatory test remains sealed. See
+one-factor-per-slot architecture. Its first ten sealed batches are valid
+development results but none passes the full gate. Batch 10 extends the
+position-aware design to 15,000 optimization steps and reaches 82.08% train
+exactness, 72.98% validation and 75.15% translator validation while using
+12,358–12,906 hard messages per sender. The translator threshold now passes,
+but the registered train, validation and injectivity thresholds do not. The
+ECP-6 positive controls remain perfect and the ECP-7 confirmatory test remains
+sealed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -82,6 +83,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b7-development.yaml`](config/ecp7-b7-development.yaml) — bounded parallel generation from one shared joint context.
 - [`config/ecp7-b8-development.yaml`](config/ecp7-b8-development.yaml) — algebraic context invariance on the parallel sender.
 - [`config/ecp7-b9-development.yaml`](config/ecp7-b9-development.yaml) — generic position-aware MLP decoding on the parallel sender.
+- [`config/ecp7-b10-development.yaml`](config/ecp7-b10-development.yaml) — the Batch 9 design with an isolated extended optimization horizon.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

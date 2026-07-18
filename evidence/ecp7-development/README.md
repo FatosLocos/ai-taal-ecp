@@ -52,6 +52,12 @@ reached 71.27% train exactness, 52.39% validation, 54.81% translator validation
 and 10,834–11,017 messages, but still missed every registered performance and
 injectivity gate. Exact identities and hashes are in `batch9-manifest.json`.
 
+Batch 10 preserved Batch 9's first 5,000 temperature steps and extended only
+population optimization to 15,000 steps. It reached 82.08% train exactness,
+72.98% validation and 75.15% translator validation. The translator gate passed,
+but train, validation and injectivity still failed. Exact identities and hashes
+are in `batch10-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
