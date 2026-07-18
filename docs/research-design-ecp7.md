@@ -556,3 +556,38 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative depth, activation,
 width, residual connection, sender, loss, duration, optimizer or seed may be
 tried inside Batch 12.
+
+## Batch 13 preregistration — Deep bounded-parallel sender
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b13-development.yaml`<br>
+Raw configuration SHA-256: `9b57b1ae0387483594a8171a1535c0e9a82fc988708d74d0300a775747ea7210`<br>
+Effective configuration SHA-256: `661a0e286eb986a1b907df5e30dc416a1aefd5e5263056ccc12092c6beb3002d`
+
+Batch 12 rejected extra receiver and translator depth. Batch 10 remains the
+base, but its bounded parallel sender still constructs all four message slots
+from one shallow shared context. Batch 13 tests the symmetric remaining capacity
+hypothesis: the sender context is too shallow to construct the residual color
+and size distinctions.
+
+ECP7-B13-I returns to the complete B10 model, receiver, translator, training and
+loss schedule. It keeps the shared factor embeddings and first generic context
+projection, then adds exactly one second `hidden_dim × hidden_dim` projection
+with `tanh`. All four slot heads read that same second shared context.
+
+The sender still has no factor-specific hidden path, binding matrix, hard slot
+selector or factor-to-slot assignment. Hidden width, receiver, translator,
+losses, optimizer, data, 15,000-step duration, original 5,000-step temperature
+annealing, selection window and thresholds remain unchanged from B10. Smoke
+runs are mechanical only and may not authorize tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B13-I with the deeper shared bounded-parallel sender.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative sender depth,
+activation, width, residual connection, decoder, loss, duration, optimizer or
+seed may be tried inside Batch 13.

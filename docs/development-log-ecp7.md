@@ -856,3 +856,71 @@ future ECP7-B13 may return to the complete B10 model and add exactly one second
 generic shared hidden layer to the bounded parallel sender before all four slot
 heads. It must retain the B10 one-layer receiver and translator and must not add
 factor-specific sender paths, loss, width, duration, data or threshold changes.
+
+## Batch 13 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `15,000`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Sender change: one additional shared `hidden_dim × hidden_dim` layer<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B13-I returns to every Batch 10 model, training and loss setting, then
+changes only sender depth. All four slot heads still consume one shared context
+of the complete meaning. There is no binding or factor-specific hidden path.
+The unchanged positive control is rerun, and no alternative sender variant is
+admitted into this batch.
+
+## Batch 13 results
+
+Positive-control run: `runs/ecp7-batch13-control-development/20260718T131611Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch13-intervention-development/20260718T131611Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B13-I |
+|---|---:|---:|
+| Population train, mean | 100% | 1.3218% |
+| Population train, worst link | 100% | 1.0672% |
+| Population validation, mean | 100% | 0.3174% |
+| Population validation, worst link | 100% | 0% |
+| Universal translator, validation | 100% | 0.6104% |
+| Exact sender-message agreement | 100% | 19.06% |
+| Unique messages per sender | 15,360 | 694–831 |
+| Collision meanings per sender | 0 | 14,529–14,666 |
+| Message entropy | 13.91 bits | 8.44–8.77 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B13-I failed every
+performance and injectivity requirement and does not authorize confirmatory
+access.
+
+The second sender layer caused a renewed semantic collapse. Population
+validation factor accuracies were only
+`[4.28%, 18.58%, 98.49%, 99.84%]`; the protocol preserved texture and size but
+failed to encode color and shape. Universal-translator validation was similarly
+`[4.71%, 21.41%, 98.58%, 99.85%]`.
+
+The selected checkpoint was step 600 with task loss `1.3516` and utilization
+loss `-0.6994`. The registered minimum-step rule kept training through step
+5,000, but no later checkpoint surpassed the early validation score. At that
+point each sender used only 694–831 messages and collision buckets contained up
+to 161–170 meanings.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 13 decision
+
+ECP7-B13-I is rejected. Additional generic sender depth is strongly harmful,
+just as additional decoder depth was harmful in Batch 12. Batch 10 remains the
+strongest weak-structure base, and the confirmatory split remains sealed.
+
+The next clean refinement hypothesis is optimization stability rather than
+capacity or loss removal. B10 continued improving late but fluctuated around its
+validation plateau at the unchanged learning rate `0.001`. A future ECP7-B14 may
+keep the complete B10 design and learning rate through step 5,000, then decay
+only that rate linearly to `0.0001` at step 15,000. Temperature, utilization,
+architecture, duration, data, translator and thresholds must remain unchanged.

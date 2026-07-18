@@ -455,3 +455,27 @@ def test_ecp7_b12_changes_only_the_shared_decoder_depth(
     assert b10_translator.pop("family") == "position_aware_mlp_receiver"
     assert b12_translator.pop("family") == "deep_position_aware_mlp_receiver"
     assert b12_translator == b10_translator
+
+
+def test_ecp7_b13_changes_only_the_shared_sender_depth(
+    ecp7_b10_config, ecp7_b13_config
+):
+    assert ecp7_b13_config["world"] == ecp7_b10_config["world"]
+    assert ecp7_b13_config["dataset"] == ecp7_b10_config["dataset"]
+    assert ecp7_b13_config["channel"] == ecp7_b10_config["channel"]
+    assert ecp7_b13_config["training"] == ecp7_b10_config["training"]
+    assert (
+        ecp7_b13_config["agents"]["population"]
+        == ecp7_b10_config["agents"]["population"]
+    )
+    assert (
+        ecp7_b13_config["agents"]["receiver"]
+        == ecp7_b10_config["agents"]["receiver"]
+    )
+    assert (
+        ecp7_b13_config["agents"]["translator"]
+        == ecp7_b10_config["agents"]["translator"]
+    )
+    assert ecp7_b13_config["agents"]["sender"] == {
+        "family": "deep_bounded_parallel_sender"
+    }
