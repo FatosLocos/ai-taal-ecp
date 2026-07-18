@@ -1,0 +1,49 @@
+{
+  "batch": "ECP7-B19",
+  "confirmatory_test_unsealed": false,
+  "config_effective_sha256": "cbd144a5fce451315a7d5fb322a11f2f29c32514fc22fbe06f46285aef677d13",
+  "config_raw_sha256": "dab2cd0dadbadb47a10e2c45a720611dc91d140d3783f0ca1a537e4e8a8549c0",
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "d38450c328b0528137d7873144338300f6542c54f28ed1a096329a5404bb13ac",
+      "seed-11/metrics.json": "3fa1aa30d7795153e24622d5d4f519b5f86b178fa79bb2b7a39c75c875016927",
+      "summary.json": "cfea6b314e74d04a0236e7eaf61ac70f9945f3e15513d343f19267b4093d7f46"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T151853Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "05bfddf2185783338a4c9fc626b06f7dcb335d883380b0d5f14c5117eb897e76",
+      "posthoc-analysis.json": "e6954381e530120522873543d0e89a454d191e2e05e878fa1ee7b81c04bf661e",
+      "seed-11/metrics.json": "26d40d118482038fca8bb73930a646babd7c1ae8c7a41178254cd5d8d2528b15",
+      "summary.json": "965b1ca352583378eedfdacb72651d8656bda495f5307b952540ad592e2fc668"
+    },
+    "best_code_utilization_loss": -0.7285780310630798,
+    "best_global_collision_replay_loss": 0.0,
+    "best_global_collision_replay_pair_counts": [2674, 2645, 2921, 2352],
+    "best_global_collision_replay_weight": 0.0,
+    "best_step": 26200,
+    "collision_meanings_per_sender": [2505, 2474, 2651, 2160],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.9180881076388889,
+    "final_step": 30000,
+    "message_entropy_bits_per_sender": [13.56302604477656, 13.567062503109893, 13.538167215820996, 13.60794791977656],
+    "population_train_mean_exact_match": 0.8373849051339286,
+    "population_train_worst_link_exact_match": 0.8271484375,
+    "population_validation_factor_accuracy": [0.97930908203125, 0.99725341796875, 0.984375, 0.85302734375],
+    "population_validation_mean_exact_match": 0.8204345703125,
+    "population_validation_worst_link_exact_match": 0.8056640625,
+    "run_id": "20260718T151853Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.8349609375,
+    "unique_messages_per_sender": [12855, 12886, 12709, 13200]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

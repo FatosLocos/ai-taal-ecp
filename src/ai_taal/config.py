@@ -254,6 +254,31 @@ def validate_config(config: dict[str, Any]) -> None:
             raise ConfigError(
                 "Global collision-replay temperature must be positive."
             )
+        decay = collision_replay.get("weight_decay", {})
+        if decay.get("enabled", False):
+            decay_start = decay.get("start_step", 0)
+            decay_end = decay.get("end_step", 0)
+            final_weight = decay.get("final_weight", -1)
+            if isinstance(decay_start, bool) or not isinstance(decay_start, int):
+                raise ConfigError(
+                    "Global collision-replay decay start must be an integer."
+                )
+            if isinstance(decay_end, bool) or not isinstance(decay_end, int):
+                raise ConfigError(
+                    "Global collision-replay decay end must be an integer."
+                )
+            if decay_start < start_step + warmup_steps:
+                raise ConfigError(
+                    "Global collision-replay decay cannot start before warmup completes."
+                )
+            if decay_end <= decay_start or decay_end > training["max_steps"]:
+                raise ConfigError(
+                    "Global collision-replay decay end must follow its start and fit max_steps."
+                )
+            if final_weight < 0 or final_weight >= collision_replay["weight"]:
+                raise ConfigError(
+                    "Global collision-replay final weight must be non-negative and below its initial weight."
+                )
 
     sender_consensus = training.get("sender_message_consensus", {})
     if sender_consensus.get("enabled", False):

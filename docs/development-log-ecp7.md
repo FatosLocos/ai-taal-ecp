@@ -26,6 +26,7 @@ this log.
 | ECP7-B16-I | Intervention | B15 with late normalized factor minimax | Position-aware MLP | completed; gate failed |
 | ECP7-B17-I | Intervention | B15 with late global collision-pair replay | Position-aware MLP | completed; gate failed |
 | ECP7-B18-I | Intervention | B17 replay with final weight 0.1 | Position-aware MLP | completed; gate failed |
+| ECP7-B19-I | Intervention | B18 with replay decayed to zero after step 20,000 | Position-aware MLP | valid negative; validation 82.04%, train and injectivity fail |
 
 ## Batch 1 preregistration
 
@@ -1353,3 +1354,103 @@ it at zero thereafter. This tests whether a bounded replay pulse can preserve
 the early collision reduction while returning the final phase to pure B15 task
 and utilization refinement. Mining, pair batch, refresh, architecture, base
 losses, optimizer, duration, data, translator and thresholds must not change.
+
+## Batch 19 preregistration
+
+Preregistered: July 18, 2026 at 15:15:36 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Replay weight: `0` through step `15,000`, linear to `0.1` at step `20,000`, linear to `0` at step `25,000`, then hold<br>
+Replay pairs per sender and update: `32`<br>
+Training-codebook refresh interval: `200` steps<br>
+Relaxed replay temperature: `1.0`<br>
+Raw configuration SHA-256: `dab2cd0dadbadb47a10e2c45a720611dc91d140d3783f0ca1a537e4e8a8549c0`<br>
+Effective configuration SHA-256: `cbd144a5fce451315a7d5fb322a11f2f29c32514fc22fbe06f46285aef677d13`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B19-I is identical to Batch 18 through step 20,000. It then changes only
+the replay coefficient, decaying from `0.1` to zero by step 25,000. Mining
+continues for diagnostics, but the final 5,000 steps receive no replay gradient
+or sampler draws. This directly tests whether the early code-use gain can be
+retained while the final phase returns to the unchanged B15 objectives. The
+positive control is rerun, and no alternative pulse or accompanying
+intervention is admitted into this batch.
+
+## Batch 19 results
+
+Positive-control run: `runs/ecp7-batch19-control-development/20260718T151853Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch19-intervention-development/20260718T151853Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B19-I |
+|---|---:|---:|
+| Population train, mean | 100% | **83.7385%** |
+| Population train, worst link | 100% | 82.7148% |
+| Population validation, mean | 100% | **82.0435%** |
+| Population validation, worst link | 100% | **80.5664%** |
+| Universal translator, validation | 100% | **83.4961%** |
+| Exact sender-message agreement | 100% | 91.81% |
+| Unique messages per sender | 15,360 | 12,709–13,200 |
+| Collision meanings per sender | 0 | 2,160–2,651 |
+| Message entropy | 13.91 bits | 13.54–13.61 bits |
+| Development gate | pass | **fail** |
+
+The positive control again passed every gate at 100%. ECP7-B19-I passed the
+validation and universal-translator thresholds, and its 80.57% worst-link
+validation is the strongest ECP-7 worst-link result so far. It still failed
+both known-meaning train thresholds and every sender remained non-injective.
+The joint gate therefore fails and confirmatory access remains unauthorized.
+
+All 101 logged trajectory records through step 20,000 match Batch 18 exactly.
+Replay then decayed as registered: weight was `0.06` at step 22,000, `0.02` at
+step 24,000 and zero from step 25,000 onward. At zero weight the logged replay
+loss is also zero and the sampler consumes no draws; deterministic full-codebook
+mining remains visible only through diagnostic collision-pair counts.
+
+Validation rose from 81.59% at the end of the decay to the selected 82.04% at
+step 26,200, with replay fully inactive. It later fluctuated and finished at
+81.20% at step 30,000. The selected checkpoint had task loss `0.06103`,
+utilization loss `-0.72858`, and mined collision-pair counts of 2,674, 2,645,
+2,921 and 2,352. The run reached the registered maximum horizon rather than an
+early stop.
+
+Compared with Batch 18, mean validation improved by 1.33 percentage points and
+sender agreement improved from 90.13% to 91.81%. Train exactness fell by 0.34
+points, translator validation fell by 0.56 points, and three of four senders
+had more collision meanings. Compared with Batch 15, the pulse slightly reduced
+collisions for three senders and produced a stronger worst validation link, but
+mean validation remained 0.54 points lower and train exactness remained lower.
+The selected sender codebooks contain 12,855, 12,886, 12,709 and 13,200 unique
+messages, with 2,505, 2,474, 2,651 and 2,160 collision meanings.
+
+Population validation factor accuracies were
+`[97.93%, 99.73%, 98.44%, 85.30%]`; universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 85.06%]`. The bounded pulse therefore improves population
+color generalization and cross-link balance after replay is removed, but does
+not resolve the persistent texture errors or hard-code collisions.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 19 decision
+
+ECP7-B19-I is a valid negative result under the joint gate. A bounded replay
+pulse is less disruptive to validation than persistent replay, and its
+replay-free tail improves the worst population link, but the collision benefit
+does not persist and the train bottleneck remains essentially unchanged. Batch
+15 retains the strongest mean validation, while Batch 18 retains the strongest
+train and translator values. The confirmatory split remains sealed.
+
+A future ECP7-B20 should stop tuning collision-replay schedules. A clean next
+causal test is deterministic global hard-meaning task replay on the unchanged
+Batch 15 base: mine only training meanings that the current population
+reconstructs incorrectly, then add ordinary sender-receiver reconstruction
+updates on a registered bounded sample. This directly tests whether the
+remaining train error is a sparse hard-example problem without adding a
+meaning-to-slot binding or a code-distance surrogate. Collision replay, factor
+reweighting, architecture, optimizer, horizon, data, translator and thresholds
+must remain unchanged or absent as appropriate.
