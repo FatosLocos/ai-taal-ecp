@@ -16,6 +16,7 @@ from ai_taal.training import (
     calibrate_receiver_binding,
     factor_agnostic_code_utilization_loss,
     slot_binding_consensus_loss,
+    straight_through_joint_collision_loss,
     train_communication_system,
 )
 from ai_taal.world import build_splits, enumerate_world
@@ -185,6 +186,44 @@ def test_code_utilization_prefers_independent_balanced_slots():
 
     assert abs(float(independent_loss) + 1.0) < 1e-6
     assert abs(float(correlated_loss)) < 1e-6
+
+
+def test_joint_collision_loss_counts_only_distinct_input_collisions():
+    symbols = torch.tensor(
+        [
+            [0, 1, 0, 1],
+            [0, 1, 0, 1],
+            [1, 0, 1, 0],
+            [0, 1, 0, 1],
+        ]
+    )
+    messages = torch.nn.functional.one_hot(symbols, num_classes=2).to(torch.float32)
+    meanings = torch.tensor(
+        [
+            [0, 0, 0, 0],
+            [1, 0, 0, 0],
+            [2, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+    )
+
+    loss = straight_through_joint_collision_loss(messages, meanings)
+
+    assert abs(float(loss) - 1.0) < 1e-6
+
+
+def test_joint_collision_loss_backpropagates_through_hard_messages(ecp7_b4_config):
+    sender = BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_b4_config))
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]], dtype=torch.long
+    )
+    messages, _ = sender(meanings, temperature=1.0, sample=True)
+
+    loss = straight_through_joint_collision_loss(messages, meanings)
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert any(parameter.grad is not None for parameter in sender.parameters())
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

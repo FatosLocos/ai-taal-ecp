@@ -177,3 +177,28 @@ def test_ecp7_b3_rejects_an_unknown_message_source(ecp7_b3_config):
     invalid["training"]["code_utilization"]["message_source"] = "hard_argmax"
     with pytest.raises(ConfigError, match="message_source"):
         validate_config(invalid)
+
+
+def test_ecp7_b4_adds_only_direct_joint_collision_pressure(
+    ecp7_b3_config, ecp7_b4_config
+):
+    assert ecp7_b4_config["world"] == ecp7_b3_config["world"]
+    assert ecp7_b4_config["dataset"] == ecp7_b3_config["dataset"]
+    assert ecp7_b4_config["channel"] == ecp7_b3_config["channel"]
+    assert ecp7_b4_config["agents"] == ecp7_b3_config["agents"]
+    assert (
+        ecp7_b4_config["training"]["code_utilization"]
+        == ecp7_b3_config["training"]["code_utilization"]
+    )
+    assert ecp7_b4_config["training"]["joint_message_collision"] == {
+        "enabled": True,
+        "weight": 1.0,
+        "warmup_steps": 400,
+    }
+
+
+def test_ecp7_b4_rejects_negative_joint_collision_weight(ecp7_b4_config):
+    invalid = deepcopy(ecp7_b4_config)
+    invalid["training"]["joint_message_collision"]["weight"] = -0.1
+    with pytest.raises(ConfigError, match="Joint-collision weight"):
+        validate_config(invalid)

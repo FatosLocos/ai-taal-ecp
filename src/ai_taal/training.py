@@ -203,6 +203,12 @@ def train_population_system(
             raise ValueError(
                 "Code-utilization message source must be relaxed or straight_through."
             )
+    joint_collision_config = training.get("joint_message_collision", {})
+    joint_collision_enabled = bool(joint_collision_config.get("enabled", False))
+    if joint_collision_enabled and float(
+        joint_collision_config.get("weight", 0.0)
+    ) < 0:
+        raise ValueError("Joint-collision weight cannot be negative.")
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
             "Population training supports all_senders_all_receivers only."
@@ -341,12 +347,28 @@ def train_population_system(
             utilization_weight = float(utilization_config["weight"]) * min(
                 step / utilization_warmup, 1.0
             )
+        joint_collision_loss = torch.zeros((), device=device)
+        joint_collision_weight = 0.0
+        if joint_collision_enabled:
+            joint_collision_loss = torch.stack(
+                [
+                    straight_through_joint_collision_loss(message, batch)
+                    for message in messages
+                ]
+            ).mean()
+            joint_collision_warmup = max(
+                int(joint_collision_config.get("warmup_steps", 1)), 1
+            )
+            joint_collision_weight = float(
+                joint_collision_config["weight"]
+            ) * min(step / joint_collision_warmup, 1.0)
         loss = (
             task_loss
             + consistency_weight * consistency_loss
             + slot_consensus_weight * slot_consensus_loss
             + atom_consensus_weight * atom_consensus_loss
             + utilization_weight * utilization_loss
+            + joint_collision_weight * joint_collision_loss
         )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -379,6 +401,10 @@ def train_population_system(
                 "atom_code_consensus_weight": float(atom_consensus_weight),
                 "code_utilization_loss": float(utilization_loss.detach().cpu()),
                 "code_utilization_weight": float(utilization_weight),
+                "joint_message_collision_loss": float(
+                    joint_collision_loss.detach().cpu()
+                ),
+                "joint_message_collision_weight": float(joint_collision_weight),
                 "temperature": float(temperature),
                 "train_mean_exact": train_metrics["mean_exact_match"],
                 "train_worst_pair_exact": train_metrics["worst_pair_exact_match"],
@@ -592,6 +618,23 @@ def factor_agnostic_code_utilization_loss(
     utilization = torch.stack(marginal_entropies).mean()
     independence = torch.stack(pairwise_mutual_information).mean()
     return determinism - utilization + independence_weight * independence
+
+
+def straight_through_joint_collision_loss(
+    message_distributions: Tensor, meanings: Tensor
+) -> Tensor:
+    """Average colliding distinct inputs per item in a straight-through batch."""
+    if message_distributions.ndim != 3:
+        raise ValueError("Joint-collision messages must have shape [batch,slots,vocab].")
+    if meanings.ndim != 2 or meanings.shape[0] != message_distributions.shape[0]:
+        raise ValueError("Joint-collision meanings must match the message batch.")
+    per_slot_agreement = torch.einsum(
+        "bsv,csv->bcs", message_distributions, message_distributions
+    )
+    full_message_agreement = per_slot_agreement.prod(dim=-1)
+    same_input = meanings[:, None, :].eq(meanings[None, :, :]).all(dim=-1)
+    distinct_input = (~same_input).to(full_message_agreement.dtype)
+    return (full_message_agreement * distinct_input).sum() / meanings.shape[0]
 
 
 def build_algebraic_quadruples(

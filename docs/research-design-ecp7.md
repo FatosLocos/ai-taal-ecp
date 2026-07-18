@@ -199,3 +199,41 @@ unchanged. B3 must pass population, validation, translator, injectivity, channel
 and sealed-test checks together. A failure remains a development result and
 does not authorize confirmatory test access. No alternative estimator, weight
 or training schedule may be tried inside Batch 3.
+
+## Batch 4 preregistration — Direct joint-message collisions
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b4-development.yaml`<br>
+Raw configuration SHA-256: `6229c5cd13c796a9ce297b9c38cc2ff1a2090a2a22a5678ec7afe38aa0bd6955`<br>
+Effective configuration SHA-256: `4cffdb040ba358d7416e0643595c4e11fadc0fdffd5c0120761c4890a8c3f10e`
+
+Batch 3 improved marginal hard utilization but retained thousands of complete
+message collisions. Batch 4 asks whether directly penalizing those joint
+collisions produces an injective and compositional code without a semantic
+factor-to-slot binding.
+
+For every sender and minibatch, the new loss is the average number of other
+distinct inputs with the same complete straight-through message:
+
+`L_joint = (1/B) × sum_i sum_j!=i 1[x_i != x_j] × product_s <m_i,s, m_j,s>`
+
+Because the forward messages are one-hot, the slot dot product is one exactly
+when both symbols match, and the product is one exactly when the full messages
+match. Identical sampled inputs are excluded; no factor label, factor identity
+or desired code is provided. Straight-through gradients flow back through the
+hard messages.
+
+The joint-collision weight is fixed at `1.0` with a 400-step linear warmup. This
+is the only Batch 4 addition. The complete Batch 3 utilization objective,
+architecture, task loss, population, split, 14-bit channel, 5,000-step limit,
+early stopping and translator remain unchanged.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B4-I with the added direct joint-collision loss.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative collision weight,
+batch size, architecture or duration may be tried inside Batch 4.

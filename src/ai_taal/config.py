@@ -144,6 +144,13 @@ def validate_config(config: dict[str, Any]) -> None:
                 "Code-utilization message_source must be relaxed or straight_through."
             )
 
+    joint_collision = training.get("joint_message_collision", {})
+    if joint_collision.get("enabled", False):
+        if joint_collision.get("weight", -1) < 0:
+            raise ConfigError("Joint-collision weight cannot be negative.")
+        if joint_collision.get("warmup_steps", 0) < 1:
+            raise ConfigError("Joint-collision warmup must be positive.")
+
 
 def file_sha256(path: str | Path) -> str:
     digest = hashlib.sha256()

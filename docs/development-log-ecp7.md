@@ -11,6 +11,7 @@ this log.
 | ECP7-B1-I | Intervention | Joint-context bounded autoregressive | Generic sequence encoder | completed; gate failed |
 | ECP7-B2-I | Intervention | B1 sender plus factor-agnostic code utilization | Generic sequence encoder | completed; gate failed |
 | ECP7-B3-I | Intervention | B2 loss on straight-through hard messages | Generic sequence encoder | completed; gate failed |
+| ECP7-B4-I | Intervention | B3 plus direct full-message collision loss | Generic sequence encoder | completed; gate failed |
 
 No other ECP-7 variant has been trained.
 
@@ -207,3 +208,63 @@ confirmatory split remains sealed and no frozen ECP-7 configuration is created.
 A future ECP7-B4 may add one direct straight-through full-message collision
 penalty while retaining all Batch 3 settings. This targets joint collisions
 without assigning semantic factors to slots.
+
+## Batch 4 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B4-I retains all Batch 3 settings and adds one factor-agnostic loss: the
+average number of distinct minibatch inputs sharing the same complete
+straight-through message. Its exact formula, weight and warmup are recorded in
+`docs/research-design-ecp7.md`. The unchanged positive control is rerun. Smoke
+cannot authorize tuning.
+
+## Batch 4 results
+
+Positive-control run: `runs/ecp7-batch4-control-development/20260718T111008Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch4-intervention-development/20260718T111141Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B4-I |
+|---|---:|---:|
+| Population train, mean | 100% | 0.3204% |
+| Population train, worst link | 100% | 0.2860% |
+| Population validation, mean | 100% | 0.4211% |
+| Population validation, worst link | 100% | 0.2930% |
+| Universal translator, validation | 100% | 0.6104% |
+| Unique messages per sender | 15,360 | 426–579 |
+| Collision meanings per sender | 0 | 14,781–14,934 |
+| Message entropy | 13.91 bits | 7.46–7.84 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B4-I failed every
+performance and injectivity gate and regressed relative to Batch 3.
+
+At the selected step 800 checkpoint, the average number of distinct colliding
+partners in the current minibatch was `0.03125`, while the retained hard
+utilization loss was `-0.7213`. Despite that low local collision count, global
+evaluation found only 426–579 messages across 15,360 accessible meanings. The
+minibatch signal was therefore too sparse and local to represent global
+codebook occupancy.
+
+Population validation dropped from Batch 3's 1.9226% to 0.4211%; message entropy
+dropped from 8.20–8.73 to 7.46–7.84 bits. Factor accuracies were approximately
+`[6.48%, 6.41%, 92.13%, 83.79%]`, so the added loss also disrupted the two
+factors previously learned almost exactly. Changing its weight after seeing
+this outcome is not permitted inside Batch 4.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 4 decision
+
+ECP7-B4-I is recorded as a negative development result and is not retained. The
+confirmatory split remains sealed. The strongest weak-structure variant remains
+ECP7-B3-I. A future ECP7-B5 may add one straight-through sender-consensus loss
+to B3, testing whether a shared factor-agnostic convention helps receivers
+without restoring semantic slot assignments.

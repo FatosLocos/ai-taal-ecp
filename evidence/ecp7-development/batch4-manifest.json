@@ -1,0 +1,40 @@
+{
+  "batch": "ECP7-B4",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "4c028786125509cb33a081662d12c28743cc212d13161a2360948c82a46e4ec1",
+      "seed-11/metrics.json": "7af4742b93a1a68dd0603e5647cd7c33161a41af24a5e40deb95b7fb997efb04",
+      "summary.json": "2aa1a8fcf8d791a6fe4ef90f669b0564e6251cfd800476b178f63c464d9053fe"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T111008Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "fd98dbb08a8cf11bd6c5e6d05f24c5950f48f11cec2e39024e901abd67bd9c9f",
+      "posthoc-analysis.json": "67fbb886d49e328c0643990b7b5d013c2fcb2831a4cdee0e0645a6082f7adb0f",
+      "seed-11/metrics.json": "f280df0ab86a0ba7555b6384bd370e3765f419d39f66f71c0a8a76704c79b297",
+      "summary.json": "1539a99f35f80467eafb5e1c7e90169c7724c862de7f9a45ced2e467b10f1e6a"
+    },
+    "best_code_utilization_loss": -0.7212955355644226,
+    "best_joint_message_collision_loss": 0.03125,
+    "best_step": 800,
+    "development_gate_passed": false,
+    "message_entropy_bits_per_sender": [7.514687306501297, 7.837134515331, 7.501597202083582, 7.462425878518177],
+    "population_train_mean_exact_match": 0.003204345703125,
+    "population_validation_factor_accuracy": [0.06475830078125, 0.06414794921875, 0.9212646484375, 0.837890625],
+    "population_validation_mean_exact_match": 0.00421142578125,
+    "run_id": "20260718T111141Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.006103515625,
+    "unique_messages_per_sender": [449, 579, 498, 426]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}
