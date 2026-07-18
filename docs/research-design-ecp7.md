@@ -494,7 +494,7 @@ of at most four meanings.
 
 Batch 11 tests one explanation: after the high-entropy code is established,
 full utilization pressure dominates the remaining task objective and prevents
-the last color and size distinctions from resolving.
+the last color and texture distinctions from resolving.
 
 ECP7-B11-I keeps the complete B10 model, data, optimizer, duration, checkpoint
 selection, temperature schedule, translator, task loss and utilization formula.
@@ -531,7 +531,7 @@ Effective configuration SHA-256: `798a6380ab144e5db63c8177d3dd70edf76e66b660b3cb
 Batch 11 showed that reducing late utilization pressure worsened task accuracy,
 code use and sender agreement. Batch 10 therefore remains the base. Its shared
 one-hidden-layer decoder and independently trained translator both retained a
-size weakness, while color was the other residual population error. Batch 12
+texture weakness, while color was the other residual population error. Batch 12
 tests whether the generic decoder is still too shallow for the entangled code.
 
 ECP7-B12-I returns to the complete B10 training and loss schedule. It keeps the
@@ -569,7 +569,7 @@ Batch 12 rejected extra receiver and translator depth. Batch 10 remains the
 base, but its bounded parallel sender still constructs all four message slots
 from one shallow shared context. Batch 13 tests the symmetric remaining capacity
 hypothesis: the sender context is too shallow to construct the residual color
-and size distinctions.
+and texture distinctions.
 
 ECP7-B13-I returns to the complete B10 model, receiver, translator, training and
 loss schedule. It keeps the shared factor embeddings and first generic context
@@ -663,3 +663,44 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative horizon, patience,
 learning rate, architecture, loss, temperature, optimizer or seed may be tried
 inside Batch 15.
+
+## Batch 16 preregistration — Late normalized factor minimax
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 14:07:11 UTC<br>
+Configuration: `config/ecp7-b16-development.yaml`<br>
+Raw configuration SHA-256: `caef16ec93d0a9424fd3c4af46a987aad63118f24e57e77e9d51cc2eb77e073b`<br>
+Effective configuration SHA-256: `b40f35ab2f03fa8450805908713b4b9a59bbc060c38a4e68e4e3c5be2d2b4efb`
+
+Batch 15 established the first weak-structure protocol to pass validation and
+universal-translator thresholds together. Its remaining exact-match errors are
+concentrated in the weakest decoded factor after a high-entropy protocol is
+already established. Batch 16 tests whether late worst-factor emphasis can
+resolve those residual collisions without disrupting the successful early
+trajectory.
+
+ECP7-B16-I keeps the complete Batch 15 architecture, base task and utilization
+losses, AdamW settings, data, temperature schedule, 30,000-step horizon,
+selection window, translator and thresholds. It adds the existing normalized
+factor-minimax term with one delayed coefficient schedule:
+
+- weight is exactly `0` through step `15,000`;
+- weight increases linearly from `0` to `1.0` over steps `15,000–20,000`;
+- weight remains `1.0` from step `20,000` through step `30,000`.
+
+The minimax formula is unchanged from Batch 6: it selects the largest factor
+cross-entropy after normalization by the uniform-guess entropy for that factor.
+Unlike Batch 6, no minimax gradient is present while the base high-entropy code
+is forming. The original mean task loss remains active throughout.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B16-I with late normalized factor minimax on the complete B15 base.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative start step, warmup, weight,
+normalization, duration, architecture, utilization, optimizer, data, translator
+or seed may be tried inside Batch 16. Failure is recorded without confirmatory
+test access.

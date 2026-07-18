@@ -529,3 +529,40 @@ def test_ecp7_b15_changes_only_the_population_optimization_horizon(
     assert b10_training.pop("patience_steps") == 3000
     assert b15_training.pop("patience_steps") == 5000
     assert b15_training == b10_training
+
+
+def test_ecp7_b16_adds_only_late_factor_minimax(
+    ecp7_b15_config, ecp7_b16_config
+):
+    assert ecp7_b16_config["world"] == ecp7_b15_config["world"]
+    assert ecp7_b16_config["dataset"] == ecp7_b15_config["dataset"]
+    assert ecp7_b16_config["channel"] == ecp7_b15_config["channel"]
+    assert ecp7_b16_config["agents"] == ecp7_b15_config["agents"]
+    b15_training = deepcopy(ecp7_b15_config["training"])
+    b16_training = deepcopy(ecp7_b16_config["training"])
+    assert b16_training.pop("factor_minimax") == {
+        "enabled": True,
+        "weight": 1.0,
+        "start_step": 15000,
+        "warmup_steps": 5000,
+    }
+    assert b16_training == b15_training
+
+
+def test_factor_minimax_schedule_must_fit_the_training_horizon(
+    ecp7_b16_config,
+):
+    invalid_start_type = deepcopy(ecp7_b16_config)
+    invalid_start_type["training"]["factor_minimax"]["start_step"] = 1.5
+    with pytest.raises(ConfigError, match="start must be an integer"):
+        validate_config(invalid_start_type)
+
+    invalid_start = deepcopy(ecp7_b16_config)
+    invalid_start["training"]["factor_minimax"]["start_step"] = -1
+    with pytest.raises(ConfigError, match="start cannot be negative"):
+        validate_config(invalid_start)
+
+    invalid_end = deepcopy(ecp7_b16_config)
+    invalid_end["training"]["factor_minimax"]["start_step"] = 26000
+    with pytest.raises(ConfigError, match="complete within max_steps"):
+        validate_config(invalid_end)

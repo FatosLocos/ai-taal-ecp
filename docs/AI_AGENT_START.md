@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 89 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 93 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 15
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 16
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -103,12 +103,15 @@ rate and regressed to 79.13% train, 65.49% validation and 71.02% translator
 validation. ECP7-B15-I extended constant-rate training to 30,000 steps and is
 now strongest at 83.46% train, 82.59% validation and 83.37% translator
 validation. Its validation and translator gates pass, but train and injectivity
-do not. The confirmatory ECP-7 test is still sealed.
+do not. ECP7-B16-I added late normalized factor-minimax pressure. It slightly
+improved texture but disrupted color, regressing to 82.80% train, 76.46%
+validation and 77.76% translator validation without solving injectivity. Batch
+15 remains strongest, and the confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B16 intervention and its failure criterion.
+2. Define exactly one ECP7-B17 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -121,23 +124,27 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 15 is the strongest weak-structure result. It passes validation and
-translator gates, with residual known-meaning error concentrated in size after
-the high-entropy code is established. Earlier Batch 6 minimax pressure started
-from step zero on a much weaker protocol. The most informative next step is one
-late worst-factor schedule. A clean ECP7-B16 progression is:
+Batch 15 remains the strongest weak-structure result. Batch 16 shows that late
+worst-factor pressure improves texture slightly but harms color generalization
+and does not resolve collisions. The next clean question is whether the global
+collisions can be made trainable without factor-to-slot supervision. A clean
+ECP7-B17 progression is:
 
 - keep the same world and bit budget;
 - keep the complete B15 architecture, horizon and base losses;
-- keep normalized factor-minimax weight `0` through step 15,000;
-- warm only that weight linearly to `1.0` over steps 15,000–20,000, then hold;
+- mine complete-message collision pairs from each sender's training-only
+  codebook after step 15,000 and refresh them only at registered evaluation
+  boundaries;
+- apply one relaxed full-message collision-probability loss to those mined
+  pairs, with a preregistered deterministic sampler and coefficient schedule;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not change architecture, utilization, optimizer, data, temperature, duration,
-validation cadence or development thresholds, and do not combine the late
-minimax schedule with variable-length messages or negotiation. That would make
-its effect uninterpretable.
+Use training meanings only for pair mining. Do not use validation to choose
+pairs, and do not change architecture, base utilization, optimizer, data,
+temperature, duration, validation cadence or development thresholds. Do not
+combine collision replay with factor reweighting, variable-length messages or
+negotiation.
 
 ## 7. Definition of done for any contribution
 
