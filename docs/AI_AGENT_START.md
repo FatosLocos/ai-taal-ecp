@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 47 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 51 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,15 +71,16 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 configs.
-ECP7-B1-I is a recorded negative development result: its generic
-autoregressive protocol collapsed to 130–139 messages, while the paired ECP-6
-positive control stayed perfect. The confirmatory ECP-7 test is still sealed.
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 and Batch 2
+configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I added a
+factor-agnostic utilization loss that improved its soft objective but collapsed
+further to 85–104 hard messages. Both paired ECP-6 positive controls stayed
+perfect. The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B2 intervention and its failure criterion.
+2. Define exactly one ECP7-B3 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -92,20 +93,20 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-The first attempt showed that removing the factor-slot bias entirely can cause
-severe code collapse. The most informative next step is a single,
-factor-agnostic code-utilization intervention. A clean ECP7-B2 progression is:
+The first two attempts showed both severe code collapse and a soft-to-hard
+relaxation gap. The most informative next step is one utilization objective
+calculated from straight-through hard messages. A clean ECP7-B3 progression is:
 
 - keep the same world and bit budget;
 - keep the joint autoregressive sender and generic isolated receiver;
-- add one preregistered pressure for using the available code space without
-  assigning factors to positions;
+- retain the Batch 2 formula and replace only its soft message input with the
+  straight-through hard message used by the task;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not combine entropy pressure, architectural resizing, longer training,
-variable-length messages or negotiation in one batch. That would make any
-change from Batch 1 uninterpretable.
+Do not combine this with architectural resizing, a new loss weight, longer
+training, variable-length messages or negotiation. That would make any change
+from Batch 2 uninterpretable.
 
 ## 7. Definition of done for any contribution
 

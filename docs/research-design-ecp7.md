@@ -116,3 +116,51 @@ a single frozen ECP-7 design and confirmatory criteria in a later commit.
 |---|---|---|
 | Intervention | `7863ffbb4fdfdf43d28fed897d75989153e72ed0c432eaadbddc835f27c77b8f` | `e5f6ea5042dc59b5b10c5860ce7a672274b6b3ba887656de6f56cb8192181561` |
 | Positive control | `4d5904a894b5d854831049cb38331c2e42aabc5da844de3d95e665d941ca6c8f` | `db323732a1160859835c930f2ffa578df363ddf146537aa0d4ee2496e2b9744d` |
+
+## Batch 2 preregistration — Factor-agnostic code utilization
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b2-development.yaml`<br>
+Raw configuration SHA-256: `95f402cc9b5f151b017d2c92ad4954d463aa73e0a13e9e1df84393f12a570cfc`<br>
+Effective configuration SHA-256: `fc419eff2065f6259553d7fb5bbbd7de396be055a66c860884fe1c193158ea0f`
+
+Batch 1 showed severe code collapse: the intervention used only 130–139
+messages and approximately 6.45 bits of entropy. Batch 2 asks whether one
+factor-agnostic pressure for using the available code space can prevent that
+collapse without restoring a factor-to-slot binding.
+
+For each sender, the new loss observes only its relaxed message distributions.
+It receives no factor labels, factor identity, target slot or desired code. For
+each slot it minimizes normalized conditional entropy and maximizes normalized
+marginal entropy. It also minimizes normalized pairwise mutual information
+between slots, discouraging four balanced slots from carrying duplicate
+information.
+
+In compact form:
+
+`L_util = mean(H(slot | input) - H(slot)) + mean(pairwise normalized MI)`
+
+Each entropy is normalized by that slot's maximum entropy. The loss weight is
+fixed at `1.0`, warms up linearly for 400 steps, uses relaxed temperature `1.0`,
+and gives the independence term weight `1.0`. An ideal deterministic, balanced,
+pairwise-independent code has loss `-1`; a deterministic collapsed code and a
+fully uncertain uniform code both have loss `0`.
+
+No architecture, task loss, population setting, data split, capacity, early
+stopping rule or translator setting changes from ECP7-B1-I. This objective adds
+a product-code utilization bias, but it does not specify which semantic factor
+belongs in any slot.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B2-I with factor-agnostic code utilization.
+
+The positive-control validity gate and intervention development gate are
+unchanged from Batch 1. In particular, B2 must reach the registered population,
+validation and translator thresholds, produce an injective code over all 15,360
+accessible meanings for every sender, respect every local slot boundary, and
+write no confirmatory test metric or episode. Failure is recorded without
+opening the test split. No weight, warmup, temperature or independence variant
+may be tried inside Batch 2.

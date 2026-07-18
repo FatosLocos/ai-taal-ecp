@@ -187,6 +187,15 @@ def train_population_system(
     slot_consensus_enabled = bool(slot_consensus_config.get("enabled", False))
     atom_consensus_config = training.get("atom_code_consensus", {})
     atom_consensus_enabled = bool(atom_consensus_config.get("enabled", False))
+    utilization_config = training.get("code_utilization", {})
+    utilization_enabled = bool(utilization_config.get("enabled", False))
+    if utilization_enabled:
+        if float(utilization_config.get("weight", 0.0)) < 0:
+            raise ValueError("Code-utilization weight cannot be negative.")
+        if float(utilization_config.get("independence_weight", 0.0)) < 0:
+            raise ValueError("Slot-independence weight cannot be negative.")
+        if float(utilization_config.get("relaxed_temperature", 0.0)) <= 0:
+            raise ValueError("Code-utilization temperature must be positive.")
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
             "Population training supports all_senders_all_receivers only."
@@ -294,11 +303,36 @@ def train_population_system(
             atom_consensus_weight = atom_consensus_config["weight"] * min(
                 step / atom_warmup, 1.0
             )
+        utilization_loss = torch.zeros((), device=device)
+        utilization_weight = 0.0
+        if utilization_enabled:
+            utilization_loss = torch.stack(
+                [
+                    factor_agnostic_code_utilization_loss(
+                        sender,
+                        batch,
+                        temperature=float(
+                            utilization_config["relaxed_temperature"]
+                        ),
+                        independence_weight=float(
+                            utilization_config["independence_weight"]
+                        ),
+                    )
+                    for sender in population.senders
+                ]
+            ).mean()
+            utilization_warmup = max(
+                int(utilization_config.get("warmup_steps", 1)), 1
+            )
+            utilization_weight = float(utilization_config["weight"]) * min(
+                step / utilization_warmup, 1.0
+            )
         loss = (
             task_loss
             + consistency_weight * consistency_loss
             + slot_consensus_weight * slot_consensus_loss
             + atom_consensus_weight * atom_consensus_loss
+            + utilization_weight * utilization_loss
         )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -329,6 +363,8 @@ def train_population_system(
                     atom_consensus_loss.detach().cpu()
                 ),
                 "atom_code_consensus_weight": float(atom_consensus_weight),
+                "code_utilization_loss": float(utilization_loss.detach().cpu()),
+                "code_utilization_weight": float(utilization_weight),
                 "temperature": float(temperature),
                 "train_mean_exact": train_metrics["mean_exact_match"],
                 "train_worst_pair_exact": train_metrics["worst_pair_exact_match"],
@@ -459,6 +495,78 @@ def atom_code_consensus_loss(
         sharpness = (stacked * (1.0 - stacked)).mean()
         losses.append(consensus + sharpness_weight * sharpness)
     return torch.stack(losses).mean()
+
+
+def factor_agnostic_code_utilization_loss(
+    sender: nn.Module,
+    meanings: Tensor,
+    *,
+    temperature: float,
+    independence_weight: float,
+) -> Tensor:
+    """Use the available code space without assigning factors to slots.
+
+    The objective favors deterministic, balanced symbols in every slot and
+    penalizes mutual information between slots. It receives no factor labels,
+    factor identities, or desired factor-to-slot mapping.
+    """
+    if temperature <= 0:
+        raise ValueError("Code-utilization temperature must be positive.")
+    if independence_weight < 0:
+        raise ValueError("Slot-independence weight cannot be negative.")
+    relaxed_message = getattr(sender, "relaxed_message", None)
+    if relaxed_message is None:
+        raise ValueError("Code utilization requires a relaxed sender message.")
+    distributions = relaxed_message(meanings, temperature=temperature)
+    alphabet_sizes = sender.spec.slot_alphabet_sizes
+    if len(alphabet_sizes) != sender.spec.message_length:
+        raise ValueError("Code utilization requires one alphabet size per slot.")
+
+    conditional_entropies = []
+    marginal_entropies = []
+    local_distributions = []
+    epsilon = torch.finfo(distributions.dtype).eps
+    for slot_index, alphabet_size in enumerate(alphabet_sizes):
+        local = distributions[:, slot_index, :alphabet_size]
+        local = local / local.sum(dim=-1, keepdim=True).clamp_min(epsilon)
+        local_distributions.append(local)
+        log_base = math.log(alphabet_size)
+        conditional_entropy = -(
+            local * local.clamp_min(epsilon).log()
+        ).sum(dim=-1).mean() / log_base
+        marginal = local.mean(dim=0)
+        marginal_entropy = -(
+            marginal * marginal.clamp_min(epsilon).log()
+        ).sum() / log_base
+        conditional_entropies.append(conditional_entropy)
+        marginal_entropies.append(marginal_entropy)
+
+    pairwise_mutual_information = []
+    for left_index in range(len(local_distributions)):
+        for right_index in range(left_index + 1, len(local_distributions)):
+            left = local_distributions[left_index]
+            right = local_distributions[right_index]
+            joint = torch.einsum("bi,bj->ij", left, right) / left.shape[0]
+            left_marginal = joint.sum(dim=1, keepdim=True)
+            right_marginal = joint.sum(dim=0, keepdim=True)
+            independent = left_marginal * right_marginal
+            mutual_information = (
+                joint
+                * (
+                    joint.clamp_min(epsilon).log()
+                    - independent.clamp_min(epsilon).log()
+                )
+            ).sum()
+            normalizer = min(
+                math.log(alphabet_sizes[left_index]),
+                math.log(alphabet_sizes[right_index]),
+            )
+            pairwise_mutual_information.append(mutual_information / normalizer)
+
+    determinism = torch.stack(conditional_entropies).mean()
+    utilization = torch.stack(marginal_entropies).mean()
+    independence = torch.stack(pairwise_mutual_information).mean()
+    return determinism - utilization + independence_weight * independence
 
 
 def build_algebraic_quadruples(

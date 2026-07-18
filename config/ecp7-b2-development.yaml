@@ -1,0 +1,17 @@
+extends: ecp7-development.yaml
+
+experiment:
+  title: ECP-7 factor-agnostic code-utilization development
+  arm: factor_agnostic_code_utilization
+  objective: >-
+    Test whether a target-agnostic pressure for deterministic, balanced, and
+    mutually independent slot use prevents the Batch 1 code collapse without
+    restoring a factor-to-slot binding.
+
+training:
+  code_utilization:
+    enabled: true
+    weight: 1.0
+    warmup_steps: 400
+    relaxed_temperature: 1.0
+    independence_weight: 1.0
