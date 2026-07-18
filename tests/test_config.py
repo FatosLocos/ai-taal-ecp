@@ -970,3 +970,20 @@ def test_ecp7_b27_adds_only_a_late_bounded_collision_pulse(
         },
     }
     assert b27_training == b25_training
+
+
+def test_ecp7_b28_changes_only_the_sender_representation(
+    ecp7_b25_config, ecp7_b28_config
+):
+    assert ecp7_b28_config["world"] == ecp7_b25_config["world"]
+    assert ecp7_b28_config["dataset"] == ecp7_b25_config["dataset"]
+    assert ecp7_b28_config["channel"] == ecp7_b25_config["channel"]
+    assert ecp7_b28_config["training"] == ecp7_b25_config["training"]
+    b25_agents = deepcopy(ecp7_b25_config["agents"])
+    b28_agents = deepcopy(ecp7_b28_config["agents"])
+    assert b25_agents["sender"].pop("family") == "bounded_parallel_sender"
+    assert (
+        b28_agents["sender"].pop("family")
+        == "residual_bounded_parallel_sender"
+    )
+    assert b28_agents == b25_agents

@@ -62,7 +62,10 @@ Batch 27 directly penalized globally mined sender collisions after step 30,000.
 It reduced collision multiplicity and reached 85.38% validation, but unique
 code counts again remained unchanged and worst-link validation regressed to
 82.13%. Both replay routing and the existing collision-loss schedule are now
-closed; future work must change sender representation or code occupancy. See
+closed. Batch 28 added an identity-initialized generic residual sender block,
+but it collapsed to 9.65% validation and roughly 8,000 unique messages. Generic
+depth active from the start promotes memorization rather than compositional
+generalization. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -130,6 +133,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b25-development.yaml`](config/ecp7-b25-development.yaml) — Batch 24 receiver-only catch-up with an isolated 45,000-step maximum horizon.
 - [`config/ecp7-b26-development.yaml`](config/ecp7-b26-development.yaml) — Batch 25 with one preregistered sender/receiver replay-route cycle.
 - [`config/ecp7-b27-development.yaml`](config/ecp7-b27-development.yaml) — Batch 25 plus one late bounded direct sender-collision pulse.
+- [`config/ecp7-b28-development.yaml`](config/ecp7-b28-development.yaml) — Batch 25 with one zero-initialized shared residual sender interaction.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

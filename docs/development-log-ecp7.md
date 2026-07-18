@@ -35,6 +35,7 @@ this log.
 | ECP7-B25-I | Intervention | B24 receiver-only catch-up with a 45,000-step maximum horizon | Position-aware MLP | valid negative; new-best means reach the non-injective code-cap |
 | ECP7-B26-I | Intervention | B25 with a second sender-only pulse and final receiver-only catch-up | Position-aware MLP | valid negative; route cycle changes error sharing but not code capacity |
 | ECP7-B27-I | Intervention | B25 plus one late bounded direct sender-collision pulse | Position-aware MLP | valid negative; collision multiplicity falls but unique-code capacity is unchanged |
+| ECP7-B28-I | Intervention | B25 with one zero-initialized shared sender residual interaction | Position-aware MLP | valid negative; generic residual depth drives memorization and code collapse |
 
 ## Batch 1 preregistration
 
@@ -2288,3 +2289,107 @@ The ECP-7 confirmatory split remains sealed. A future batch must change the
 factor-agnostic sender representation or introduce a genuinely different
 occupancy-creation mechanism; it may not combine that change with another
 replay-route or collision-coefficient search.
+
+## Batch 28 preregistration
+
+Preregistered: July 18, 2026 at 18:30:20 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `45,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Base architecture: B25 bounded-parallel sender and position-aware MLP receiver<br>
+Representation addition: one shared hidden-to-hidden residual projection<br>
+Residual activation: `tanh`<br>
+Residual weight and bias initialization: exact zero<br>
+Factor-specific sender paths or bindings: **none**<br>
+Additional collision loss: **none**<br>
+Raw configuration SHA-256: `1ce3094d0e372f4b052773a2c44d1abe36cd6255aea96f4218c175e5f93977d7`<br>
+Effective configuration SHA-256: `7bb7c2c185ed46f580464fe4364b8070bf5fdb071d3d64b16ec66b7fbe7ec307`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B28-I inherits Batch 25 and changes only the sender family. The successful
+shallow joint context and four capacity-bounded slot heads remain intact. A
+single shared projection learns an additive `tanh` correction to that context.
+Its parameters are constructed directly as zeros, so the new branch contributes
+exactly zero and consumes no random draws at initialization. Under the same
+seed, every pre-existing sender parameter and all later agent initialization
+therefore remain identical to the B25 base before optimization begins.
+
+The positive control is rerun. All existing validity and development gates
+remain unchanged. The representation hypothesis also requires a selected
+minimum sender codebook larger than Batch 25's 12,720-message minimum without a
+lower worst-link validation score. No collision replay from Batch 27, new loss,
+residual width, activation, initialization, receiver change, route change,
+optimizer, horizon, data, translator or seed may be tried inside Batch 28.
+Failure is recorded without confirmatory test access.
+
+## Batch 28 results
+
+Positive-control run: `runs/ecp7-batch28-control-development/20260718T183206Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch28-intervention-development/20260718T183329Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B28-I |
+|---|---:|---:|
+| Population train, mean | 100% | 53.9063% |
+| Population train, worst link | 100% | 53.1180% |
+| Population validation, mean | 100% | 9.6497% |
+| Population validation, worst link | 100% | 8.1055% |
+| Universal translator, validation | 100% | 11.6211% |
+| Exact sender-message agreement | 100% | 83.80% |
+| Unique messages per sender | 15,360 | 7,928–8,333 |
+| Collision meanings per sender | 0 | 7,027–7,432 |
+| Message entropy | 13.91 bits | 12.65–12.76 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B28-I fails train,
+validation, translator, injectivity and the added representation criterion by
+large margins. Its selected checkpoint occurs at step 17,000; patience stops
+training at step 22,000. The joint gate fails and confirmatory access remains
+unauthorized.
+
+Implementation tests prove that the residual sender initially has the same
+pre-existing weights and hard messages as the shallow B25 sender and consumes
+no additional random draws. The first optimization update is nevertheless
+allowed to move the zero residual parameters, so the learned trajectories
+diverge immediately. At step 200 B28 already fits training faster than B25
+(2.35% versus 1.49%), but by step 1,000 its validation is only 0.63% versus
+B25's 1.95%. At step 5,000 B28 reaches 41.69% train and 2.23% validation,
+where B25 reaches 71.27% and 52.39%.
+
+This gap keeps widening. At step 15,000 B28 has 53.21% train but only 9.42%
+validation, compared with B25's 82.08% train and 72.98% validation. The
+selected residual weight norms are 23.16–23.39 and bias norms are 1.32–1.49;
+the initially null branch has become a dominant transformation rather than a
+small correction.
+
+Selected sender codebooks contain only 7,928, 7,987, 8,333 and 8,150 unique
+messages. The selected diagnostic finds 3,902 meanings failed by all links and
+8,720 failed by at least one link, with 12.12 mean failed links per erroneous
+meaning. The all-link replay pool reaches a minimum of 3,716 at step 18,600 and
+then regrows to 4,139 at the final step.
+
+Population validation factor accuracies were
+`[80.33%, 25.42%, 99.85%, 96.20%]`; universal-translator factor accuracies were
+`[80.62%, 26.51%, 99.80%, 96.73%]`. The residual model largely memorizes the
+training relation for the held-out shape dimension instead of preserving the
+shallow model's compositional color-shape generalization.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384
+validation-only episodes, no confirmatory-test keys, valid local alphabets,
+and exactly 14 declared bits for every logged message.
+
+## Batch 28 decision
+
+ECP7-B28-I is a valid negative result. Identity-preserving initialization does
+not preserve the successful optimization path when generic residual capacity
+is trainable from the first update. Like Batch 13's replacement layer, the
+residual layer promotes training-set memorization, code collapse and severe
+compositional-generalization loss.
+
+The ECP-7 confirmatory split remains sealed. Generic sender depth from the
+start of training is closed. If one final residual test is attempted, it must
+freeze the exact-zero branch through the already successful B25 trajectory and
+activate only that representation afterward; no architectural, objective or
+route change may accompany it.

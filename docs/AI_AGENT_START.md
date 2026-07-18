@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 127 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 130 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 27
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 28
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -161,11 +161,16 @@ exactly the same 13,440, 12,960, 12,720 and 13,440 unique-message counts as
 Batch 25. Worst-link validation regressed to 82.13%, so the existing collision
 loss is also closed as a capacity solution. The confirmatory test remains
 sealed.
+ECP7-B28-I added one zero-initialized shared residual sender interaction. Tests
+prove an identical initial function and unchanged RNG state, but the trainable
+branch still collapsed to 53.91% train, 9.65% validation, 11.62% translator
+validation and only 7,928–8,333 messages. Generic sender depth active from the
+first update is therefore rejected. The confirmatory test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B28 sender-representation or occupancy intervention and its
+2. Define at most one ECP7-B29 late-activation residual intervention and its
    failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
@@ -179,20 +184,21 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 27 shows that the existing relaxed collision-pair loss can reduce
-collision multiplicity but cannot create newly occupied hard codes. Do not try
-another coefficient, pulse boundary, route cycle or horizon extension.
+Batch 28 shows that identity initialization alone does not protect the shallow
+compositional trajectory: a residual branch trainable from step 1 rapidly
+becomes dominant and memorizes the training relation. Do not try another
+always-active generic layer, width or activation.
 
-For ECP7-B28, preregister exactly one factor-agnostic sender representation or
-genuinely different occupancy-creation intervention. A defensible
-representation candidate is an identity-preserving residual interaction block
-on the successful bounded-parallel sender: retain the complete shallow joint
-context and slot heads, add one shared nonlinear residual branch initialized to
-zero output, and change no receiver, loss, data or training schedule. This
-isolates whether missing joint-context interaction capacity caused the stable
-code ceiling while avoiding Batch 13's replacement of the successful shallow
-path. Do not combine it with collision replay, a new coefficient, factor-slot
-bindings, optimizer changes, variable-length messages or negotiation.
+At most one ECP7-B29 residual follow-up is justified: inherit B28's exact
+zero-RNG representation and B25's complete training setup, freeze the residual
+weight and bias at zero through step 30,000, then activate only those parameters
+for the remaining registered horizon. The purpose is to isolate whether late
+representation capacity can split an already established code without
+relearning the compositional protocol. Predefine one activation boundary and
+do not combine it with collision replay, gradient-route changes, a new loss,
+factor-slot bindings, optimizer changes, variable-length messages or
+negotiation. If this also fails, close ECP-7 development rather than continue a
+residual schedule search.
 
 ## 7. Definition of done for any contribution
 
