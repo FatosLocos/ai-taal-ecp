@@ -943,3 +943,30 @@ def test_hard_replay_gradient_route_phases_are_bounded_and_one_sided(
     ][-1]["end_step"] = 44800
     with pytest.raises(ConfigError, match="must cover max_steps"):
         validate_config(invalid_final)
+
+
+def test_ecp7_b27_adds_only_a_late_bounded_collision_pulse(
+    ecp7_b25_config, ecp7_b27_config
+):
+    assert ecp7_b27_config["world"] == ecp7_b25_config["world"]
+    assert ecp7_b27_config["dataset"] == ecp7_b25_config["dataset"]
+    assert ecp7_b27_config["channel"] == ecp7_b25_config["channel"]
+    assert ecp7_b27_config["agents"] == ecp7_b25_config["agents"]
+    b25_training = deepcopy(ecp7_b25_config["training"])
+    b27_training = deepcopy(ecp7_b27_config["training"])
+    assert b27_training.pop("global_collision_replay") == {
+        "enabled": True,
+        "weight": 0.1,
+        "start_step": 30000,
+        "warmup_steps": 5000,
+        "pair_batch_size": 32,
+        "refresh_interval": 200,
+        "relaxed_temperature": 1.0,
+        "weight_decay": {
+            "enabled": True,
+            "start_step": 35000,
+            "end_step": 40000,
+            "final_weight": 0.0,
+        },
+    }
+    assert b27_training == b25_training

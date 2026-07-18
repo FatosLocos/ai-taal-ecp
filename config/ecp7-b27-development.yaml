@@ -1,0 +1,24 @@
+extends: ecp7-b25-development.yaml
+
+experiment:
+  title: ECP-7 late bounded sender-collision pulse
+  arm: late_bounded_sender_collision_pulse
+  objective: >-
+    Test whether a direct bounded separation pulse on globally mined sender
+    collisions can increase codebook capacity after receivers have saturated,
+    without sacrificing the established weak-structure reconstruction result.
+
+training:
+  global_collision_replay:
+    enabled: true
+    weight: 0.1
+    start_step: 30000
+    warmup_steps: 5000
+    pair_batch_size: 32
+    refresh_interval: 200
+    relaxed_temperature: 1.0
+    weight_decay:
+      enabled: true
+      start_step: 35000
+      end_step: 40000
+      final_weight: 0.0

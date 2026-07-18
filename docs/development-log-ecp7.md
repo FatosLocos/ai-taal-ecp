@@ -34,6 +34,7 @@ this log.
 | ECP7-B24-I | Intervention | B23 sender-only warmup followed by receiver-only replay catch-up | Position-aware MLP | valid negative; new-best means but link-specific errors and injectivity fail |
 | ECP7-B25-I | Intervention | B24 receiver-only catch-up with a 45,000-step maximum horizon | Position-aware MLP | valid negative; new-best means reach the non-injective code-cap |
 | ECP7-B26-I | Intervention | B25 with a second sender-only pulse and final receiver-only catch-up | Position-aware MLP | valid negative; route cycle changes error sharing but not code capacity |
+| ECP7-B27-I | Intervention | B25 plus one late bounded direct sender-collision pulse | Position-aware MLP | valid negative; collision multiplicity falls but unique-code capacity is unchanged |
 
 ## Batch 1 preregistration
 
@@ -2184,3 +2185,106 @@ sender-only training reduces shared errors by fragmenting them across links.
 The ECP-7 confirmatory split remains sealed. Any future batch must change the
 sender collision objective or sender representation directly, rather than add
 another route phase, route boundary or horizon extension.
+
+## Batch 27 preregistration
+
+Preregistered: July 18, 2026 at 18:05:30 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `45,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Base hard-meaning replay: unchanged B25 sender-only warmup, then receiver-only catch-up<br>
+Direct sender-collision pulse start: step `30,000`, weight `0`<br>
+Direct sender-collision pulse peak: step `35,000`, weight `0.1`<br>
+Direct sender-collision pulse end: step `40,000`, weight `0`<br>
+Collision pairs: globally mined hard-message collisions per sender on training meanings only<br>
+Collision pair batch: `32` pairs per sender, uniform with replacement<br>
+Collision refresh interval: `200` steps<br>
+Relaxed replay temperature: `1.0`<br>
+Raw configuration SHA-256: `d44df83436f5ca81a2a51229b8ffe1a6fd6832d28dff4c7ab2ead3ace8efc9bd`<br>
+Effective configuration SHA-256: `649ddca4a285fbbb00b29c1cab82678e42ab8d6810f89f2131766cd82496c463`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B27-I inherits Batch 25 and adds only one bounded direct sender-collision
+loss after the unchanged trajectory through step 30,000. It reuses Batch 18's
+task-scale `0.1` coefficient and Batch 19's registered 5,000-step rise and
+5,000-step decay. The existing shared-hard-meaning replay remains receiver-only
+after step 20,000, so readers continue fitting while the new branch acts only
+on sender code separation. A final 5,000-step zero-collision-loss phase permits
+unperturbed receiver catch-up.
+
+The positive control is rerun. All existing validity and development gates
+remain unchanged. The direct-capacity hypothesis also requires a selected
+minimum sender codebook larger than Batch 25's 12,720-message minimum without a
+lower worst-link validation score. No alternative coefficient, pulse boundary,
+pair sampler, replay route, predicate, architecture, optimizer, horizon, data,
+translator or seed may be tried inside Batch 27. Failure is recorded without
+confirmatory test access.
+
+## Batch 27 results
+
+Positive-control run: `runs/ecp7-batch27-control-development/20260718T180724Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch27-intervention-development/20260718T180838Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B27-I |
+|---|---:|---:|
+| Population train, mean | 100% | **85.3760%** |
+| Population train, worst link | 100% | 82.1498% |
+| Population validation, mean | 100% | **85.3760%** |
+| Population validation, worst link | 100% | 82.1289% |
+| Universal translator, validation | 100% | **85.3516%** |
+| Exact sender-message agreement | 100% | 92.36% |
+| Unique messages per sender | 15,360 | 12,720–13,440 |
+| Collision meanings per sender | 0 | 1,920–2,640 |
+| Message entropy | 13.91 bits | 13.56–13.66 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B27-I modestly exceeds
+Batch 25's mean train, mean validation and translator scores, but fails both
+train thresholds, sender injectivity and the preregistered direct-capacity
+criterion. Worst-link validation falls from Batch 25's 82.7148% to 82.1289%.
+The joint gate fails and confirmatory access remains unauthorized.
+
+All 151 optimization records through step 30,000 match Batch 25 exactly after
+excluding the new zero-weight collision diagnostics. The first mining boundary
+finds 2,429, 2,578, 2,912 and 2,128 unordered collision pairs. At the pulse
+peak on step 35,000, the pair banks contain 1,792, 2,605, 2,480 and 2,128
+pairs. Once the pulse reaches zero at step 40,000 they stabilize at 1,792,
+2,240, 2,464 and 1,792 pairs through the selected step 43,800 and final step
+45,000.
+
+For comparison, Batch 25's selected hard codebooks contain 2,128, 2,576,
+2,912 and 2,128 unordered collision pairs. B27 therefore reduces collision
+pair multiplicity substantially. It nevertheless produces exactly the same
+unique-message counts as B25: 13,440, 12,960, 12,720 and 13,440. Collision
+meaning counts are likewise unchanged at 1,920, 2,400, 2,640 and 1,920. The
+higher 13.56–13.66-bit entropies show that the loss redistributes multiplicity
+among already occupied codes instead of creating new occupied codes.
+
+The selected diagnostic finds 1,792 meanings failed by all links and 2,812
+failed by at least one link, with 11.93 mean failed links per erroneous
+meaning. Relative to Batch 25, any-link failures fall by 155 while shared
+failures rise by 115. The direct pulse therefore produces a different
+error-sharing tradeoff from route cycling, but still cannot raise the minimum
+sender code capacity above 12,720.
+
+Population validation factor accuracies were
+`[100%, 100%, 98.44%, 86.94%]`; universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 86.91%]`. Both sealed analyses report 65 matching
+artifact hashes, 16,384 validation-only episodes, no confirmatory-test keys,
+valid local alphabets, and exactly 14 declared bits for every logged message.
+
+## Batch 27 decision
+
+ECP7-B27-I is a valid negative result. Direct relaxed collision-pair pressure
+can reduce high-multiplicity hard collisions while preserving mean accuracy,
+but it does not occupy additional codes and it weakens the worst population
+link. Repeating this loss with another late coefficient or pulse boundary is
+not justified.
+
+The ECP-7 confirmatory split remains sealed. A future batch must change the
+factor-agnostic sender representation or introduce a genuinely different
+occupancy-creation mechanism; it may not combine that change with another
+replay-route or collision-coefficient search.

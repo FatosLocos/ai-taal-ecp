@@ -731,6 +731,19 @@ def test_hard_replay_coordinate_route_follows_registered_phases(
         )
 
 
+def test_late_sender_collision_pulse_preserves_the_first_30000_steps(
+    ecp7_b27_config,
+):
+    schedule = ecp7_b27_config["training"]["global_collision_replay"]
+
+    assert _scheduled_collision_replay_weight(schedule, 30000) == 0.0
+    assert _scheduled_collision_replay_weight(schedule, 32500) == 0.05
+    assert _scheduled_collision_replay_weight(schedule, 35000) == 0.1
+    assert _scheduled_collision_replay_weight(schedule, 37500) == 0.05
+    assert _scheduled_collision_replay_weight(schedule, 40000) == 0.0
+    assert _scheduled_collision_replay_weight(schedule, 45000) == 0.0
+
+
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
     receiver = FactorizedPermutationSlotReceiver(ModelSpec.from_config(ecp4_config))
     meanings = torch.tensor(

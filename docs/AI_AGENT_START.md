@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 125 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 127 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 26
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 27
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -155,11 +155,17 @@ and translator validation, but its unique-message counts were effectively
 unchanged. Shared failures fell while any-link failures rose, closing the
 replay-routing family as an error-redistribution mechanism rather than an
 injectivity solution. The confirmatory ECP-7 test remains sealed.
+ECP7-B27-I added a late bounded direct collision-pair penalty. It reached
+85.38% mean validation and reduced collision-pair multiplicity, but produced
+exactly the same 13,440, 12,960, 12,720 and 13,440 unique-message counts as
+Batch 25. Worst-link validation regressed to 82.13%, so the existing collision
+loss is also closed as a capacity solution. The confirmatory test remains
+sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B27 direct sender-capacity intervention and its
+2. Define exactly one ECP7-B28 sender-representation or occupancy intervention and its
    failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
@@ -173,20 +179,20 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 26 shows that another one-sided replay cycle cannot increase sender code
-capacity. Receiver-only phases fit the existing codebook ceiling; sender-only
-ordinary-task replay converts shared errors into link-specific errors. Do not
-try another route boundary, route cycle or horizon extension.
+Batch 27 shows that the existing relaxed collision-pair loss can reduce
+collision multiplicity but cannot create newly occupied hard codes. Do not try
+another coefficient, pulse boundary, route cycle or horizon extension.
 
-For ECP7-B27, preregister exactly one direct sender-capacity intervention on the
-strongest stable base. A defensible candidate is a late, bounded pulse that
-explicitly separates globally mined hard-message collisions while preserving
-the ordinary reconstruction task. Reuse an already tested loss and coefficient
-where possible, activate it only after a shared unchanged trajectory, and
-define success primarily as a reproducible increase in unique messages without
-loss of worst-link validation. Do not combine this with a new architecture,
-new predicate, optimizer change, factor-specific supervision, variable-length
-messages or negotiation in the same batch.
+For ECP7-B28, preregister exactly one factor-agnostic sender representation or
+genuinely different occupancy-creation intervention. A defensible
+representation candidate is an identity-preserving residual interaction block
+on the successful bounded-parallel sender: retain the complete shallow joint
+context and slot heads, add one shared nonlinear residual branch initialized to
+zero output, and change no receiver, loss, data or training schedule. This
+isolates whether missing joint-context interaction capacity caused the stable
+code ceiling while avoiding Batch 13's replacement of the successful shallow
+path. Do not combine it with collision replay, a new coefficient, factor-slot
+bindings, optimizer changes, variable-length messages or negotiation.
 
 ## 7. Definition of done for any contribution
 
