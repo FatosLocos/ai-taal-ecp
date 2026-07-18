@@ -455,6 +455,11 @@ def train_population_system(
                 collision_replay_loss = torch.stack(replay_losses).mean()
         hard_meaning_replay_loss = torch.zeros((), device=device)
         hard_meaning_replay_weight = 0.0
+        hard_meaning_replay_receiver_parameter_gradients = bool(
+            hard_meaning_replay_config.get(
+                "receiver_parameter_gradients", True
+            )
+        )
         if hard_meaning_replay_enabled:
             hard_meaning_replay_weight = (
                 _scheduled_hard_meaning_replay_weight(
@@ -483,17 +488,16 @@ def train_population_system(
                     )[0]
                     for sender in population.senders
                 ]
-                hard_receiver_logits = [
-                    receiver(message)
-                    for message in hard_messages
-                    for receiver in population.receivers
-                ]
-                hard_meaning_replay_loss = torch.stack(
-                    [
-                        _factor_loss(logits, hard_batch)
-                        for logits in hard_receiver_logits
-                    ]
-                ).mean()
+                hard_meaning_replay_loss = (
+                    routed_population_reconstruction_loss(
+                        population,
+                        hard_messages,
+                        hard_batch,
+                        receiver_parameter_gradients=(
+                            hard_meaning_replay_receiver_parameter_gradients
+                        ),
+                    )
+                )
         sender_consensus_loss = torch.zeros((), device=device)
         sender_consensus_weight = 0.0
         if sender_consensus_enabled:
@@ -597,6 +601,9 @@ def train_population_system(
                 ),
                 "global_hard_meaning_replay_pool_size": len(
                     hard_meaning_replay_indices
+                ),
+                "global_hard_meaning_replay_receiver_parameter_gradients": (
+                    hard_meaning_replay_receiver_parameter_gradients
                 ),
                 "sender_message_consensus_loss": float(
                     sender_consensus_loss.detach().cpu()
@@ -888,6 +895,39 @@ def mine_population_hard_meaning_indices(
     return (failed_links >= minimum_failed_links).nonzero(
         as_tuple=False
     ).flatten()
+
+
+def routed_population_reconstruction_loss(
+    population: PopulationSystem,
+    messages: list[Tensor],
+    targets: Tensor,
+    *,
+    receiver_parameter_gradients: bool,
+) -> Tensor:
+    """Compute all-link task loss with optional fixed receiver parameters."""
+    if len(messages) != len(population.senders):
+        raise ValueError("Replay messages must match the sender population.")
+    receiver_parameters = list(population.receivers.parameters())
+    prior_gradient_states = [
+        parameter.requires_grad for parameter in receiver_parameters
+    ]
+    if not receiver_parameter_gradients:
+        for parameter in receiver_parameters:
+            parameter.requires_grad_(False)
+    try:
+        receiver_logits = [
+            receiver(message)
+            for message in messages
+            for receiver in population.receivers
+        ]
+        return torch.stack(
+            [_factor_loss(logits, targets) for logits in receiver_logits]
+        ).mean()
+    finally:
+        for parameter, requires_grad in zip(
+            receiver_parameters, prior_gradient_states, strict=True
+        ):
+            parameter.requires_grad_(requires_grad)
 
 
 def relaxed_collision_pair_probability(message_pairs: Tensor) -> Tensor:

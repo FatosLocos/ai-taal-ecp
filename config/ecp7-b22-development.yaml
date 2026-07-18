@@ -1,0 +1,13 @@
+extends: ecp7-b21-development.yaml
+
+experiment:
+  title: ECP-7 sender-only population-shared hard replay
+  arm: sender_only_population_shared_hard_replay
+  objective: >-
+    Test whether blocking receiver-parameter gradients only for the additional
+    all-link hard-meaning replay loss prevents joint coadaptation and moves
+    ambiguous sender codes toward existing decoder distinctions.
+
+training:
+  global_hard_meaning_replay:
+    receiver_parameter_gradients: false

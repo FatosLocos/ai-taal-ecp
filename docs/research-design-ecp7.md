@@ -930,3 +930,45 @@ sealed-test requirement fails. No alternative failed-link threshold, graded
 score, coefficient, replay batch, refresh, schedule, architecture, base loss,
 optimizer, duration, data, translator or seed may be tried inside Batch 21.
 Failure is recorded without confirmatory test access.
+
+## Batch 22 preregistration — Sender-only shared-error replay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 16:28:26 UTC<br>
+Configuration: `config/ecp7-b22-development.yaml`<br>
+Raw configuration SHA-256: `7d91bb825564681f059ba207766d0a392cc26bafaf2b113d5354c249abd1d2a0`<br>
+Effective configuration SHA-256: `518ff24f4e1d625ff09366b9515dd5359a3a34fc7e8e801cca5dde40dd8f5acc`
+
+Batch 21's all-link replay pool grew from 1,745 to 1,997 meanings while
+validation and sender agreement improved. This is consistent with joint
+sender-receiver replay updates aligning the population around persistent
+ambiguous codes instead of forcing sender codes to move. Batch 22 isolates that
+gradient-routing explanation.
+
+ECP7-B22-I inherits the complete Batch 21 predicate, Batch 20 replay mechanism,
+Batch 15 architecture, ordinary task batch, utilization objective, optimizer,
+data, temperature schedule, coefficient, replay batch, sampler, refresh,
+warmup, 30,000-step horizon, selection, translator and thresholds. The sole
+change is:
+
+- during the additional all-link hard-replay forward pass, receiver parameters
+  are treated as fixed constants, so that replay loss sends gradients through
+  the receivers into sender messages but not into receiver parameters.
+
+The ordinary base task remains unchanged and continues to update both senders
+and receivers every step. Receiver gradient flags are restored before backward,
+so ordinary-task receiver gradients remain active. Mining still uses hard
+training predictions only. The complete optimization trajectory through step
+15,000 must match Batch 21, Batch 20 and Batch 15 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B22-I with sender-only population-shared hard replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative gradient route, predicate,
+coefficient, replay batch, refresh, schedule, architecture, base loss,
+optimizer, duration, data, translator or seed may be tried inside Batch 22.
+Failure is recorded without confirmatory test access.
