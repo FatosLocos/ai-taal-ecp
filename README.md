@@ -1,94 +1,103 @@
-# AI-taal — onderzoek naar emergente communicatie
+# AI Language — Emergent Communication Research
 
-Dit project onderzoekt of onafhankelijk getrainde AI-agents zelf een communicatieprotocol kunnen ontwikkelen dat voor een afgebakende taak compacter, minder ambigu en beter overdraagbaar is dan menselijke taal.
+This project investigates whether independently trained AI agents can develop a communication protocol that is more compact, less ambiguous and more portable than human language for a defined task.
 
-De eerste versie heet **ECP-0**: *Emergent Communication Protocol, experiment 0*. ECP-0 gebruikt geen woorden of vooraf toegekende symboolbetekenissen. Een zender en ontvanger moeten via vier discrete symbolen een betekenis uit een kunstmatige wereld reconstrueren.
+The first version is called **ECP-0**: *Emergent Communication Protocol, experiment 0*. ECP-0 does not use words or pre-assigned symbol meanings. A sender and receiver must reconstruct a meaning from an artificial world via four discrete symbols.
 
-## Onderzoeksvraag
+## Research question
 
-> Kunnen onafhankelijke AI-agents zelf een communicatieprotocol ontwikkelen dat bij gelijke taakprestatie efficiënt, generaliseerbaar, vertaalbaar en overdraagbaar is?
+> Can independent AI agents themselves develop a communication protocol that is efficient, generalizable, translatable and portable given the same task performance?
 
-Een protocol geldt binnen dit onderzoek pas als een serieuze nieuwe communicatievorm wanneer het:
+Within this research, a protocol only counts as a serious new form of communication when it:
 
-1. niet door mensen semantisch is voorgeprogrammeerd;
-2. onbekende combinaties kan uitdrukken;
-3. door een onafhankelijke vertaler kan worden ontsloten;
-4. door nieuwe agents kan worden aangeleerd;
-5. aantoonbaar efficiënt is ten opzichte van vaste baselines;
-6. uitsluitend het toegestane en volledig gelogde kanaal gebruikt.
+1. is not semantically pre-programmed by humans;
+2. can express unknown combinations;
+3. can be accessed by an independent translator;
+4. can be learned by new agents;
+5. is demonstrably efficient compared to fixed baselines;
+6. only uses the allowed and fully logged channel.
 
-## Huidige status
+## Current status
 
-**ECP-6 is de geslaagde schaalreplicatie van het volledig efficiënte protocol.** Alle vijf seeds reconstrueren bekende én volledig nieuwe factorcombinaties voor 100%. De universele vertaler en het slechtste agentpaar halen eveneens 100%. De vooraf vastgelegde classificatie is **sterk bewijs**.
+**ECP-6 is the successful scale replication of the fully efficient protocol.** All five seeds reconstruct known and completely new factor combinations for 100%. The universal translator and the worst agent pair also achieve 100%. The predetermined classification is **strong evidence**.
 
-Het protocol gebruikt geen woorden of alfabet, maar vier betekenisvrije lokale symbolen. Voor `16 × 16 × 8 × 8 = 16.384` uniforme betekenissen gebruikt het exact `4+4+3+3=14` bits: de informatietheoretische ondergrens. Voor deze afgebakende taak is dat gemiddeld 23,9 keer compacter dan het Nederlandse tekstsjabloon.
+The protocol uses no words or alphabet, but four meaning-free local symbols. For `16 × 16 × 8 × 8 = 16,384` uniform meanings it uses exactly `4+4+3+3=14` bits: the information-theoretic lower bound. For this defined task, this is on average 23.9 times more compact than the Dutch text template.
 
-Zie [`docs/resultaten-ecp6.md`](docs/resultaten-ecp6.md) voor de conclusie, [`docs/protocolspecificatie-ecp6.md`](docs/protocolspecificatie-ecp6.md) voor het wire-formaat en [`evidence/ecp6/report.md`](evidence/ecp6/report.md) voor de compacte confirmatieve evidence.
+See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
-## Verder bouwen
+## Build on this work
 
-Een nieuwe ontwikkelaar of verse AI-agent kan zonder eerdere chatcontext beginnen. Lees eerst [`AGENTS.md`](AGENTS.md) voor de bindende onderzoeksregels en volg daarna [`docs/AI_AGENT_START.md`](docs/AI_AGENT_START.md) voor installatie, architectuuroverzicht, reproductie en het correct opzetten van ECP-7.
+A new developer or fresh AI agent can start with no previous chat context. First read [`AGENTS.md`](AGENTS.md) for the binding research rules and then follow [`docs/AI_AGENT_START.md`](docs/AI_AGENT_START.md) for installation, architecture overview, reproduction and proper setup of ECP-7.
 
-Bijdragen zijn welkom via [`CONTRIBUTING.md`](CONTRIBUTING.md). Grote gegenereerde runs blijven lokaal; compacte verifieerbare resultaten komen onder [`evidence/`](evidence/).
+Contributions are welcome via [`CONTRIBUTING.md`](CONTRIBUTING.md). Large generated runs stay local; compact verifiable results come under [`evidence/`](evidence/).
 
-## Bestanden
+## Language and frozen provenance
 
-- [`docs/onderzoeksopzet.md`](docs/onderzoeksopzet.md) — volledige onderzoeksvraag, fasering, metingen en stopcriteria.
-- [`docs/experiment-template.md`](docs/experiment-template.md) — vast verslagformat per experimentele run.
-- [`docs/resultaten-ecp0.md`](docs/resultaten-ecp0.md) — uitkomsten, hypothesetoetsing en aanbeveling voor stap 2.
-- [`docs/onderzoeksopzet-ecp1.md`](docs/onderzoeksopzet-ecp1.md) — vooraf vastgelegde populatieproef en besliscriteria.
-- [`docs/ontwikkellog-ecp1.md`](docs/ontwikkellog-ecp1.md) — ontwikkeling die plaatsvond terwijl de ECP-1-testset gesloten bleef.
-- [`docs/resultaten-ecp1.md`](docs/resultaten-ecp1.md) — confirmatieve uitkomsten, vergelijking met ECP-0 en aanbeveling voor ECP-2.
-- [`docs/resultaten-ecp2.md`](docs/resultaten-ecp2.md) — permutationslots, gepaarde consensusproef en resterende symboolbotsingen.
-- [`docs/onderzoeksopzet-ecp3.md`](docs/onderzoeksopzet-ecp3.md) — vooraf bevroren hypothese, split en beslisregels voor het injectieve protocol.
-- [`docs/ontwikkellog-ecp3.md`](docs/ontwikkellog-ecp3.md) — ontwikkeling terwijl de ECP-3-testmatching gesloten bleef.
-- [`docs/resultaten-ecp3.md`](docs/resultaten-ecp3.md) — sterk bewijs, protocolvoorbeeld, efficiëntie en grenzen van het basismodel.
-- [`docs/resultaten-ecp4.md`](docs/resultaten-ecp4.md) — perfecte 10-bitpopulatie en de geïsoleerde vertalerfout.
-- [`docs/onderzoeksopzet-ecp5.md`](docs/onderzoeksopzet-ecp5.md) — vooraf bevroren kalibratieproef en orthogonale holdout.
-- [`docs/ontwikkellog-ecp5.md`](docs/ontwikkellog-ecp5.md) — gesloten ontwikkeling van exacte bindingsinductie.
-- [`docs/resultaten-ecp5.md`](docs/resultaten-ecp5.md) — 5/5 foutloze seeds en volledige efficiëntieanalyse.
-- [`docs/protocolspecificatie-ecp5.md`](docs/protocolspecificatie-ecp5.md) — logisch bericht, 10-bit-wireformaat en decoderprocedure.
-- [`docs/onderzoeksopzet-ecp6.md`](docs/onderzoeksopzet-ecp6.md) — vooraf bevroren schaalproef voor 16.384 betekenissen.
-- [`docs/ontwikkellog-ecp6.md`](docs/ontwikkellog-ecp6.md) — schaalinvarianten en gesloten 14-bitontwikkeling.
-- [`docs/resultaten-ecp6.md`](docs/resultaten-ecp6.md) — 5/5 foutloze schaalreplicaties en integriteitsanalyse.
-- [`docs/protocolspecificatie-ecp6.md`](docs/protocolspecificatie-ecp6.md) — machinecode, 14-bit-wireformaat en inductieprocedure.
-- [`config/ecp0.yaml`](config/ecp0.yaml) — machineleesbare configuratie van stap 1.
-- [`config/ecp1.yaml`](config/ecp1.yaml) — bevroren configuratie van de populatieproef.
-- [`config/ecp3.yaml`](config/ecp3.yaml) — bevroren configuratie van het eerste geslaagde basismodel.
-- [`config/ecp5.yaml`](config/ecp5.yaml) — bevroren configuratie van het volledig efficiënte eindmodel.
-- [`config/ecp6.yaml`](config/ecp6.yaml) — bevroren configuratie van de 16× schaalreplicatie.
-- [`AGENTS.md`](AGENTS.md) — bindende onderzoeks- en wijzigingsregels voor AI-agents.
-- [`docs/AI_AGENT_START.md`](docs/AI_AGENT_START.md) — volledige onboarding voor een verse AI-agent.
-- [`evidence/ecp6/manifest.json`](evidence/ecp6/manifest.json) — compacte machineleesbare confirmatieve evidence.
-- [`schemas/meaning.schema.json`](schemas/meaning.schema.json) — formaat van een betekenis.
-- [`schemas/message.schema.json`](schemas/message.schema.json) — formaat van een agentbericht.
-- [`schemas/episode.schema.json`](schemas/episode.schema.json) — formaat van een geëvalueerde aflevering.
+All reader-facing documentation, schemas, command-line output, and source commentary are in English. Two reproducibility artifacts intentionally retain original Dutch literals:
 
-## ECP-0 in één minuut
+- the Dutch UTF-8 baseline sentence in `src/ai_taal/baselines.py`, because its byte length is a measured comparison;
+- descriptive metadata and comments inside existing ECP-0 through ECP-6 YAML configurations, because their exact bytes are preregistered and referenced by published SHA-256 hashes.
 
-- De wereld bevat `8 × 8 × 4 × 4 = 1024` mogelijke betekenissen.
-- Iedere betekenis bestaat uit vier onafhankelijke factoren: kleur, vorm, grootte en textuur.
-- De agents zien alleen numerieke categorieën, geen menselijke labels.
-- Het kanaal heeft 16 mogelijke symbolen en exact 4 posities: 16 bits per bericht.
-- De zender en ontvanger delen geen gewichten, embeddings of toestand.
-- 128 betekenissen worden als onbekende kleur-vormcombinaties volledig buiten training gehouden.
-- Na training wordt het protocol bevroren en door een derde model vertaald.
-- Vijf onafhankelijke trainingsruns voorkomen conclusies op basis van één toevallige code.
+Do not translate those artifacts in place. New experiment configurations and all new public documentation must be written in English.
 
-De theoretische ondergrens voor het exact onderscheiden van 1024 uniforme betekenissen is 10 bits. ECP-0 gebruikt bewust 16 bits: ruim genoeg om eerst leerbaarheid, compositionaliteit en vertaalbaarheid te testen. Compressie naar 12 bits en daarna richting de 10-bitondergrens hoort bij stap 2.
+## Files
+
+- [`docs/research-design.md`](docs/research-design.md) — complete research question, phasing, measurements and stopping criteria.
+- [`docs/experiment-template.md`](docs/experiment-template.md) — fixed report format per experimental run.
+- [`docs/results-ecp0.md`](docs/results-ecp0.md) — outcomes, hypothesis testing and recommendation for step 2.
+- [`docs/research-design-ecp1.md`](docs/research-design-ecp1.md) — predefined population experiment and decision criteria.
+- [`docs/development-log-ecp1.md`](docs/development-log-ecp1.md) — development that occurred while the ECP-1 test set remained sealed.
+- [`docs/results-ecp1.md`](docs/results-ecp1.md) — confirmatory results, comparison with ECP-0 and recommendation for ECP-2.
+- [`docs/results-ecp2.md`](docs/results-ecp2.md) — permutation slots, paired consensus trial, and residual symbol collisions.
+- [`docs/research-design-ecp3.md`](docs/research-design-ecp3.md) — pre-frozen hypothesis, split and decision rules for the injective protocol.
+- [`docs/development-log-ecp3.md`](docs/development-log-ecp3.md) — development while the ECP-3 test split remained sealed.
+- [`docs/results-ecp3.md`](docs/results-ecp3.md) — strong evidence, protocol example, efficiency and limits of the base model.
+- [`docs/results-ecp4.md`](docs/results-ecp4.md) — perfect 10-bit population and the isolated translator error.
+- [`docs/research-design-ecp5.md`](docs/research-design-ecp5.md) — prefrozen calibration experiment and orthogonal holdout.
+- [`docs/development-log-ecp5.md`](docs/development-log-ecp5.md) — sealed development of exact binding induction.
+- [`docs/results-ecp5.md`](docs/results-ecp5.md) — 5/5 error-free seeds and full efficiency analysis.
+- [`docs/protocol-specification-ecp5.md`](docs/protocol-specification-ecp5.md) — logical message, 10-bit wire format and decoder procedure.
+- [`docs/research-design-ecp6.md`](docs/research-design-ecp6.md) — pre-frozen scale test for 16,384 meanings.
+- [`docs/development-log-ecp6.md`](docs/development-log-ecp6.md) — scale invariants and sealed 14-bit development.
+- [`docs/results-ecp6.md`](docs/results-ecp6.md) — 5/5 error-free scale replications and integrity analysis.
+- [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) — machine code, 14-bit wire format and induction procedure.
+- [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
+- [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
+- [`config/ecp3.yaml`](config/ecp3.yaml) — frozen configuration of the first successful base model.
+- [`config/ecp5.yaml`](config/ecp5.yaml) — frozen configuration of the fully efficient end model.
+- [`config/ecp6.yaml`](config/ecp6.yaml) — frozen configuration of the 16× scale replication.
+- [`AGENTS.md`](AGENTS.md) — binding research and change rules for AI agents.
+- [`docs/AI_AGENT_START.md`](docs/AI_AGENT_START.md) — full onboarding for a fresh AI agent.
+- [`evidence/ecp6/manifest.json`](evidence/ecp6/manifest.json) — compact machine-readable confirmatory evidence.
+- [`schemas/meaning.schema.json`](schemas/meaning.schema.json) — format of a meaning.
+- [`schemas/message.schema.json`](schemas/message.schema.json) — format of an agent message.
+- [`schemas/episode.schema.json`](schemas/episode.schema.json) — format of an evaluated episode.
+
+## ECP-0 in one minute
+
+- The world contains `8 × 8 × 4 × 4 = 1024` possible meanings.
+- Each meaning consists of four independent factors: color, shape, size and texture.
+- The agents only see numerical categories, not human labels.
+- The channel has 16 possible symbols and exactly 4 positions: 16 bits per message.
+- The sender and receiver do not share weights, embeddings or state.
+- 128 meanings are completely excluded from training as unknown color-shape combinations.
+- After training, the protocol is frozen and translated by a third model.
+- Five independent training runs prevent conclusions based on one random code.
+
+The theoretical lower limit for exactly distinguishing 1024 uniform meanings is 10 bits. ECP-0 deliberately uses 16 bits: more than enough to first test learnability, compositionality and translatability. Compression to 12 bits and then towards the 10-bit lower limit is part of step 2.
 
 ## Simulator
 
-De reproduceerbare simulator bevat:
+The reproducible simulator includes:
 
-1. deterministische datasetgeneratie;
-2. afzonderlijke zender-, ontvanger- en vertaalmodellen;
-3. discrete evaluatie zonder verborgen nevenkanaal;
-4. automatische baselines, controles, metingen en runrapporten.
+1. deterministic dataset generation;
+2. separate sender, receiver and translation models;
+3. discrete evaluation without hidden side channel;
+4. automatic baselines, checks, measurements and run reports.
 
-## Uitvoeren
+## Execute
 
-Vereist: Python 3.12.
+Required: Python 3.12.
 
 ```bash
 python3.12 -m venv .venv
@@ -97,36 +106,36 @@ python3.12 -m venv .venv
 .venv/bin/pytest
 ```
 
-De drie uitvoermodi hebben bewust verschillende toegang tot de data:
+The three output modes deliberately access the data differently:
 
 ```bash
-# 25 stappen: alleen controleren of de hele technische keten werkt
+# 25 steps: verify that the complete technical pipeline works
 .venv/bin/ecp0 smoke --seed 11
 
-# Volledig trainen op train en validatie; test blijft gesloten
+# Full training on train and validation; the test split remains sealed
 .venv/bin/ecp0 develop --seed 11
 
-# Confirmatief: alle vastgelegde seeds en eenmalige testontzegeling
+# Confirmatory run: all preregistered seeds and one-time test unsealing
 .venv/bin/ecp0 experiment --unseal-test
 
-# Controleer hashes en vergelijk protocolstructuur met willekeurige koppelingen
+# Verify hashes and compare protocol structure with random assignments
 .venv/bin/ecp0 analyze runs/<run-id> --permutations 100
 
-# ECP-1 gebruikt dezelfde interface met de populatieconfiguratie
+# ECP-1 uses the same interface with the population configuration
 .venv/bin/ecp1 --config config/ecp1.yaml validate
 .venv/bin/ecp1 --config config/ecp1.yaml analyze runs/<ecp1-run-id> --permutations 100
 
-# ECP-3: injectieve atoomcodes en geleerde protocolconsensus
+# ECP-3: injective atomic codes and learned protocol consensus
 .venv/bin/ecp3 --config config/ecp3.yaml validate
 .venv/bin/ecp3 --config config/ecp3.yaml analyze runs/<ecp3-run-id> --permutations 100
 
-# ECP-5: theoretisch minimale 10-bitcode met gekalibreerde lezer
+# ECP-5: theoretically minimal 10-bit code with a calibrated reader
 .venv/bin/ecp5 --config config/ecp5.yaml validate
 .venv/bin/ecp5 --config config/ecp5.yaml analyze runs/<ecp5-run-id> --permutations 100
 
-# ECP-6: 16.384 betekenissen bij de exacte 14-bitondergrens
+# ECP-6: 16,384 meanings at the exact 14-bit lower bound
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 .venv/bin/ecp6 --config config/ecp6.yaml analyze runs/<ecp6-run-id> --permutations 100
 ```
 
-Iedere uitvoering schrijft configuratie, omgeving, checkpoints, ruwe berichten, controles, hashes, metrics en een rapport naar een nieuwe map onder `runs/`.
+Each run writes configuration, environment, checkpoints, raw messages, checks, hashes, metrics, and a report to a new folder under `runs/`.

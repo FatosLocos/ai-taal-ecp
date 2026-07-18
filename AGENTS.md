@@ -7,9 +7,9 @@ This repository is a reproducible research project, not a generic chat applicati
 Read these files in order before changing code:
 
 1. `README.md`
-2. `docs/resultaten-ecp6.md`
-3. `docs/protocolspecificatie-ecp6.md`
-4. `docs/onderzoeksopzet-ecp6.md`
+2. `docs/results-ecp6.md`
+3. `docs/protocol-specification-ecp6.md`
+4. `docs/research-design-ecp6.md`
 5. `docs/AI_AGENT_START.md`
 
 Then run:
@@ -40,6 +40,7 @@ python3.12 -m venv .venv
 - Run the full test suite and the relevant config validation before committing.
 - Keep existing ECP-0 through ECP-6 configurations reproducible.
 - Document new experiments in three stages: preregistration, sealed development log, confirmatory results.
+- Write new configurations, documentation, reports and user-facing output in English.
 - When proposing ECP-7, prefer a single falsifiable intervention over several simultaneous architecture changes.
 
 The recommended next research question is whether compositional structure still emerges when the explicit one-factor-per-slot architectural bias is weakened.

@@ -1,29 +1,29 @@
-# Experimentrapport ECP-__
+# Experiment report ECP-__
 
-## Registratie vóór de run
+## Registration before the run
 
 - Experiment-ID:
-- Datum:
-- Onderzoeksvraag:
-- Primaire hypothese:
-- Configbestand en hash:
-- Codecommit:
-- Datasetmanifest en hash:
+- Date:
+- Research question:
+- Primary hypothesis:
+- Configuration file and hash:
+- Code commit:
+- Dataset manifest and hash:
 - Seeds:
-- Vooraf vastgelegde succesdrempel:
-- Geplande afwijkingen ten opzichte van ECP-0:
+- Predefined success threshold:
+- Planned deviations from ECP-0:
 
-## Omgeving
+## Environment
 
-- Besturingssysteem:
+- Operating system:
 - Hardware:
-- Pythonversie:
-- Framework en versie:
-- Start- en eindtijd:
+- Python version:
+- Framework and version:
+- Start and end time:
 
-## Resultaten
+## Results
 
-| Run | Seed | Bekend exact | Compositie exact | Vertaling exact | Bits/bericht | Geldig? |
+| Run | Seed | Known exact match | Compositional exact match | Translation exact match | Bits/message | Valid? |
 |---|---:|---:|---:|---:|---:|---|
 | 1 |  |  |  |  |  |  |
 | 2 |  |  |  |  |  |  |
@@ -31,35 +31,34 @@
 | 4 |  |  |  |  |  |  |
 | 5 |  |  |  |  |  |  |
 
-## Baselines en controles
+## Baselines and controls
 
-| Baseline of controle | Verwachting | Waarneming | Geslaagd? |
+| Baseline or control | Expectation | Observation | Passed? |
 |---|---|---|---|
-| Gepakte factorcode | 10 bits, foutloos |  |  |
-| Willekeurige lookup | Bekend hoog, compositie laag |  |  |
-| Handmatig compositioneel | Bekend en compositie hoog |  |  |
-| Berichten gehusseld | Ongeveer kansniveau |  |  |
-| Symbool-ID's consistent gepermuteerd | Prestatie onveranderd |  |  |
-| Kanaalisolatie | Geen nevenkanaal |  |  |
+| Packed factor code | 10 bits, error-free |  |  |
+| Random lookup | Known high, composition low |  |  |
+| Manual compositional code | Known and composition high |  |  |
+| Messages shuffled | Approximately chance level |  |  |
+| Symbol IDs consistently permuted | Performance unchanged |  |  |
+| Channel isolation | No side channel |  |  |
 
-## Protocolanalyse
+## Protocol analysis
 
-- Aantal unieke berichten:
-- Aantal botsingen:
-- Berichtentropie:
-- Topografische overeenkomst:
-- Resultaat minimale-parenanalyse:
-- Resultaat symboolablaties:
-- Stabiliteit tussen seeds:
+- Number of unique messages:
+- Number of collisions:
+- Message entropy:
+- Topographic similarity:
+- Result of minimal-pair analysis:
+- Result of symbol ablations:
+- Stability across seeds:
 
-## Afwijkingen en incidenten
+## Deviations and incidents
 
-Beschrijf iedere afwijking, ook als deze ogenschijnlijk geen invloed had. Een niet vooraf geregistreerde inhoudelijke wijziging maakt de betreffende run ongeldig voor confirmatieve conclusies.
+Describe every deviation, even if it appears to have no impact. Any unregistered content change renders the corresponding run invalid for confirmatory conclusions.
 
-## Conclusie
+## Conclusion
 
-- Classificatie: sterk bewijs / gemengd bewijs / negatief resultaat / ongeldige run
-- Wordt de hypothese ondersteund?
-- Welke alternatieve verklaringen blijven mogelijk?
-- Welke vooraf te registreren wijziging is gerechtvaardigd voor het volgende experiment?
-
+- Classification: strong evidence / mixed evidence / negative result / invalid run
+- Does the hypothesis receive support?
+- Which alternative explanations remain possible?
+- Which pre-registered modification is justified for the next experiment?

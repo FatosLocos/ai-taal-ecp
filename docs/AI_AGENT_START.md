@@ -78,10 +78,10 @@ Do not modify ECP-6. Use this sequence:
 3. Create a genuinely new deterministic holdout or world seed.
 4. Add tests for every new invariant before training.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
-6. Record all tried variants in `docs/ontwikkellog-ecp7.md`.
+6. Record all tried variants in `docs/development-log-ecp7.md`.
 7. Select one final design using train and validation only.
 8. Create `config/ecp7.yaml` with status `frozen_for_confirmatory` and a UTC freeze time.
-9. Record config and split SHA-256 values in `docs/onderzoeksopzet-ecp7.md`.
+9. Record config and split SHA-256 values in `docs/research-design-ecp7.md`.
 10. Only then run the predefined seeds once with `experiment --unseal-test`.
 11. Run posthoc integrity analysis and publish both successes and failures.
 

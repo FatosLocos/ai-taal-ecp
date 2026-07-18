@@ -1,4 +1,4 @@
-"""Populatie-experimenten met universele vertaling en overdraagbaarheid."""
+"""Population experiments with universal translation and transferability."""
 
 from __future__ import annotations
 
@@ -50,14 +50,14 @@ def run_population_experiment(
 ) -> Path:
     experiment_id = config["experiment"]["id"].upper()
     if smoke and development:
-        raise ValueError("Een run kan niet tegelijk smoke en development zijn.")
+        raise ValueError("A run cannot be both smoke and development.")
     if not smoke and not development and not unseal_test:
         raise ValueError(
-            f"Een confirmatieve {experiment_id}-run vereist --unseal-test."
+            f"A confirmatory {experiment_id} run requires --unseal-test."
         )
     if (smoke or development) and unseal_test:
         raise ValueError(
-            f"Een niet-confirmatieve {experiment_id}-run mag de testset niet openen."
+            f"A non-confirmatory {experiment_id} run must not open the test set."
         )
 
     split = build_splits(config)
@@ -284,7 +284,7 @@ def run_population_seed(
         "train", "validation", "compositional_test"
     }
     if unknown_logged_splits:
-        raise ValueError(f"Onbekende episode-logsplits: {unknown_logged_splits}")
+        raise ValueError(f"Unknown episode-log splits: {unknown_logged_splits}")
     logged_splits = [
         (name, meanings)
         for name, meanings in evaluated_splits
@@ -829,7 +829,7 @@ def _render_report(
 ) -> str:
     experiment_id = summary["experiment_id"].upper()
     title = (
-        f"{experiment_id} technische proefrun"
+        f"{experiment_id} technical smoke run"
         if smoke
         else f"{experiment_id} ontwikkelrun"
         if development
@@ -838,9 +838,9 @@ def _render_report(
     lines = [
         f"# {title}",
         "",
-        f"Classificatie: **{summary['overall_classification']}**",
+        f"Classification: **{summary['overall_classification']}**",
         "",
-        "| Seed | Bekend gemiddeld | Bekend slechtste paar | Validatie gemiddeld | Test gemiddeld | Universele vertaler test | Classificatie |",
+        "| Seed | Known mean | Known worst pair | Validation mean | Test mean | Universal translator test | Classification |",
         "|---:|---:|---:|---:|---:|---:|---|",
     ]
     for result in results:
@@ -863,23 +863,23 @@ def _render_report(
     lines.extend(
         [
             "",
-            "## Methodologische status",
+            "## Methodological status",
             "",
-            "Alle zenders en ontvangers hebben onafhankelijke parameters. Tijdens de definitieve evaluatie ontvingen afzonderlijke ontvangerprocessen uitsluitend symboolmatrices van alle zenders.",
+            "All senders and receivers have independent parameters. During final evaluation, separate receiver processes received only symbol matrices from all senders.",
             "",
         ]
     )
     if smoke:
         lines.append(
-            f"Technische ketencontrole; de {experiment_id}-testset bleef gesloten."
+            f"Technical pipeline check; the {experiment_id} test set remained sealed."
         )
     elif development:
         lines.append(
-            f"Volledige ontwikkeltraining; de {experiment_id}-testset bleef gesloten."
+            f"Full development training; the {experiment_id} test set remained sealed."
         )
     else:
         lines.append(
-            f"Confirmatieve run met de vooraf bevroren {experiment_id}-configuratie en eenmalige testontzegeling."
+            f"Confirmatory run with the prefrozen {experiment_id} configuration and one-time test unsealing."
         )
     lines.append("")
     return "\n".join(lines)

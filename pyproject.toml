@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ai-taal-ecp"
 version = "0.1.0"
-description = "Reproduceerbare experimenten met emergente AI-communicatie"
+description = "Reproducible experiments in emergent AI communication"
 readme = "README.md"
 license = "MIT"
 authors = [{name = "Fatih Ligtvoet"}]

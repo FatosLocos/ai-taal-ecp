@@ -1,12 +1,12 @@
 # Runs
 
-De simulator schrijft hier onveranderlijke uitvoerbestanden van ECP-experimenten. Iedere run krijgt een eigen map met minimaal:
+The simulator writes here immutable output files from ECP experiments. Each run gets its own directory containing at minimum:
 
-- de effectieve configuratie en hash;
-- datasetmanifest en hashes;
-- model- en softwareversies;
-- ruwe berichten en reconstructies;
-- metrics en controles;
-- een ingevuld experimentrapport.
+- the effective configuration and hash;
+- dataset manifest and hashes;
+- model and software versions;
+- raw messages and reconstructions;
+- metrics and controls;
+- a filled-in experiment report.
 
-Runmappen kunnen honderden megabytes groot worden en staan daarom in `.gitignore`. Commit geen checkpoints, geïsoleerde matrices of episodebestanden. Publiceer een compacte, gecontroleerde resultatensnapshot onder `evidence/` en leg de reproductieopdracht vast.
+Run directories can grow hundreds of megabytes in size and are therefore listed in `.gitignore`. Do not commit checkpoints, isolated matrices, or episode files. Publish a compact, controlled results snapshot under `evidence/` and record the reproduction instruction.

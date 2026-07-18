@@ -1,4 +1,4 @@
-"""Commandoregelinterface voor ECP-0."""
+"""Command-line interface for ECP experiments."""
 
 from __future__ import annotations
 
@@ -19,30 +19,30 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", type=Path, default=Path("config/ecp0.yaml"))
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("validate", help="Valideer configuratie en JSON-schema's.")
-    subparsers.add_parser("split", help="Toon de deterministische datasplitsing.")
+    subparsers.add_parser("validate", help="Validate the configuration and JSON Schemas.")
+    subparsers.add_parser("split", help="Show the deterministic data split.")
 
     analyze = subparsers.add_parser(
-        "analyze", help="Controleer en analyseer een voltooide confirmatieve run."
+        "analyze", help="Verify and analyze a completed confirmatory run."
     )
     analyze.add_argument("run_directory", type=Path)
     analyze.add_argument("--permutations", type=int, default=100)
 
     compare = subparsers.add_parser(
-        "compare", help="Vergelijk gepaarde confirmatieve populatiearmen."
+        "compare", help="Compare paired confirmatory population arms."
     )
     compare.add_argument("intervention_directory", type=Path)
     compare.add_argument("control_directory", type=Path)
 
     smoke = subparsers.add_parser(
-        "smoke", help="Draai 25 stappen zonder de compositionele testset te openen."
+        "smoke", help="Run 25 steps without opening the compositional test set."
     )
     smoke.add_argument("--output-root", type=Path, default=Path("runs"))
     smoke.add_argument("--seed", type=int)
 
     development = subparsers.add_parser(
         "develop",
-        help="Train volledig op train/validatie en houd de compositionele testset gesloten.",
+        help="Train fully on train/validation while keeping the compositional test set sealed.",
     )
     development.add_argument("--output-root", type=Path, default=Path("runs"))
     development.add_argument("--seed", action="append", type=int)
@@ -50,24 +50,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--algebraic-weight",
         type=float,
         help=(
-            "Alleen voor ontwikkeling: overschrijf het gewicht van de "
-            "algebraïsche consistentiedruk; 0 schakelt haar uit."
+            "Development only: override the algebraic-consistency weight; "
+            "0 disables it."
         ),
     )
     development.add_argument(
         "--replacement-interval",
         type=int,
         help=(
-            "Alleen voor ontwikkeling: vervang na dit aantal stappen één zender "
-            "en ontvanger; 0 schakelt culturele transmissie uit."
+            "Development only: replace one sender and receiver after this many "
+            "steps; 0 disables cultural transmission."
         ),
     )
     development.add_argument(
         "--maximum-replacements",
         type=int,
         help=(
-            "Alleen voor ontwikkeling: stop culturele vervanging na dit aantal "
-            "agents; 0 betekent doorgaan tot het einde."
+            "Development only: stop cultural replacement after this many "
+            "agents; 0 continues to the end."
         ),
     )
     development.add_argument(
@@ -78,31 +78,31 @@ def build_parser() -> argparse.ArgumentParser:
             "injective_permutation_slot_sender",
             "minimal_permutation_slot_sender",
         ),
-        help="Alleen voor ontwikkeling: overschrijf de zenderarchitectuur.",
+        help="Development only: override the sender architecture.",
     )
     development.add_argument(
         "--slot-consensus-weight",
         type=float,
         help=(
-            "Alleen voor ontwikkeling: gebruik de permutationslotzender met "
-            "dit gewicht voor betekenisvrije bindingsconsensus."
+            "Development only: use the permutation-slot sender with this "
+            "weight for meaning-free binding consensus."
         ),
     )
 
     experiment = subparsers.add_parser(
-        "experiment", help="Draai de vooraf vastgelegde confirmatieve runs."
+        "experiment", help="Run the preregistered confirmatory experiments."
     )
     experiment.add_argument("--output-root", type=Path, default=Path("runs"))
     experiment.add_argument(
         "--unseal-test",
         action="store_true",
-        help="Bevestig expliciet dat de compositionele testset eenmalig mag worden gebruikt.",
+        help="Explicitly confirm one-time use of the compositional test set.",
     )
     experiment.add_argument(
         "--seed",
         action="append",
         type=int,
-        help="Beperk tot één of meer seeds; zonder deze vlag worden alle vijf gebruikt.",
+        help="Limit execution to one or more seeds; without this flag all five are used.",
     )
     return parser
 
@@ -119,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
         validate_schemas(Path(config["artifacts"]["meaning_schema"]).parent)
         split = build_splits(config)
         print(
-            "Configuratie, schema's en splitsing geldig: "
+            "Configuration, schemas, and split are valid: "
             f"{len(split.train)}/{len(split.validation)}/{len(split.compositional_test)}"
         )
         return 0
@@ -157,21 +157,21 @@ def main(argv: list[str] | None = None) -> int:
             and args.replacement_interval > 0
         ):
             raise ValueError(
-                "Ontwikkel één interventie tegelijk: algebraïsch of generationeel."
+                "Develop one intervention at a time: algebraic or generational."
             )
         if args.sender_family is not None and (
             (args.algebraic_weight or 0) > 0
             or (args.replacement_interval or 0) > 0
         ):
             raise ValueError(
-                "Test een nieuwe zenderarchitectuur eerst zonder tweede interventie."
+                "Test a new sender architecture without a second intervention first."
             )
         if args.slot_consensus_weight is not None and (
             (args.algebraic_weight or 0) > 0
             or (args.replacement_interval or 0) > 0
         ):
             raise ValueError(
-                "Bindingsconsensus wordt zonder tweede interventie ontwikkeld."
+                "Develop binding consensus without a second intervention."
             )
         if (
             args.algebraic_weight is not None
@@ -183,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
             config = copy.deepcopy(config)
         if args.algebraic_weight is not None:
             if args.algebraic_weight < 0:
-                raise ValueError("Algebraïsch gewicht mag niet negatief zijn.")
+                raise ValueError("Algebraic weight cannot be negative.")
             regularizer = config["training"]["algebraic_consistency"]
             regularizer["enabled"] = args.algebraic_weight > 0
             regularizer["weight"] = args.algebraic_weight
@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
             }
         if args.replacement_interval is not None:
             if args.replacement_interval < 0:
-                raise ValueError("Vervangingsinterval mag niet negatief zijn.")
+                raise ValueError("Replacement interval cannot be negative.")
             config["training"]["algebraic_consistency"]["enabled"] = False
             transmission = config["training"]["cultural_transmission"]
             transmission["enabled"] = args.replacement_interval > 0
@@ -202,10 +202,10 @@ def main(argv: list[str] | None = None) -> int:
             }
         if args.maximum_replacements is not None:
             if args.maximum_replacements < 0:
-                raise ValueError("Maximum aantal vervangingen mag niet negatief zijn.")
+                raise ValueError("Maximum replacements cannot be negative.")
             if args.replacement_interval is None:
                 raise ValueError(
-                    "--maximum-replacements vereist --replacement-interval."
+                    "--maximum-replacements requires --replacement-interval."
                 )
             transmission["maximum_replacements"] = args.maximum_replacements
             config["experiment"]["development_variant"][
@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
             }
         if args.slot_consensus_weight is not None:
             if args.slot_consensus_weight < 0:
-                raise ValueError("Bindingsconsensusgewicht mag niet negatief zijn.")
+                raise ValueError("Binding-consensus weight cannot be negative.")
             config["agents"]["sender"]["family"] = (
                 "learned_permutation_slot_sender"
             )
@@ -256,7 +256,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(run_dir)
         return 0
-    raise AssertionError(f"Onbekend commando: {args.command}")
+    raise AssertionError(f"Unknown command: {args.command}")
 
 
 if __name__ == "__main__":

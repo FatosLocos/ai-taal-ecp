@@ -15,7 +15,7 @@ def test_registered_invariants_are_consistent(config):
 def test_invalid_split_is_rejected(config):
     invalid = deepcopy(config)
     invalid["dataset"]["train_meanings"] -= 1
-    with pytest.raises(ConfigError, match="Datasplitsingen"):
+    with pytest.raises(ConfigError, match="Data splits"):
         validate_config(invalid)
 
 

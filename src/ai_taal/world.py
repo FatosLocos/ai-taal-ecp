@@ -1,4 +1,4 @@
-"""De volledig synthetische ECP-0-wereld en deterministische datasplitsing."""
+"""The fully synthetic ECP world and deterministic data splitting."""
 
 from __future__ import annotations
 
@@ -97,9 +97,9 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
     if len(held_out_factor_names) != 2 or any(
         name not in FACTOR_NAMES for name in held_out_factor_names
     ):
-        raise ValueError("holdout_factors moet twee geldige, verschillende factoren bevatten.")
+        raise ValueError("holdout_factors must contain two valid, distinct factors.")
     if held_out_factor_names[0] == held_out_factor_names[1]:
-        raise ValueError("holdout_factors moet twee verschillende factoren bevatten.")
+        raise ValueError("holdout_factors must contain two distinct factors.")
     left_name, right_name = held_out_factor_names
     left_index = FACTOR_NAMES.index(left_name)
     right_index = FACTOR_NAMES.index(right_name)
@@ -110,7 +110,7 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
     )
     if left_count != right_count or holdout_count != left_count:
         raise ValueError(
-            "Een held-out matching vereist gelijke factorgroottes en één paar per waarde."
+            "A held-out matching requires equal factor sizes and one pair per value."
         )
 
     excluded_values = dataset.get(
@@ -133,7 +133,7 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
     )
     if (explicit_validation is None) != (explicit_test is None):
         raise ValueError(
-            "Expliciete validatie- en testmatchings moeten samen worden opgegeven."
+            "Explicit validation and test matchings must be provided together."
         )
     if explicit_validation is not None:
         held_out_validation = _parse_explicit_matching(
@@ -141,39 +141,39 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
             left_count,
             left_name=left_name,
             right_name=right_name,
-            purpose="validatiematching",
+            purpose="validation matching",
         )
         held_out = _parse_explicit_matching(
             explicit_test,
             left_count,
             left_name=left_name,
             right_name=right_name,
-            purpose="testmatching",
+            purpose="test matching",
         )
         if set(held_out_validation) & set(held_out):
-            raise ValueError("Expliciete validatie- en testmatchings overlappen.")
+            raise ValueError("Explicit validation and test matchings overlap.")
         if not (set(held_out_validation) | set(held_out)).isdisjoint(excluded_pairs):
-            raise ValueError("Expliciete matchings bevatten eerder uitgesloten paren.")
+            raise ValueError("Explicit matchings contain previously excluded pairs.")
     elif validation_holdout_count:
         if validation_holdout_count != left_count:
             raise ValueError(
-                "Een compositionele validatiematching vereist één paar per kleur."
+                "A compositional validation matching requires one pair per value."
             )
         held_out_validation = _sample_matching(
-            rng, left_count, excluded_pairs, purpose="validatiematching"
+            rng, left_count, excluded_pairs, purpose="validation matching"
         )
         held_out = _sample_matching(
             rng,
             left_count,
             excluded_pairs | set(held_out_validation),
-            purpose="testmatching",
+            purpose="test matching",
         )
     else:
         held_out = _sample_matching(
             rng,
             left_count,
             excluded_pairs,
-            purpose="testmatching",
+            purpose="test matching",
         )
     held_out_set = set(held_out)
 
@@ -204,7 +204,7 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
             not in validation_set
         ]
         if len(validation) != validation_count:
-            raise RuntimeError("Compositionele validatiematching heeft onjuiste grootte.")
+            raise RuntimeError("Compositional validation matching has the wrong size.")
     else:
         validation = None
         train = None
@@ -219,7 +219,7 @@ def build_splits(config: dict[str, Any]) -> WorldSplit:
                 train = proposed_train
                 break
         if validation is None or train is None:
-            raise RuntimeError("Kon geen gestratificeerde train/validatiesplitsing maken.")
+            raise RuntimeError("Could not create a stratified train/validation split.")
 
     result = WorldSplit(
         train=tuple(sorted(train, key=lambda item: item.meaning_id)),
@@ -246,7 +246,7 @@ def _sample_matching(
         pairs = tuple((color, permutation[color]) for color in range(size))
         if set(pairs).isdisjoint(excluded_pairs):
             return pairs
-    raise RuntimeError(f"Kon geen {purpose} maken buiten de uitgesloten paren.")
+    raise RuntimeError(f"Could not create a {purpose} outside the excluded pairs.")
 
 
 def _parse_explicit_matching(
@@ -261,22 +261,22 @@ def _parse_explicit_matching(
         (int(value[left_name]), int(value[right_name])) for value in values
     )
     if len(pairs) != size or len(set(pairs)) != size:
-        raise ValueError(f"Expliciete {purpose} moet {size} unieke paren bevatten.")
+        raise ValueError(f"Explicit {purpose} must contain {size} unique pairs.")
     if {color for color, _ in pairs} != set(range(size)):
-        raise ValueError(f"Expliciete {purpose} bevat niet iedere kleur exact één keer.")
+        raise ValueError(f"Explicit {purpose} does not contain every left value exactly once.")
     if {shape for _, shape in pairs} != set(range(size)):
-        raise ValueError(f"Expliciete {purpose} bevat niet iedere vorm exact één keer.")
+        raise ValueError(f"Explicit {purpose} does not contain every right value exactly once.")
     return tuple(sorted(pairs))
 
 
 def meaning_from_factors(factors: Iterable[int], config: dict[str, Any]) -> Meaning:
     values = tuple(int(value) for value in factors)
     if len(values) != len(FACTOR_NAMES):
-        raise ValueError("Een ECP-0-betekenis heeft precies vier factoren.")
+        raise ValueError("An ECP meaning has exactly four factors.")
     sizes = [len(config["world"]["factors"][name]["values"]) for name in FACTOR_NAMES]
     for value, size in zip(values, sizes, strict=True):
         if value < 0 or value >= size:
-            raise ValueError(f"Factorwaarde {value} valt buiten 0..{size - 1}.")
+            raise ValueError(f"Factor value {value} is outside 0..{size - 1}.")
     meaning_id = 0
     for value, size in zip(values, sizes, strict=True):
         meaning_id = meaning_id * size + value
@@ -307,11 +307,11 @@ def _validate_split(split: WorldSplit, config: dict[str, Any]) -> None:
         "compositional_test": len(split.compositional_test),
     }
     if actual != expected:
-        raise AssertionError(f"Onjuiste splitsingsgroottes: {actual} versus {expected}.")
+        raise AssertionError(f"Incorrect split sizes: {actual} versus {expected}.")
 
     groups = [split.train, split.validation, split.compositional_test]
     id_sets = [{meaning.meaning_id for meaning in group} for group in groups]
     if any(id_sets[left] & id_sets[right] for left, right in ((0, 1), (0, 2), (1, 2))):
-        raise AssertionError("Datasplitsingen overlappen.")
+        raise AssertionError("Data splits overlap.")
     if len(set.union(*id_sets)) != config["world"]["meaning_count"]:
-        raise AssertionError("Datasplitsingen dekken de wereld niet volledig.")
+        raise AssertionError("Data splits do not cover the complete world.")

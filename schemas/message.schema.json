@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.ai-taal/schemas/message.schema.json",
   "title": "ECP message",
-  "description": "Volledig gelogd discreet bericht tussen twee agents.",
+  "description": "Fully logged discrete message between two agents.",
   "type": "object",
   "additionalProperties": false,
   "required": [
