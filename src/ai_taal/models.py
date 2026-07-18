@@ -362,6 +362,27 @@ class DeepBoundedParallelSender(BoundedParallelSender):
         return torch.tanh(self.hidden_projection(context))
 
 
+class ResidualBoundedParallelSender(BoundedParallelSender):
+    """Add an identity-preserving shared interaction block to the joint context.
+
+    The zero-initialized residual projection leaves the successful shallow
+    sender exactly unchanged at initialization. It can subsequently learn one
+    generic nonlinear correction without factor-specific paths or bindings.
+    """
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__(spec)
+        self.residual_weight = nn.Parameter(
+            torch.zeros(spec.hidden_dim, spec.hidden_dim)
+        )
+        self.residual_bias = nn.Parameter(torch.zeros(spec.hidden_dim))
+
+    def _context(self, meanings: Tensor) -> Tensor:
+        context = super()._context(meanings)
+        residual = F.linear(context, self.residual_weight, self.residual_bias)
+        return context + torch.tanh(residual)
+
+
 class LearnedPermutationSlotSender(nn.Module):
     """Compositional slots whose factor-slot binding is selected internally."""
 
@@ -689,6 +710,8 @@ SenderModel = (
     Sender
     | BoundedAutoregressiveSender
     | BoundedParallelSender
+    | DeepBoundedParallelSender
+    | ResidualBoundedParallelSender
     | LearnedPermutationSlotSender
     | InjectivePermutationSlotSender
     | MinimalPermutationSlotSender
@@ -704,6 +727,8 @@ def make_sender(spec: ModelSpec) -> SenderModel:
         return BoundedParallelSender(spec)
     if spec.sender_family == "deep_bounded_parallel_sender":
         return DeepBoundedParallelSender(spec)
+    if spec.sender_family == "residual_bounded_parallel_sender":
+        return ResidualBoundedParallelSender(spec)
     if spec.sender_family == "learned_permutation_slot_sender":
         return LearnedPermutationSlotSender(spec)
     if spec.sender_family == "injective_permutation_slot_sender":

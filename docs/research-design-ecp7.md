@@ -1205,3 +1205,60 @@ minimum-capacity/worst-link criterion without accessing the confirmatory split.
 This closes coefficient and timing development for the existing relaxed
 collision-pair loss. Any later batch must preregister a distinct sender
 representation or occupancy-creation mechanism.
+
+## Batch 28 preregistration — Identity-preserving residual parallel sender
+
+Status: **completed sealed development; valid negative**<br>
+Preregistered: July 18, 2026 at 18:30:20 UTC<br>
+Configuration: `config/ecp7-b28-development.yaml`<br>
+Raw configuration SHA-256: `1ce3094d0e372f4b052773a2c44d1abe36cd6255aea96f4218c175e5f93977d7`<br>
+Effective configuration SHA-256: `7bb7c2c185ed46f580464fe4364b8070bf5fdb071d3d64b16ec66b7fbe7ec307`
+
+Batch 13 replaced the successful shallow sender context with an additional
+nonlinear layer and collapsed. Batches 25–27 now show a stable hard-code
+capacity ceiling that receiver training, replay routing and direct collision
+pressure do not cross. Batch 28 isolates a representation hypothesis without
+discarding the shallow path: add one identity-preserving residual interaction
+to the shared joint context.
+
+ECP7-B28-I inherits the full Batch 25 configuration, including its 45,000-step
+horizon, receiver-only hard-meaning replay after step 20,000, architecture on
+the receiver side, losses, optimizer, data, temperature, selection, translator
+and thresholds. The sole configuration change is the sender family from
+`bounded_parallel_sender` to `residual_bounded_parallel_sender`.
+
+The new sender first computes the unchanged shallow context. It then adds
+`tanh(W context + b)` before the unchanged slot heads. `W` and `b` are created
+as exact zero tensors without consuming random draws. Consequently the residual
+sender has exactly the same initial discrete messages and pre-existing
+parameters as the shallow sender under the same seed, while its residual
+parameters receive gradients immediately. The branch is shared by all slots
+and sees only the joint context; it has no factor-local projection, factor-slot
+binding, semantic symbol assignment or capacity change.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B28-I with the residual bounded-parallel sender.
+
+All existing validity and development gates remain unchanged. Additionally,
+the representation claim requires the selected minimum unique-message count to
+exceed Batch 25's 12,720 while worst-link validation is at least Batch 25's
+82.7148%. No Batch 27 collision loss, alternative residual width, activation,
+initialization, receiver, replay route, base loss, optimizer, horizon, data,
+translator or seed may be tried inside Batch 28. Failure is recorded without
+confirmatory test access.
+
+### Batch 28 outcome
+
+The registered seed-11 residual sender reached 53.91% mean train, 53.12%
+worst-link train, 9.65% mean validation, 8.11% worst-link validation and 11.62%
+universal-translator validation. Its sender codebooks collapsed to 7,928–8,333
+unique messages. Although tests prove exact functional and RNG-equivalent
+initialization, the trainable residual rapidly became dominant and destroyed
+the shallow sender's compositional trajectory. It failed every performance and
+injectivity gate without accessing the confirmatory split.
+
+This closes generic sender-depth changes active from the start of training. A
+future residual experiment is justified only as a single late-activation test
+that preserves the complete established shallow trajectory before unfreezing.

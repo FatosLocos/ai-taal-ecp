@@ -14,6 +14,7 @@ from ai_taal.models import (
     MinimalPermutationSlotSender,
     ModelSpec,
     PositionAwareMLPReceiver,
+    ResidualBoundedParallelSender,
     load_agent_checkpoint,
     save_agent_checkpoint,
 )
@@ -325,6 +326,55 @@ def test_deep_bounded_parallel_sender_checkpoint_round_trip(
     _, expected = sender(meanings, temperature=1.0, sample=False)
     _, actual = loaded(meanings, temperature=1.0, sample=False)
     assert torch.equal(actual, expected)
+
+
+def test_residual_parallel_sender_starts_as_the_shallow_sender(ecp7_b28_config):
+    spec = ModelSpec.from_config(ecp7_b28_config)
+    shallow_spec = deepcopy(spec)
+    object.__setattr__(shallow_spec, "sender_family", "bounded_parallel_sender")
+
+    torch.manual_seed(2801)
+    shallow = BoundedParallelSender(shallow_spec)
+    torch.manual_seed(2801)
+    residual = ResidualBoundedParallelSender(spec)
+    meanings = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+
+    for name, value in shallow.state_dict().items():
+        assert torch.equal(value, residual.state_dict()[name])
+    assert torch.count_nonzero(residual.residual_weight) == 0
+    assert torch.count_nonzero(residual.residual_bias) == 0
+    assert torch.equal(
+        shallow(meanings, sample=False)[1],
+        residual(meanings, sample=False)[1],
+    )
+
+    sum(logits.sum() for logits in residual._local_logits(meanings)).backward()
+    assert torch.count_nonzero(residual.residual_weight.grad) > 0
+
+    torch.manual_seed(2802)
+    _ = BoundedParallelSender(shallow_spec)
+    shallow_sentinel = torch.rand(4)
+    torch.manual_seed(2802)
+    _ = ResidualBoundedParallelSender(spec)
+    residual_sentinel = torch.rand(4)
+    assert torch.equal(shallow_sentinel, residual_sentinel)
+
+
+def test_residual_parallel_sender_checkpoint_round_trip(
+    ecp7_b28_config, tmp_path
+):
+    sender = ResidualBoundedParallelSender(ModelSpec.from_config(ecp7_b28_config))
+    path = tmp_path / "residual-parallel-sender.pt"
+    save_agent_checkpoint(path, sender, kind="sender")
+
+    loaded = load_agent_checkpoint(path, expected_kind="sender")
+
+    assert isinstance(loaded, ResidualBoundedParallelSender)
+    meanings = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+    assert torch.equal(
+        sender(meanings, sample=False)[1],
+        loaded(meanings, sample=False)[1],
+    )
 
 
 def test_position_aware_mlp_receiver_reads_the_complete_message(ecp7_b9_config):

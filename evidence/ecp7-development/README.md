@@ -158,6 +158,13 @@ message entropy, but produced exactly the same unique-message counts as Batch
 therefore reshapes occupied codes without creating new ones. Exact identities
 and hashes are in `batch27-manifest.json`.
 
+Batch 28 added one zero-initialized shared residual interaction to the
+bounded-parallel sender. Despite exact functional and RNG-equivalent
+initialization, the trainable branch collapsed code use to 7,928–8,333 messages
+and validation to 9.65%. Generic sender depth active from the first update
+therefore promotes memorization rather than compositional generalization. Exact
+identities and hashes are in `batch28-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
