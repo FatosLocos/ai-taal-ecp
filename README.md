@@ -26,14 +26,15 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first fifteen sealed batches are valid
-development results but none passes the full gate. Batch 15 is now strongest:
+one-factor-per-slot architecture. Its first sixteen sealed batches are valid
+development results but none passes the full gate. Batch 15 remains strongest:
 the position-aware design at 30,000 optimization steps reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
 12,585–13,200 hard messages per sender. Validation and translator thresholds pass
-together, but the registered train and injectivity thresholds do not. The ECP-6
-positive controls remain perfect and the ECP-7 confirmatory test remains sealed. See
-[`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
+together, but the registered train and injectivity thresholds do not. Batch 16
+added late worst-factor pressure and regressed to 76.46% validation. The ECP-6
+positive controls remain perfect and the ECP-7 confirmatory test remains sealed.
+See [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
 
@@ -88,6 +89,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b13-development.yaml`](config/ecp7-b13-development.yaml) — one additional generic shared sender layer on the Batch 10 base.
 - [`config/ecp7-b14-development.yaml`](config/ecp7-b14-development.yaml) — late learning-rate decay on the Batch 10 base.
 - [`config/ecp7-b15-development.yaml`](config/ecp7-b15-development.yaml) — the Batch 10 design with a 30,000-step population horizon.
+- [`config/ecp7-b16-development.yaml`](config/ecp7-b16-development.yaml) — late normalized factor-minimax pressure on the Batch 15 base.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

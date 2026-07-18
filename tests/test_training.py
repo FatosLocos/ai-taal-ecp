@@ -12,6 +12,7 @@ from ai_taal.models import (
 )
 from ai_taal.training import (
     _scheduled_code_utilization_weight,
+    _scheduled_factor_minimax_weight,
     _scheduled_learning_rate,
     _scheduled_temperature,
     algebraic_consistency_loss,
@@ -343,6 +344,28 @@ def test_normalized_factor_minimax_targets_the_worst_relative_factor():
     assert bool(torch.any(worst_logits.grad != 0))
     assert easy_logits.grad is not None
     assert bool(torch.all(easy_logits.grad == 0))
+
+
+def test_late_factor_minimax_weight_starts_warms_and_holds():
+    schedule = {
+        "weight": 1.0,
+        "start_step": 15000,
+        "warmup_steps": 5000,
+    }
+
+    assert _scheduled_factor_minimax_weight(schedule, 1) == 0.0
+    assert _scheduled_factor_minimax_weight(schedule, 15000) == 0.0
+    assert _scheduled_factor_minimax_weight(schedule, 17500) == 0.5
+    assert _scheduled_factor_minimax_weight(schedule, 20000) == 1.0
+    assert _scheduled_factor_minimax_weight(schedule, 30000) == 1.0
+
+
+def test_factor_minimax_schedule_preserves_zero_start_behavior():
+    schedule = {"weight": 1.0, "warmup_steps": 400}
+
+    assert _scheduled_factor_minimax_weight(schedule, 1) == 1 / 400
+    assert _scheduled_factor_minimax_weight(schedule, 400) == 1.0
+    assert _scheduled_factor_minimax_weight(schedule, 5000) == 1.0
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

@@ -1,0 +1,46 @@
+{
+  "batch": "ECP7-B16",
+  "confirmatory_test_unsealed": false,
+  "config_effective_sha256": "b40f35ab2f03fa8450805908713b4b9a59bbc060c38a4e68e4e3c5be2d2b4efb",
+  "config_raw_sha256": "caef16ec93d0a9424fd3c4af46a987aad63118f24e57e77e9d51cc2eb77e073b",
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "ce9a2a72f20d620bc95c8e05e14fdb55e0733bdef31a4cfb0a8378ff5dc240e3",
+      "seed-11/metrics.json": "5669a51ad38f160bfd8d32e2ea6f108cad43e59121d1afae622097b39b6dacab",
+      "summary.json": "d376c9b9ac535bcfbece16ea2805b54115d65e09f8728cc7a15e0cefe5d9fa2e"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T140854Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "8e8224ab8585a5bb1ffd34444f2742403bc0fdda14b88bbba6248b27a14b3c45",
+      "posthoc-analysis.json": "1b18c8843579097b893c62b24ce86fae8e6ea2dc6dd1f2b0b443eebde1f2fd0f",
+      "seed-11/metrics.json": "ebf364157a59d955b8e489979a6f9d81d07ef6a022be343a5a861a51a054c91e",
+      "summary.json": "2c126384aed6c1e07428cf9af857f2de8abce18fd6ab5f7ef59aeb60f03d5010"
+    },
+    "best_code_utilization_loss": -0.7514331340789795,
+    "best_factor_minimax_loss": 0.11384329944849014,
+    "best_step": 28000,
+    "collision_meanings_per_sender": [2647, 2650, 2873, 2316],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.9258680555555555,
+    "message_entropy_bits_per_sender": [13.539554671899065, 13.538952776554154, 13.499020519849005, 13.586250317243977],
+    "population_train_mean_exact_match": 0.828033447265625,
+    "population_train_worst_link_exact_match": 0.8141043526785714,
+    "population_validation_factor_accuracy": [0.90740966796875, 0.99896240234375, 0.984375, 0.8634033203125],
+    "population_validation_mean_exact_match": 0.7646484375,
+    "population_validation_worst_link_exact_match": 0.7451171875,
+    "run_id": "20260718T140854Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.777587890625,
+    "unique_messages_per_sender": [12713, 12710, 12487, 13044]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

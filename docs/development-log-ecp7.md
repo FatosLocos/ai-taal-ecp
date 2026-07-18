@@ -12,8 +12,18 @@ this log.
 | ECP7-B2-I | Intervention | B1 sender plus factor-agnostic code utilization | Generic sequence encoder | completed; gate failed |
 | ECP7-B3-I | Intervention | B2 loss on straight-through hard messages | Generic sequence encoder | completed; gate failed |
 | ECP7-B4-I | Intervention | B3 plus direct full-message collision loss | Generic sequence encoder | completed; gate failed |
-
-No other ECP-7 variant has been trained.
+| ECP7-B5-I | Intervention | B3 plus straight-through sender consensus | Generic sequence encoder | completed; gate failed |
+| ECP7-B6-I | Intervention | B3 plus normalized factor minimax | Generic sequence encoder | completed; gate failed |
+| ECP7-B7-I | Intervention | Bounded parallel joint-context sender | Generic sequence encoder | completed; gate failed |
+| ECP7-B8-I | Intervention | B7 plus algebraic context invariance | Generic sequence encoder | completed; gate failed |
+| ECP7-B9-I | Intervention | B7 sender and position-aware MLP decoder | Position-aware MLP | completed; gate failed |
+| ECP7-B10-I | Intervention | B9 with 15,000-step optimization | Position-aware MLP | completed; gate failed |
+| ECP7-B11-I | Intervention | B10 with late utilization decay | Position-aware MLP | completed; gate failed |
+| ECP7-B12-I | Intervention | B10 with deeper shared decoder | Deep position-aware MLP | completed; gate failed |
+| ECP7-B13-I | Intervention | B10 with deeper shared sender | Position-aware MLP | completed; gate failed |
+| ECP7-B14-I | Intervention | B10 with late learning-rate decay | Position-aware MLP | completed; gate failed |
+| ECP7-B15-I | Intervention | B10 with 30,000-step optimization | Position-aware MLP | completed; gate failed |
+| ECP7-B16-I | Intervention | B15 with late normalized factor minimax | Position-aware MLP | completed; gate failed |
 
 ## Batch 1 preregistration
 
@@ -689,7 +699,7 @@ Sender agreement rose from 89.51% to 92.31%, and collisions fell substantially.
 Population validation factor accuracies were
 `[87.24%, 99.93%, 98.44%, 86.18%]`; universal-translator factor accuracies were
 `[94.41%, 100%, 97.73%, 81.69%]`. Shape became essentially perfect while color
-and size remained the residual errors.
+and texture remained the residual errors.
 
 The selected checkpoint was again the final registered step, now 15,000. Its
 task loss was `0.0765` and its full-weight code-utilization term was `-0.7548`.
@@ -763,7 +773,7 @@ measure in the wrong direction.
 
 Population validation factor accuracies were
 `[87.21%, 99.96%, 98.54%, 85.45%]`; universal-translator factor accuracies were
-`[87.50%, 100%, 98.54%, 85.28%]`. Color and size remain the residual errors.
+`[87.50%, 100%, 98.54%, 85.28%]`. Color and texture remain the residual errors.
 
 The selected checkpoint was step 14,800. Its task loss was `0.0805`, utilization
 loss was `-0.7275`, and scheduled utilization weight was `0.118`. Every setting
@@ -781,8 +791,8 @@ full late utilization pressure was the primary B10 bottleneck. B10 remains the
 strongest weak-structure base, and the confirmatory split remains sealed.
 
 The residual error now appears decoder-limited rather than loss-weight-limited:
-B10's shared one-hidden-layer decoder plateaued on color and size, and its fresh
-translator showed the same size weakness. A future ECP7-B12 may return to the
+B10's shared one-hidden-layer decoder plateaued on color and texture, and its
+fresh translator showed the same texture weakness. A future ECP7-B12 may return to the
 complete B10 schedule and add exactly one second generic shared hidden layer to
 both the position-aware receiver and isolated translator. It must preserve the
 same flattened positional input and must not add factor-specific paths, binding,
@@ -1043,8 +1053,8 @@ principal gate failure.
 Population validation factor accuracies were
 `[98.86%, 99.75%, 98.44%, 85.05%]`; universal-translator factor accuracies were
 `[100%, 100%, 98.44%, 84.94%]`. Color and shape became essentially perfect.
-Size is now the dominant residual factor, with the fixed texture error also
-preventing exact reconstruction.
+Texture is now the dominant residual factor. The fixed 98.44% size accuracy
+adds a smaller exact-match ceiling.
 
 The selected checkpoint was step 28,800 with task loss `0.0675` and utilization
 loss `-0.7399`. Validation first crossed 80% between steps 24,000 and 26,000 and
@@ -1062,9 +1072,92 @@ strongest weak-structure base. It passes composition and new-reader induction;
 only known-meaning exactness and injectivity remain below their registered
 thresholds. The confirmatory split remains sealed.
 
-The residual error is concentrated in size after the shared code is already
+The residual error is concentrated in texture after the shared code is already
 established. A future ECP7-B16 may keep the complete B15 design and introduce
 only late normalized worst-factor emphasis: factor-minimax weight `0` through
 step 15,000, linearly warm to `1.0` over 5,000 steps, then hold. This revisits the
 Batch 6 objective only after the high-entropy B15 protocol exists and must not
 change architecture, utilization, duration, data, translator or thresholds.
+
+## Batch 16 preregistration
+
+Preregistered: July 18, 2026 at 14:07:11 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Factor-minimax weight: `0` through step `15,000`, linear to `1.0` at step `20,000`, then hold<br>
+Raw configuration SHA-256: `caef16ec93d0a9424fd3c4af46a987aad63118f24e57e77e9d51cc2eb77e073b`<br>
+Effective configuration SHA-256: `b40f35ab2f03fa8450805908713b4b9a59bbc060c38a4e68e4e3c5be2d2b4efb`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B16-I keeps every Batch 15 architecture, base loss, optimizer, data,
+temperature, duration, selection and translator setting. It adds only the
+existing normalized factor-minimax loss with a delayed coefficient: no minimax
+gradient through step 15,000, a 5,000-step linear warmup, then full weight.
+The unchanged positive control is rerun. No alternative schedule or accompanying
+intervention is admitted into this batch, and smoke remains mechanical only.
+
+## Batch 16 results
+
+Positive-control run: `runs/ecp7-batch16-control-development/20260718T140854Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch16-intervention-development/20260718T140854Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B16-I |
+|---|---:|---:|
+| Population train, mean | 100% | 82.8033% |
+| Population train, worst link | 100% | 81.4104% |
+| Population validation, mean | 100% | 76.4648% |
+| Population validation, worst link | 100% | 74.5117% |
+| Universal translator, validation | 100% | 77.7588% |
+| Exact sender-message agreement | 100% | 92.59% |
+| Unique messages per sender | 15,360 | 12,487–13,044 |
+| Collision meanings per sender | 0 | 2,316–2,873 |
+| Message entropy | 13.91 bits | 13.50–13.59 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B16-I retained a passing
+universal-translator score, but failed known-meaning train exactness, validation
+and injectivity. It therefore remains a negative sealed-development result and
+does not authorize confirmatory access.
+
+The trajectory through step 15,000 matches B15 exactly, including task loss
+`0.076486`, train exactness `82.0836%` and validation `72.9797%`. This verifies
+that the delayed schedule isolated the intended late intervention. Minimax
+weight then rose to `0.2` at step 16,000, `0.6` at step 18,000 and `1.0` at step
+20,000.
+
+At the selected step 28,000 checkpoint, the minimax loss was `0.11384` at full
+weight, task loss was `0.07254`, and utilization loss was `-0.75143`. Relative
+to B15, validation fell from 82.5867% to 76.4648% and translator validation fell
+from 83.3740% to 77.7588%. The intervention did not reduce collision meanings or
+make any sender injective.
+
+Population validation factor accuracies were
+`[90.74%, 99.90%, 98.44%, 86.34%]`; universal-translator factor accuracies were
+`[93.65%, 100%, 98.44%, 84.62%]`. Late minimax slightly improved the weakest
+texture score relative to B15 but disrupted the previously near-perfect color
+generalization. The largest collision bucket also increased from three meanings
+in B15 to four meanings in B16.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 16 decision
+
+ECP7-B16-I is rejected. Generic worst-factor pressure after protocol formation
+trades texture improvement for a larger color regression and does not solve
+injectivity. Batch 15 remains the strongest weak-structure base, and the
+confirmatory split remains sealed.
+
+The next intervention should target the remaining hard-message collisions
+without reweighting semantic factors. A future ECP7-B17 may return to B15 and
+add one late, training-only global collision-pair replay objective. It would
+mine colliding meaning pairs from each sender's complete training codebook,
+then penalize their relaxed full-message collision probability. This directly
+addresses the sparse-minibatch limitation observed in Batch 4 while assigning
+no semantic factor to any channel slot. Architecture, base losses, duration,
+data, translator and thresholds must remain unchanged.

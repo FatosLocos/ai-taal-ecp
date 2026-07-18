@@ -83,6 +83,11 @@ train exactness, 82.59% validation and 83.37% translator validation. Validation
 and translator gates passed together, but train exactness and injectivity still
 failed. Exact identities and hashes are in `batch15-manifest.json`.
 
+Batch 16 added normalized factor-minimax pressure only after step 15,000. It
+regressed to 82.80% train exactness, 76.46% validation and 77.76% translator
+validation, while injectivity still failed. Batch 15 remains strongest. Exact
+identities and hashes are in `batch16-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

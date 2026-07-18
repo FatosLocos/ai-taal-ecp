@@ -219,8 +219,22 @@ def validate_config(config: dict[str, Any]) -> None:
     if factor_minimax.get("enabled", False):
         if factor_minimax.get("weight", -1) < 0:
             raise ConfigError("Factor-minimax weight cannot be negative.")
-        if factor_minimax.get("warmup_steps", 0) < 1:
+        warmup_steps = factor_minimax.get("warmup_steps", 0)
+        if (
+            isinstance(warmup_steps, bool)
+            or not isinstance(warmup_steps, int)
+            or warmup_steps < 1
+        ):
             raise ConfigError("Factor-minimax warmup must be positive.")
+        start_step = factor_minimax.get("start_step", 0)
+        if isinstance(start_step, bool) or not isinstance(start_step, int):
+            raise ConfigError("Factor-minimax start must be an integer.")
+        if start_step < 0:
+            raise ConfigError("Factor-minimax start cannot be negative.")
+        if start_step + warmup_steps > training["max_steps"]:
+            raise ConfigError(
+                "Factor-minimax warmup must complete within max_steps."
+            )
 
 
 def file_sha256(path: str | Path) -> str:

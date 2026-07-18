@@ -282,11 +282,8 @@ def train_population_system(
                     for logits in receiver_logits
                 ]
             ).mean()
-            factor_minimax_warmup = max(
-                int(factor_minimax_config.get("warmup_steps", 1)), 1
-            )
-            factor_minimax_weight = float(factor_minimax_config["weight"]) * min(
-                step / factor_minimax_warmup, 1.0
+            factor_minimax_weight = _scheduled_factor_minimax_weight(
+                factor_minimax_config, step
             )
         consistency_loss = torch.zeros((), device=device)
         consistency_weight = 0.0
@@ -1069,3 +1066,16 @@ def _scheduled_code_utilization_weight(
         return final_weight
     progress = min((step - start_step) / (end_step - start_step), 1.0)
     return initial_weight + (final_weight - initial_weight) * progress
+
+
+def _scheduled_factor_minimax_weight(
+    factor_minimax_config: dict[str, Any], step: int
+) -> float:
+    start_step = int(factor_minimax_config.get("start_step", 0))
+    if step <= start_step:
+        return 0.0
+    warmup_steps = max(
+        int(factor_minimax_config.get("warmup_steps", 1)), 1
+    )
+    progress = min((step - start_step) / warmup_steps, 1.0)
+    return float(factor_minimax_config["weight"]) * progress

@@ -1,0 +1,16 @@
+extends: ecp7-b15-development.yaml
+
+experiment:
+  title: ECP-7 late normalized factor-minimax refinement
+  arm: late_normalized_factor_minimax
+  objective: >-
+    Test whether emphasizing the worst normalized reconstruction factor only
+    after the high-entropy Batch 15 protocol is established resolves residual
+    collisions without changing the architecture or base optimization path.
+
+training:
+  factor_minimax:
+    enabled: true
+    weight: 1.0
+    start_step: 15000
+    warmup_steps: 5000
