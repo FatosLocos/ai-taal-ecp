@@ -1,0 +1,60 @@
+extends: ecp7-b25-development.yaml
+
+experiment:
+  id: ecp8
+  title: ECP-8 14-bit weak-structure paired control
+  status: development_test_sealed
+  frozen_at_utc: null
+  parent_experiment: ecp7
+  arm: local_capacity_14_bit_control
+  objective: >-
+    Measure the strongest ECP-7 weak-structure system on the fresh ECP-8 split
+    before changing only its channel capacity allocation.
+
+reproducibility:
+  dataset_seed: 18072058
+
+dataset:
+  split_strategy: dual_explicit_fresh_color_shape_matchings
+  train_meanings: 14336
+  validation_meanings: 1024
+  compositional_test_meanings: 1024
+  holdout_factors: [color, shape]
+  held_out_factor_pairs: 16
+  validation_held_out_factor_pairs: 16
+  variants_per_held_out_pair: 64
+  excluded_factor_pairs: []
+  explicit_validation_factor_pairs:
+    - {color: 0, shape: 12}
+    - {color: 1, shape: 13}
+    - {color: 2, shape: 14}
+    - {color: 3, shape: 15}
+    - {color: 4, shape: 0}
+    - {color: 5, shape: 1}
+    - {color: 6, shape: 2}
+    - {color: 7, shape: 3}
+    - {color: 8, shape: 4}
+    - {color: 9, shape: 5}
+    - {color: 10, shape: 6}
+    - {color: 11, shape: 7}
+    - {color: 12, shape: 8}
+    - {color: 13, shape: 9}
+    - {color: 14, shape: 10}
+    - {color: 15, shape: 11}
+  explicit_test_factor_pairs:
+    - {color: 0, shape: 13}
+    - {color: 1, shape: 14}
+    - {color: 2, shape: 15}
+    - {color: 3, shape: 0}
+    - {color: 4, shape: 1}
+    - {color: 5, shape: 2}
+    - {color: 6, shape: 3}
+    - {color: 7, shape: 4}
+    - {color: 8, shape: 5}
+    - {color: 9, shape: 6}
+    - {color: 10, shape: 7}
+    - {color: 11, shape: 8}
+    - {color: 12, shape: 9}
+    - {color: 13, shape: 10}
+    - {color: 14, shape: 11}
+    - {color: 15, shape: 12}

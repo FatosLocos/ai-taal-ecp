@@ -73,6 +73,14 @@ configuration was frozen and its confirmatory split was never opened. See
 The compact synthesis is in
 [`docs/ecp7-development-conclusion.md`](docs/ecp7-development-conclusion.md).
 
+ECP-8 Batch 1 is now preregistered for sealed development. It tests whether the
+strongest generic ECP-7 architecture becomes injective when its four positions
+may all use the complete 16-symbol vocabulary: 16 fixed bits instead of the
+14-bit lower bound. A factorized positive control and a direct 14-bit
+weak-structure control use the same fresh split. No ECP-8 training or
+confirmatory metric existed when the configurations, hashes and gates were
+registered. See [`docs/research-design-ecp8.md`](docs/research-design-ecp8.md).
+
 ## Build on this work
 
 A new developer or fresh AI agent can start with no previous chat context. First read [`AGENTS.md`](AGENTS.md) for the binding research rules and then follow [`docs/AI_AGENT_START.md`](docs/AI_AGENT_START.md) for installation, architecture overview, reproduction and proper setup of ECP-7.
@@ -112,6 +120,8 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`docs/research-design-ecp7.md`](docs/research-design-ecp7.md) — preregistered weak-structure question, paired control and sealed split.
 - [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md) — the first negative weak-structure batch and integrity checks.
 - [`docs/ecp7-development-conclusion.md`](docs/ecp7-development-conclusion.md) — sealed development synthesis and closure after 29 variants.
+- [`docs/research-design-ecp8.md`](docs/research-design-ecp8.md) — preregistered surplus-capacity question, fresh split and three-arm gate.
+- [`docs/development-log-ecp8.md`](docs/development-log-ecp8.md) — sealed ECP-8 development record.
 - [`config/ecp7-development.yaml`](config/ecp7-development.yaml) — sealed weak-structure intervention configuration.
 - [`config/ecp7-b2-development.yaml`](config/ecp7-b2-development.yaml) — factor-agnostic soft code-utilization intervention.
 - [`config/ecp7-b3-development.yaml`](config/ecp7-b3-development.yaml) — the same utilization formula on straight-through hard messages.
@@ -142,6 +152,9 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b28-development.yaml`](config/ecp7-b28-development.yaml) — Batch 25 with one zero-initialized shared residual sender interaction.
 - [`config/ecp7-b29-development.yaml`](config/ecp7-b29-development.yaml) — Batch 28 with residual parameters frozen through step 30,000.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
+- [`config/ecp8-positive-control-development.yaml`](config/ecp8-positive-control-development.yaml) — factorized 14-bit positive control on the fresh ECP-8 split.
+- [`config/ecp8-control-development.yaml`](config/ecp8-control-development.yaml) — paired 14-bit weak-structure control.
+- [`config/ecp8-development.yaml`](config/ecp8-development.yaml) — four-global-position 16-bit intervention.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
 - [`config/ecp3.yaml`](config/ecp3.yaml) — frozen configuration of the first successful base model.

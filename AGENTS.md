@@ -41,6 +41,6 @@ python3.12 -m venv .venv
 - Keep existing ECP-0 through ECP-6 configurations reproducible.
 - Document new experiments in three stages: preregistration, sealed development log, confirmatory results.
 - Write new configurations, documentation, reports and user-facing output in English.
-- When proposing ECP-7, prefer a single falsifiable intervention over several simultaneous architecture changes.
+- For ECP-8, preserve the preregistered three-arm capacity isolation and do not combine it with another architecture, loss, split, or training change.
 
-The recommended next research question is whether compositional structure still emerges when the explicit one-factor-per-slot architectural bias is weakened.
+The active research question is whether two surplus unallocated channel bits can make the strongest weak-structure system injective without restoring a factor-slot binding.

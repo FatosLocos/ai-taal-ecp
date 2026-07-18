@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 133 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 136 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -69,7 +69,7 @@ Then verify hashes, channel constraints and topographic null models:
 
 This reruns a known experiment. It must not be presented as a new independent confirmatory test.
 
-## 5. Continue ECP-7 scientifically
+## 5. Preserve the completed ECP-7 series
 
 Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 29
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
@@ -192,12 +192,18 @@ ECP-7 development is closed after 29 sealed variants. Do not continue a
 residual schedule, collision coefficient, replay route or horizon search, and
 do not open the unused ECP-7 confirmatory split.
 
-Start ECP-8 with a separate preregistration that chooses exactly one new
-question. Plausible directions include learned compositional structure without
-fixed slots, variable-length coding efficiency, interactive negotiation, or
-transfer across altered synthetic worlds. These are different hypotheses:
-select one, define its channel and baselines, generate a fresh deterministic
-split, and register the development and confirmatory gates before training.
+ECP-8 Batch 1 is a separate preregistration that selects the learned-structure
+direction through one narrow capacity question. Read
+`docs/research-design-ecp8.md` and
+`docs/development-log-ecp8.md`. Three seed-11 arms were registered before
+training: a factorized 14-bit positive control, the strongest weak-structure
+14-bit paired control, and the identical weak system with four unrestricted
+16-symbol positions. Do not change their split, seed, architecture, training,
+channel or gates, and never add `--unseal-test` during development.
+
+After all three sealed runs, record the result even if it is negative. A passed
+development gate only permits a later freeze decision; it does not itself
+authorize confirmatory test access.
 
 ## 7. Definition of done for any contribution
 

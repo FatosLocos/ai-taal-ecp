@@ -1022,3 +1022,36 @@ def test_sender_residual_activation_is_late_bounded_and_architecture_specific(
     invalid_sender["agents"]["sender"]["family"] = "bounded_parallel_sender"
     with pytest.raises(ConfigError, match="requires the residual parallel sender"):
         validate_config(invalid_sender)
+
+
+def test_ecp8_arms_share_one_world_and_fresh_split(
+    ecp8_positive_control_config, ecp8_control_config, ecp8_config
+):
+    arms = (ecp8_positive_control_config, ecp8_control_config, ecp8_config)
+    for arm in arms:
+        assert arm["experiment"]["id"] == "ecp8"
+        assert arm["experiment"]["status"] == "development_test_sealed"
+        assert arm["world"] == ecp8_positive_control_config["world"]
+        assert arm["reproducibility"] == ecp8_positive_control_config["reproducibility"]
+        assert arm["dataset"] == ecp8_positive_control_config["dataset"]
+
+
+def test_ecp8_intervention_changes_only_weak_structure_channel_capacity(
+    ecp8_control_config, ecp8_config
+):
+    assert ecp8_config["world"] == ecp8_control_config["world"]
+    assert ecp8_config["dataset"] == ecp8_control_config["dataset"]
+    assert ecp8_config["agents"] == ecp8_control_config["agents"]
+    assert ecp8_config["training"] == ecp8_control_config["training"]
+    assert ecp8_config["translator_training"] == ecp8_control_config[
+        "translator_training"
+    ]
+    assert ecp8_control_config["channel"]["type"] == (
+        "slot_local_discrete_fixed_length"
+    )
+    assert ecp8_control_config["channel"]["slot_alphabet_sizes"] == [16, 16, 8, 8]
+    assert ecp8_control_config["channel"]["bits_per_message"] == 14
+    assert ecp8_config["channel"]["type"] == "discrete_fixed_length"
+    assert ecp8_config["channel"]["slot_alphabet_sizes"] is None
+    assert ecp8_config["channel"]["bits_per_symbol"] == 4
+    assert ecp8_config["channel"]["bits_per_message"] == 16

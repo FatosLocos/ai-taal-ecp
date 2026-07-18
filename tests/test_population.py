@@ -120,3 +120,34 @@ def test_ecp7_uses_new_matching_for_intervention_and_positive_control(
     assert len(intervention_split.train) == 14_336
     assert len(intervention_split.validation) == 1_024
     assert len(intervention_split.compositional_test) == 1_024
+
+
+def test_ecp8_uses_one_fresh_matching_for_all_three_arms(
+    ecp6_config,
+    ecp7_config,
+    ecp8_positive_control_config,
+    ecp8_control_config,
+    ecp8_config,
+):
+    prior_splits = (build_splits(ecp6_config), build_splits(ecp7_config))
+    positive_split = build_splits(ecp8_positive_control_config)
+    control_split = build_splits(ecp8_control_config)
+    intervention_split = build_splits(ecp8_config)
+
+    prior_pairs = {
+        pair
+        for split in prior_splits
+        for pair in (
+            *split.held_out_validation_color_shape_pairs,
+            *split.held_out_color_shape_pairs,
+        )
+    }
+    ecp8_pairs = set(positive_split.held_out_validation_color_shape_pairs) | set(
+        positive_split.held_out_color_shape_pairs
+    )
+    assert prior_pairs.isdisjoint(ecp8_pairs)
+    assert positive_split.manifest() == control_split.manifest()
+    assert positive_split.manifest() == intervention_split.manifest()
+    assert len(intervention_split.train) == 14_336
+    assert len(intervention_split.validation) == 1_024
+    assert len(intervention_split.compositional_test) == 1_024
