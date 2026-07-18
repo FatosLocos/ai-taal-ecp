@@ -1,0 +1,114 @@
+{
+  "batch": "ECP8-B1",
+  "confirmatory_test_unsealed": false,
+  "configurations": {
+    "intervention": {
+      "effective_sha256": "0572857aa786e0a41995aedd1cee8c2bb6dbdbc47f46025411bb8c06615b9693",
+      "path": "config/ecp8-development.yaml",
+      "raw_sha256": "f6219110ebfe8f26248d9dbd646d80e1033f63d618a2524f7b96668ebd7fdaea"
+    },
+    "paired_control": {
+      "effective_sha256": "fcaf5e8f39df2349cb3dedefcc233e5a08d813763a5b644d6a2ed2c050748f06",
+      "path": "config/ecp8-control-development.yaml",
+      "raw_sha256": "9e3c865fcec9698bb95fcfc3ad429a354e26ffd39f2533dd7dc836dfdd3ab34a"
+    },
+    "positive_control": {
+      "effective_sha256": "3a8e55ee262418f1005405afec3eeee7ebaaad164cb83274bd95c95e2c0939c3",
+      "path": "config/ecp8-positive-control-development.yaml",
+      "raw_sha256": "e996bf66c30b3e699b27046e9824c13c7ecf3f2cb9831c4b9f0528d17b7b5f05"
+    }
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "86cce5f1f679b6cbfd781f015c58283d50c42511dbd26ddb7c0732f8cc63c638",
+      "posthoc-analysis.json": "fd73d82668a43bdcf5ce750e79d40d004a721530445d0143e39d1235699144e4",
+      "seed-11/metrics.json": "dc654f204698f196ed19828bac77c866ef9b93492d16639163c404b1dd5bec5f",
+      "summary.json": "9f2712e7599daaddfe506a43b57d295f423fe92146d018f72c4aba7ce5b15df5"
+    },
+    "best_step": 16200,
+    "channel_audit_applicable": true,
+    "channel_bits": 16,
+    "collision_meanings_per_sender": [265, 241, 225, 237],
+    "development_gate_passed": false,
+    "final_step": 21200,
+    "message_entropy_bits_per_sender": [13.872139655666405, 13.875510387275181, 13.877544574286759, 13.875294025782184],
+    "population_train_mean_exact_match": 0.9875662667410714,
+    "population_train_worst_link_exact_match": 0.9868861607142857,
+    "population_validation_factor_accuracy": [0.94659423828125, 0.79766845703125, 0.9976806640625, 1.0],
+    "population_validation_mean_exact_match": 0.74462890625,
+    "population_validation_worst_link_exact_match": 0.7333984375,
+    "run_id": "20260718T200637Z-ecp8-development",
+    "sender_message_agreement": 0.7755642361111111,
+    "universal_translator_validation_exact_match": 0.810546875,
+    "unique_messages_per_sender": [15095, 15119, 15135, 15123]
+  },
+  "paired_control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "c25d3fc2ce87917e98c57d6bff3588dabdcee98cc4e1f06b44a0f944204fb815",
+      "posthoc-analysis.json": "1a03b75fc568abdddb1513e1514da7cfabf01b4ba4e6b37341ef10d5995b3b80",
+      "seed-11/metrics.json": "1545cbf6df5419e5c1dbe54d2e0d70fbf0bba587613a2ab64571ffd52eb4e8e1",
+      "summary.json": "e6de108c96d285730710cf6cb6f86a2ca629d036de5335e3cca845b09e0d6df3"
+    },
+    "best_step": 7400,
+    "channel_audit_applicable": true,
+    "channel_bits": 14,
+    "collision_meanings_per_sender": [3162, 3105, 3122, 3312],
+    "development_gate_passed": false,
+    "final_step": 15000,
+    "message_entropy_bits_per_sender": [13.473864279689561, 13.482229528712717, 13.480163426011318, 13.453976865953427],
+    "population_train_mean_exact_match": 0.7954755510602678,
+    "population_train_worst_link_exact_match": 0.7865513392857143,
+    "population_validation_factor_accuracy": [0.9853515625, 0.85198974609375, 0.96044921875, 0.8804931640625],
+    "population_validation_mean_exact_match": 0.70269775390625,
+    "population_validation_worst_link_exact_match": 0.6484375,
+    "run_id": "20260718T200256Z-ecp8-development",
+    "sender_message_agreement": 0.9374023437500001,
+    "universal_translator_validation_exact_match": 0.751953125,
+    "unique_messages_per_sender": [12198, 12255, 12238, 12048]
+  },
+  "paired_effect": {
+    "minimum_unique_message_gain": 3047,
+    "population_train_mean_difference": 0.1920907156808036,
+    "population_train_worst_link_difference": 0.2003348214285714,
+    "population_validation_mean_difference": 0.04193115234375,
+    "population_validation_worst_link_difference": 0.0849609375,
+    "sender_message_agreement_difference": -0.161838107638889,
+    "universal_translator_validation_difference": 0.05859375
+  },
+  "positive_control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "ef6a5c4715e81f974bc3d428388f0dee39ac5b9ddee74a3c3eafda7fb94f94ff",
+      "posthoc-analysis.json": "8e8417e31b3ce13fa71a26788509c80845538d13f6c29489c106a65932166e54",
+      "seed-11/metrics.json": "7fdd6bfeb93cb3f9623c49f536dc4504b8b6232aee7f0f25c411f12a4e048bc2",
+      "summary.json": "d79ebad4528e51fc91f928081d0ec15dee9e53e7f3097e82faad9c20ed40c66f"
+    },
+    "channel_audit_applicable": true,
+    "channel_bits": 14,
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "population_validation_worst_link_exact_match": 1.0,
+    "run_id": "20260718T200136Z-ecp8-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "preregistration_commit": "c63e5e32622fc56753cea1513d9f0f7f2fe31fb3",
+  "registered_intervention_gate": {
+    "all_artifact_hashes_match": true,
+    "all_channel_messages_valid": true,
+    "all_senders_injective": false,
+    "all_test_metrics_absent": true,
+    "all_validation_only_episodes": true,
+    "minimum_codebook_improved_over_control": true,
+    "population_train_mean_at_least_0_97": true,
+    "population_train_worst_link_at_least_0_95": true,
+    "population_validation_mean_at_least_0_80": false,
+    "population_validation_mean_preserved_over_control": true,
+    "population_validation_worst_link_at_least_0_80": false,
+    "population_validation_worst_link_preserved_over_control": true,
+    "universal_translator_validation_at_least_0_70": true
+  },
+  "seed": 11,
+  "split_artifact_sha256": "b686b8d705a2387f9681c4d409c85c83bf437a361b62e551977001ceae8de506",
+  "split_sha256": "241acd2ee42ff658ddf0c8c897d4e4df0f52a18098b3ef68c009c74c2134592a"
+}

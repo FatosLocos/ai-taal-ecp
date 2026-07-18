@@ -73,13 +73,15 @@ configuration was frozen and its confirmatory split was never opened. See
 The compact synthesis is in
 [`docs/ecp7-development-conclusion.md`](docs/ecp7-development-conclusion.md).
 
-ECP-8 Batch 1 is now preregistered for sealed development. It tests whether the
-strongest generic ECP-7 architecture becomes injective when its four positions
-may all use the complete 16-symbol vocabulary: 16 fixed bits instead of the
-14-bit lower bound. A factorized positive control and a direct 14-bit
-weak-structure control use the same fresh split. No ECP-8 training or
-confirmatory metric existed when the configurations, hashes and gates were
-registered. See [`docs/research-design-ecp8.md`](docs/research-design-ecp8.md).
+ECP-8 Batch 1 is a valid negative sealed-development result. It tested whether
+the strongest generic ECP-7 architecture becomes injective when all four
+positions may use the complete 16-symbol vocabulary: 16 fixed bits instead of
+the 14-bit lower bound. Compared with the paired 14-bit control, mean train
+exactness rose from 79.55% to 98.76%, worst-link validation from 64.84% to
+73.34%, and the minimum codebook from 12,048 to 15,095 messages. The arm still
+had 225–265 collisions per sender and failed both 80% validation thresholds.
+The ECP-8 confirmatory split remains sealed. See
+[`docs/development-log-ecp8.md`](docs/development-log-ecp8.md).
 
 ## Build on this work
 
@@ -155,6 +157,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp8-positive-control-development.yaml`](config/ecp8-positive-control-development.yaml) — factorized 14-bit positive control on the fresh ECP-8 split.
 - [`config/ecp8-control-development.yaml`](config/ecp8-control-development.yaml) — paired 14-bit weak-structure control.
 - [`config/ecp8-development.yaml`](config/ecp8-development.yaml) — four-global-position 16-bit intervention.
+- [`evidence/ecp8-development/batch1-manifest.json`](evidence/ecp8-development/batch1-manifest.json) — compact sealed Batch 1 evidence and artifact hashes.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
 - [`config/ecp3.yaml`](config/ecp3.yaml) — frozen configuration of the first successful base model.

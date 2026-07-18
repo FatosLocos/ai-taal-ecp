@@ -162,7 +162,7 @@ def _analyze_population_development_run(
             )
             for sender_id, (semantic, messages) in sender_matrices.items()
         }
-        channel_audit = _factor_local_channel_audit(
+        channel_audit = _discrete_channel_audit(
             episode_path, metrics, config
         )
         protocols = metrics["sender_protocols"]
@@ -481,7 +481,7 @@ def _analyze_population_run(
             )
             for sender_id, (semantic, messages) in sender_matrices.items()
         }
-        factor_local_audit = _factor_local_channel_audit(
+        factor_local_audit = _discrete_channel_audit(
             metrics_path.parent / "episodes.jsonl", metrics, config
         )
         rows.append(
@@ -680,11 +680,12 @@ def _contains_mapping_key(value: Any, key: str) -> bool:
     return False
 
 
-def _factor_local_channel_audit(
+def _discrete_channel_audit(
     path: Path, metrics: dict[str, Any], config: dict[str, Any]
 ) -> dict[str, Any]:
     channel = config["channel"]
     if channel["type"] not in {
+        "discrete_fixed_length",
         "factor_local_discrete_fixed_length",
         "slot_local_discrete_fixed_length",
     }:
@@ -693,10 +694,20 @@ def _factor_local_channel_audit(
         factor_sizes = channel["factor_alphabet_sizes"]
         bindings = metrics["sender_binding_diagnostics"]["hard_factor_by_slot"]
         alphabet_sizes_by_slot = None
-    else:
+    elif channel["type"] == "slot_local_discrete_fixed_length":
         factor_sizes = None
         bindings = None
         alphabet_sizes_by_slot = channel["slot_alphabet_sizes"]
+    else:
+        factor_sizes = None
+        bindings = None
+        alphabet_sizes_by_slot = [channel["vocabulary_size"]] * channel[
+            "message_length"
+        ]
+    message_length = channel.get(
+        "message_length",
+        len(factor_sizes or alphabet_sizes_by_slot),
+    )
     violations = []
     checked = 0
     with path.open("r", encoding="utf-8") as handle:
@@ -710,7 +721,12 @@ def _factor_local_channel_audit(
                 violations.append(
                     {"line": line_number, "reason": "incorrect_channel_bits"}
                 )
-            for slot_index, symbol in enumerate(message["symbols"]):
+            symbols = message["symbols"]
+            if len(symbols) != message_length:
+                violations.append(
+                    {"line": line_number, "reason": "incorrect_message_length"}
+                )
+            for slot_index, symbol in enumerate(symbols[:message_length]):
                 factor_index = (
                     factor_by_slot[slot_index]
                     if factor_by_slot is not None

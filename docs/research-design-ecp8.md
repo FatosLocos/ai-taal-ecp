@@ -1,6 +1,6 @@
 # Research Design ECP-8 — Surplus Capacity Without Factor Slots
 
-Status: **preregistered for sealed development**<br>
+Status: **sealed development active; Batch 1 valid negative**<br>
 Preregistered: July 18, 2026 at 19:58:58 UTC<br>
 Positive-control configuration: `config/ecp8-positive-control-development.yaml`<br>
 Paired-control configuration: `config/ecp8-control-development.yaml`<br>
@@ -92,3 +92,19 @@ capacity search.
 | 16-bit intervention | `f6219110ebfe8f26248d9dbd646d80e1033f63d618a2524f7b96668ebd7fdaea` | `0572857aa786e0a41995aedd1cee8c2bb6dbdbc47f46025411bb8c06615b9693` |
 
 These identities and thresholds were recorded before any ECP-8 training run.
+
+## Batch 1 outcome
+
+The factorized positive control passed at 100%. Relative to the direct 14-bit
+weak-structure control, the 16-bit intervention increased mean train exactness
+from 79.55% to 98.76%, mean validation from 70.27% to 74.46%, worst-link
+validation from 64.84% to 73.34% and the minimum sender codebook from 12,048 to
+15,095. Universal-translator validation increased from 75.20% to 81.05%.
+
+The intervention still used only 15,095–15,135 unique messages for 15,360
+accessible meanings and did not reach either 80% validation threshold. It
+therefore failed the registered injectivity and validation gates. This is a
+valid negative sealed-development result; no confirmatory access is authorized.
+See `docs/development-log-ecp8.md` and
+`evidence/ecp8-development/batch1-manifest.json` for the full decision and
+compact artifact identities.

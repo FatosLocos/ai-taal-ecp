@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 136 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 138 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -204,6 +204,14 @@ channel or gates, and never add `--unseal-test` during development.
 After all three sealed runs, record the result even if it is negative. A passed
 development gate only permits a later freeze decision; it does not itself
 authorize confirmatory test access.
+
+Batch 1 is complete and negative. The 16-bit arm reached 98.76% mean train,
+74.46% mean validation, 73.34% worst-link validation and 81.05% translator
+validation with 15,095–15,135 unique messages. It failed injectivity and both
+80% validation gates; the confirmatory split remains sealed. Do not search
+larger channels. At most one Batch 2 structure-induction intervention is
+justified at the unchanged 16-bit capacity. Preregister it before training and
+do not combine it with a slot binding or another objective change.
 
 ## 7. Definition of done for any contribution
 

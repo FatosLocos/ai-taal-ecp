@@ -1,7 +1,7 @@
 import json
 
 from ai_taal.analysis import (
-    _factor_local_channel_audit,
+    _discrete_channel_audit,
     _paired_sign_flip_test,
     _population_episode_matrices,
 )
@@ -66,7 +66,7 @@ def test_slot_local_channel_audit_checks_each_position_capacity(tmp_path):
         }
     }
 
-    audit = _factor_local_channel_audit(path, {}, config)
+    audit = _discrete_channel_audit(path, {}, config)
 
     assert audit["applicable"] is True
     assert audit["valid"] is True
@@ -91,7 +91,62 @@ def test_slot_local_channel_audit_rejects_a_symbol_outside_its_slot(tmp_path):
         }
     }
 
-    audit = _factor_local_channel_audit(path, {}, config)
+    audit = _discrete_channel_audit(path, {}, config)
 
     assert audit["valid"] is False
     assert audit["violations"][0]["slot"] == 2
+
+
+def test_global_fixed_length_channel_audit_checks_full_vocabulary(tmp_path):
+    episode = {
+        "message": {
+            "sender_id": "sender-0",
+            "channel_bits": 16,
+            "symbols": [15, 8, 15, 8],
+        }
+    }
+    path = tmp_path / "episodes.jsonl"
+    path.write_text(json.dumps(episode) + "\n", encoding="utf-8")
+    config = {
+        "channel": {
+            "type": "discrete_fixed_length",
+            "bits_per_message": 16,
+            "message_length": 4,
+            "vocabulary_size": 16,
+        }
+    }
+
+    audit = _discrete_channel_audit(path, {}, config)
+
+    assert audit["applicable"] is True
+    assert audit["valid"] is True
+    assert audit["slot_alphabet_sizes"] == [16, 16, 16, 16]
+
+
+def test_global_fixed_length_channel_audit_rejects_invalid_message(tmp_path):
+    episode = {
+        "message": {
+            "sender_id": "sender-0",
+            "channel_bits": 15,
+            "symbols": [0, 16, 2],
+        }
+    }
+    path = tmp_path / "episodes.jsonl"
+    path.write_text(json.dumps(episode) + "\n", encoding="utf-8")
+    config = {
+        "channel": {
+            "type": "discrete_fixed_length",
+            "bits_per_message": 16,
+            "message_length": 4,
+            "vocabulary_size": 16,
+        }
+    }
+
+    audit = _discrete_channel_audit(path, {}, config)
+
+    assert audit["valid"] is False
+    assert {violation["reason"] for violation in audit["violations"]} == {
+        "incorrect_channel_bits",
+        "incorrect_message_length",
+        "symbol_outside_local_alphabet",
+    }

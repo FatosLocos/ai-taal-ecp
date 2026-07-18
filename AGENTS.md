@@ -41,6 +41,6 @@ python3.12 -m venv .venv
 - Keep existing ECP-0 through ECP-6 configurations reproducible.
 - Document new experiments in three stages: preregistration, sealed development log, confirmatory results.
 - Write new configurations, documentation, reports and user-facing output in English.
-- For ECP-8, preserve the preregistered three-arm capacity isolation and do not combine it with another architecture, loss, split, or training change.
+- Preserve the completed ECP-8 Batch 1 capacity isolation and its sealed confirmatory split. Any Batch 2 must keep the 16-bit arm fixed and preregister exactly one structure-induction mechanism.
 
-The active research question is whether two surplus unallocated channel bits can make the strongest weak-structure system injective without restoring a factor-slot binding.
+ECP-8 Batch 1 found that surplus capacity nearly removes collisions but does not reach injectivity or compositional validation. Do not continue a channel-size search.
