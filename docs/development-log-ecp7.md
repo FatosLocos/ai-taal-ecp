@@ -412,3 +412,81 @@ generic parallel sender whose every slot reads the same joint meaning context.
 This removes sequential optimization while still providing no factor-specific
 input path, factor-to-slot assignment or semantic codebook. It must return to
 the Batch 3 loss set and leave the generic receiver unchanged.
+
+## Batch 7 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B7-I returns to the complete Batch 3 loss set and changes exactly one
+sender property: the four locally bounded symbols are generated in parallel
+from one shared joint meaning context instead of autoregressively. The receiver,
+translator, hard-utilization objective and every training rule remain
+unchanged. The exact architecture and exclusions are recorded in
+`docs/research-design-ecp7.md`. The unchanged positive control is rerun. Smoke
+is mechanical only and cannot authorize tuning.
+
+## Batch 7 results
+
+Positive-control run: `runs/ecp7-batch7-control-development/20260718T114952Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch7-intervention-development/20260718T114952Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B7-I |
+|---|---:|---:|
+| Population train, mean | 100% | 9.5965% |
+| Population train, worst link | 100% | 9.2494% |
+| Population validation, mean | 100% | 0.5066% |
+| Population validation, worst link | 100% | 0% |
+| Universal translator, validation | 100% | 2.7588% |
+| Exact sender-message agreement | 100% | 27.90% |
+| Unique messages per sender | 15,360 | 3,118–3,415 |
+| Collision meanings per sender | 0 | 11,945–12,242 |
+| Message entropy | 13.91 bits | 11.11–11.25 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B7-I failed the
+population, validation, translator and injectivity gates. It stopped at step
+4,800 under the unchanged early-stopping rule, with step 3,200 selected.
+
+Parallel generation produced the largest optimization gain in ECP-7 so far.
+Compared with autoregressive Batch 3, mean training exactness rose from 1.1911%
+to 9.5965%, unique messages rose from 585–972 to 3,118–3,415, entropy rose from
+8.20–8.73 to 11.11–11.25 bits, and universal-translator validation rose from
+2.2705% to 2.7588%. The selected hard-utilization loss was `-0.7229`.
+
+Those gains did not compose across the held-out color-shape matching.
+Population validation remained 0.5066%, below Batch 3's 1.9226%, and its worst
+sender-receiver link reconstructed none of the 1,024 validation meanings.
+Population validation factor accuracies were approximately
+`[45.64%, 4.84%, 94.67%, 95.04%]`. Parallelization substantially improved color
+but shape remained below its 6.25% chance level. The universal translator
+reached 12.40% on shape, suggesting that the sender messages contain some shape
+signal that the jointly trained receiver population does not use reliably.
+
+The first intervention smoke reached isolated evaluation but stopped because
+the worker's sender-type guard did not yet list the new checkpoint class. No
+test data was accessed. The guard and worker-route regression test were added;
+the repeated smoke completed without changing the registered config or model.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 7 decision
+
+ECP7-B7-I is a negative development result, but it establishes that
+autoregressive generation was a major optimization bottleneck. The
+confirmatory split remains sealed. Batch 3 still has the highest population
+validation exactness, while Batch 7 has the strongest train exactness,
+code-space use, color learning and translator result among the weak-structure
+variants.
+
+A future ECP7-B8 may retain the B7 parallel sender and add exactly one
+context-invariance objective: the existing algebraic consistency loss for the
+same atomic factor transition in two different training contexts. This directly
+targets composition rather than memorization and assigns no factor to a message
+slot. It must not restore B4–B6 losses or change the receiver simultaneously.

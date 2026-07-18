@@ -38,6 +38,11 @@ Batch 6 emphasized the worst normalized factor-reconstruction loss. Color and
 shape remained near chance, and the protocol used only 313–542 messages with
 0.46% validation. Exact identities and hashes are in `batch6-manifest.json`.
 
+Batch 7 replaced autoregressive generation with a joint-context parallel
+sender. It reached 3,118–3,415 messages, 9.60% train exactness and 45.64% color
+accuracy, but shape remained below chance and validation stayed at 0.51%. Exact
+identities and hashes are in `batch7-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

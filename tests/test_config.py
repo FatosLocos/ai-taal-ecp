@@ -265,3 +265,35 @@ def test_ecp7_b6_rejects_invalid_factor_minimax_parameters(ecp7_b6_config):
     invalid_warmup["training"]["factor_minimax"]["warmup_steps"] = 0
     with pytest.raises(ConfigError, match="Factor-minimax warmup"):
         validate_config(invalid_warmup)
+
+
+def test_ecp7_b7_changes_only_the_sender_generation_architecture(
+    ecp7_b3_config, ecp7_b7_config
+):
+    assert ecp7_b7_config["world"] == ecp7_b3_config["world"]
+    assert ecp7_b7_config["dataset"] == ecp7_b3_config["dataset"]
+    assert ecp7_b7_config["channel"] == ecp7_b3_config["channel"]
+    assert (
+        ecp7_b7_config["agents"]["receiver"]
+        == ecp7_b3_config["agents"]["receiver"]
+    )
+    assert (
+        ecp7_b7_config["agents"]["translator"]
+        == ecp7_b3_config["agents"]["translator"]
+    )
+    assert ecp7_b7_config["agents"]["sender"] == {
+        "family": "bounded_parallel_sender"
+    }
+    b3_training = deepcopy(ecp7_b3_config["training"])
+    b7_training = deepcopy(ecp7_b7_config["training"])
+    assert b3_training.pop("discrete_estimator") == (
+        "straight_through_bounded_autoregressive"
+    )
+    assert (
+        b7_training.pop("discrete_estimator")
+        == "straight_through_bounded_parallel"
+    )
+    assert b7_training == b3_training
+    assert "joint_message_collision" not in b7_training
+    assert "sender_message_consensus" not in b7_training
+    assert "factor_minimax" not in b7_training

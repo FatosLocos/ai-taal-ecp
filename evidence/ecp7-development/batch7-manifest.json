@@ -1,0 +1,40 @@
+{
+  "batch": "ECP7-B7",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "ed4b45df543491c6601311fbdf4120c135ff32908746e9c27f4e5bdf9d461ae7",
+      "seed-11/metrics.json": "527c2d25c8901fa25ce30fe96adc22a5e03f68f098e431ec821848c6fbb30c0b",
+      "summary.json": "ddae1e01d78660daa0ea18bbc980538661de98b16ba7543bad4aa009125d9f50"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T114952Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "0d750f4b596045a70d5b0599b21dd2e95f1926d8b167cd286fd822913a771b35",
+      "posthoc-analysis.json": "175e03f6d414ef819cb0f4b5cc1aa7f2345e0700838dbd539e72a5b8a4bb24d6",
+      "seed-11/metrics.json": "043bf63d7ec931ad8df46e936d39dc2a2ac1785cc60df2cb562e1cbceddf02c7",
+      "summary.json": "21e570c9b20e4f141b2d474f598fe9afd27f62493ad8776c7a72966d18c1ca48"
+    },
+    "best_code_utilization_loss": -0.7229328155517578,
+    "best_step": 3200,
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.2790256076388889,
+    "message_entropy_bits_per_sender": [11.165613790193623, 11.241084563730809, 11.112674547774205, 11.249967060387442],
+    "population_train_mean_exact_match": 0.09596470424107142,
+    "population_validation_factor_accuracy": [0.45635986328125, 0.04840087890625, 0.94671630859375, 0.95037841796875],
+    "population_validation_mean_exact_match": 0.00506591796875,
+    "run_id": "20260718T114952Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.027587890625,
+    "unique_messages_per_sender": [3279, 3350, 3118, 3415]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}
