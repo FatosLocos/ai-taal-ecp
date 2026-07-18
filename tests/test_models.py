@@ -11,6 +11,7 @@ from ai_taal.models import (
     LearnedPermutationSlotSender,
     MinimalPermutationSlotSender,
     ModelSpec,
+    PositionAwareMLPReceiver,
     load_agent_checkpoint,
     save_agent_checkpoint,
 )
@@ -282,6 +283,58 @@ def test_bounded_parallel_sender_checkpoint_round_trip(ecp7_b7_config, tmp_path)
     exit_code = worker_main(
         [
             "encode",
+            "--checkpoint",
+            str(path),
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+        ]
+    )
+    assert exit_code == 0
+    assert output_path.read_text(encoding="utf-8").startswith("[[")
+
+
+def test_position_aware_mlp_receiver_reads_the_complete_message(ecp7_b9_config):
+    receiver = PositionAwareMLPReceiver(ModelSpec.from_config(ecp7_b9_config))
+    message = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+
+    outputs = receiver(message)
+
+    assert [output.shape for output in outputs] == [
+        (2, 16),
+        (2, 16),
+        (2, 8),
+        (2, 8),
+    ]
+    assert receiver.message_projection.in_features == (
+        receiver.spec.message_length * receiver.spec.symbol_embedding_dim
+    )
+    assert not hasattr(receiver, "recurrent")
+    assert not hasattr(receiver, "binding_matrix")
+
+
+def test_position_aware_mlp_receiver_checkpoint_round_trip(
+    ecp7_b9_config, tmp_path
+):
+    receiver = PositionAwareMLPReceiver(ModelSpec.from_config(ecp7_b9_config))
+    path = tmp_path / "position-aware-receiver.pt"
+    save_agent_checkpoint(path, receiver, kind="receiver")
+
+    loaded = load_agent_checkpoint(path, expected_kind="receiver")
+
+    assert isinstance(loaded, PositionAwareMLPReceiver)
+    message = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+    expected = tuple(output.detach() for output in receiver(message))
+    actual = loaded(message)
+    assert all(torch.equal(left, right) for left, right in zip(actual, expected))
+
+    input_path = tmp_path / "position-aware-input.json"
+    output_path = tmp_path / "position-aware-output.json"
+    input_path.write_text("[[0,1,2,3],[15,15,7,7]]\n", encoding="utf-8")
+    exit_code = worker_main(
+        [
+            "decode",
             "--checkpoint",
             str(path),
             "--input",

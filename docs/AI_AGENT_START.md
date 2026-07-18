@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 70 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 73 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,27 +71,30 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 8
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 9
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
 but still reached only 1.92% validation. ECP7-B4-I added direct minibatch
 collision pressure and regressed to 426–579 messages and 0.42% validation.
 ECP7-B5-I raised exact inter-sender agreement from 2.47% to 44.02%, but did so
-through a shared collapse to 169–231 messages and 0.48% validation. All paired
+through a shared collapse to 169–231 messages and 0.48% validation.
 ECP7-B6-I emphasized the worst normalized factor loss, but color and shape
 remained near chance and validation reached only 0.46%. All paired ECP-6
 positive controls stayed perfect. ECP7-B7-I replaced autoregression with a
 parallel joint-context sender. It increased train exactness to 9.60% and used
 3,118–3,415 messages, but shape stayed below chance and validation reached only
 0.51%. ECP7-B8-I added context-invariant atomic transitions, but regressed to
-857–1,135 messages and 0.32% validation. The confirmatory ECP-7 test is still
-sealed.
+857–1,135 messages and 0.32% validation. ECP7-B9-I replaced the recurrent
+final-state decoder with a generic position-aware MLP. It is the first major
+weak-structure result: 71.27% train exactness, 52.39% validation, 54.81%
+translator validation and 10,834–11,017 messages. It still failed all joint
+performance and injectivity gates. The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B9 intervention and its failure criterion.
+2. Define exactly one ECP7-B10 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -104,23 +107,26 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 7 is the strongest optimization result but still memorizes rather than
-composes. Batch 8 context invariance suppressed that gain. B7 messages change
-when shape changes, and its fresh universal translator decodes shape better
-than its jointly trained recurrent receivers. The most informative next step is
-one generic decoder change. A clean ECP7-B9 progression is:
+Batch 9 is the strongest weak-structure result. Its selected checkpoint was the
+final registered step 5,000, exactness was still improving, no factor remained
+near chance, and each sender used about 11,000 high-entropy messages. The most
+informative next step is therefore one isolated optimization-budget change. A
+clean ECP7-B10 progression is:
 
 - keep the same world and bit budget;
-- keep the joint autoregressive sender and generic isolated receiver;
-- keep the B7 sender and losses, then replace the GRU final-state decoder with
-  one position-aware MLP over all four embedded message slots;
+- keep the complete B9 sender, position-aware receiver, translator and losses;
+- preserve the original temperature annealing through step 5,000, then hold its
+  final value;
+- extend only population optimization to 15,000 steps with a preregistered
+  longer selection window;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not restore the Batch 4 through Batch 6 or Batch 8 terms, and do not combine
-the receiver change with sender changes, architectural resizing, longer
-training, variable-length messages or negotiation. That would make its effect
-uninterpretable.
+Do not change the architecture, loss weights, data, translator, temperature
+endpoints, validation cadence or development thresholds. Do not restore the
+Batch 4 through Batch 6 or Batch 8 terms, and do not combine the longer horizon
+with resizing, variable-length messages or negotiation. That would make its
+effect uninterpretable.
 
 ## 7. Definition of done for any contribution
 

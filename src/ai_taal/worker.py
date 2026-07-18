@@ -15,6 +15,7 @@ from ai_taal.models import (
     InjectivePermutationSlotSender,
     LearnedPermutationSlotSender,
     MinimalPermutationSlotSender,
+    PositionAwareMLPReceiver,
     Receiver,
     Sender,
     load_agent_checkpoint,
@@ -62,7 +63,10 @@ def main(argv: list[str] | None = None) -> int:
         output = encode_meanings(agent, matrix)
     else:
         agent = load_agent_checkpoint(args.checkpoint)
-        if not isinstance(agent, (Receiver, FactorizedPermutationSlotReceiver)):
+        if not isinstance(
+            agent,
+            (Receiver, PositionAwareMLPReceiver, FactorizedPermutationSlotReceiver),
+        ):
             raise TypeError("Decoder checkpoint did not load a receiver.")
         output = predict_receiver(agent, matrix)
     _write_matrix(args.output, output)

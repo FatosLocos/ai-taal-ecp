@@ -729,6 +729,37 @@ class Receiver(nn.Module):
         return tuple(head(representation) for head in self.factor_heads)
 
 
+class PositionAwareMLPReceiver(nn.Module):
+    """Decode every factor from one flattened representation of all slots."""
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__()
+        self.spec = spec
+        self.symbol_embedding = nn.Embedding(
+            spec.vocabulary_size, spec.symbol_embedding_dim
+        )
+        self.message_projection = nn.Linear(
+            spec.message_length * spec.symbol_embedding_dim,
+            spec.hidden_dim,
+        )
+        self.factor_heads = nn.ModuleList(
+            nn.Linear(spec.hidden_dim, size) for size in spec.factor_sizes
+        )
+
+    def forward(self, message: Tensor) -> tuple[Tensor, ...]:
+        if message.ndim == 2:
+            embedded = self.symbol_embedding(message)
+        elif message.ndim == 3:
+            embedded = message @ self.symbol_embedding.weight
+        else:
+            raise ValueError(
+                "Message must have shape [batch,length] or [batch,length,vocab]."
+            )
+        flattened = embedded.reshape(embedded.shape[0], -1)
+        representation = torch.tanh(self.message_projection(flattened))
+        return tuple(head(representation) for head in self.factor_heads)
+
+
 class FactorizedPermutationSlotReceiver(nn.Module):
     """Decode each factor from exactly one freely selected message slot."""
 
@@ -784,12 +815,16 @@ class FactorizedPermutationSlotReceiver(nn.Module):
         return InjectivePermutationSlotSender._sinkhorn(self.binding_logits)
 
 
-ReceiverModel = Receiver | FactorizedPermutationSlotReceiver
+ReceiverModel = (
+    Receiver | PositionAwareMLPReceiver | FactorizedPermutationSlotReceiver
+)
 
 
 def make_receiver(spec: ModelSpec) -> ReceiverModel:
     if spec.receiver_family == "sequence_encoder_multihead_classifier":
         return Receiver(spec)
+    if spec.receiver_family == "position_aware_mlp_receiver":
+        return PositionAwareMLPReceiver(spec)
     if spec.receiver_family == "factorized_permutation_slot_receiver":
         return FactorizedPermutationSlotReceiver(spec)
     raise ValueError(f"Unknown receiver architecture: {spec.receiver_family}")
