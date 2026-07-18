@@ -1,0 +1,10 @@
+extends: ecp5.yaml
+
+experiment:
+  title: Gepaarde ECP-5-controle zonder bindingskalibratie
+  arm: learned_binding_without_calibration
+
+translator_training:
+  binding_calibration:
+    enabled: false
+

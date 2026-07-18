@@ -1,0 +1,8 @@
+extends: ecp3-development.yaml
+
+experiment:
+  title: Confirmatief injectief geleerd permutationslotprotocol
+  status: frozen_for_confirmatory
+  frozen_at_utc: "2026-07-18T02:07:44Z"
+  arm: slot_and_atom_consensus
+

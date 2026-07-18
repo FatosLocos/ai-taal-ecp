@@ -1,0 +1,161 @@
+schema_version: "0.2"
+experiment:
+  id: ecp0
+  title: Vertaalbare discrete basis
+  status: frozen_for_confirmatory
+  frozen_at_utc: "2026-07-17T22:18:41Z"
+  objective: >-
+    Leer zonder menselijke symboolbetekenissen een discreet protocol voor exacte
+    reconstructie en test combinatorische generalisatie en onafhankelijke vertaling.
+
+reproducibility:
+  dataset_seed: 17072026
+  training_seeds: [11, 23, 37, 53, 71]
+  deterministic_evaluation: true
+  retain_failed_runs: true
+
+world:
+  distribution: uniform
+  factors:
+    color:
+      values: [c0, c1, c2, c3, c4, c5, c6, c7]
+      model_sees_display_labels: false
+    shape:
+      values: [s0, s1, s2, s3, s4, s5, s6, s7]
+      model_sees_display_labels: false
+    size:
+      values: [z0, z1, z2, z3]
+      model_sees_display_labels: false
+    texture:
+      values: [t0, t1, t2, t3]
+      model_sees_display_labels: false
+  meaning_count: 1024
+  source_entropy_bits: 10
+
+dataset:
+  split_strategy: held_out_color_shape_matching
+  train_meanings: 768
+  validation_meanings: 128
+  compositional_test_meanings: 128
+  held_out_color_shape_pairs: 8
+  variants_per_held_out_pair: 16
+  test_is_sealed: true
+
+channel:
+  type: discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: 4
+  bits_per_message: 16
+  natural_language_allowed: false
+  continuous_values_allowed_at_evaluation: false
+
+task:
+  type: exact_factor_reconstruction
+  sender_input: [color, shape, size, texture]
+  receiver_input: [message]
+  receiver_outputs: [color, shape, size, texture]
+  exact_match_requires_all_factors: true
+
+agents:
+  pretrained: false
+  shared_parameters: false
+  shared_embeddings: false
+  shared_hidden_state: false
+  sender:
+    family: categorical_encoder_autoregressive_sender
+  receiver:
+    family: sequence_encoder_multihead_classifier
+  translator:
+    family: sequence_encoder_multihead_classifier
+    trained_after_protocol_freeze: true
+    sees_receiver_parameters: false
+    sees_test_meanings_during_training: false
+
+training:
+  discrete_estimator: straight_through_gumbel_softmax
+  selection_metric: validation_exact_match_subject_to_known_threshold
+  selection_known_exact_min: 0.99
+  selection_never_uses_test: true
+  evaluation_uses_hard_symbols_only: true
+  device: cpu
+  batch_size: 128
+  max_steps: 7000
+  evaluation_interval: 100
+  patience_steps: 2500
+  minimum_steps: 3500
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  gradient_clip_norm: 1.0
+  temperature_start: 1.5
+  temperature_end: 0.5
+  factor_embedding_dim: 16
+  symbol_embedding_dim: 24
+  hidden_dim: 128
+
+translator_training:
+  batch_size: 128
+  max_steps: 3000
+  evaluation_interval: 100
+  patience_steps: 800
+  minimum_steps: 600
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  gradient_clip_norm: 1.0
+
+baselines:
+  - dutch_template_utf8
+  - canonical_json_utf8
+  - packed_factor_code_10_bit
+  - random_lookup_code
+  - handcrafted_compositional_code
+
+metrics:
+  primary:
+    - known_exact_match
+    - compositional_exact_match
+    - translator_compositional_exact_match
+    - channel_bits_per_message
+  diagnostic:
+    - factor_accuracy
+    - unique_message_count
+    - message_collisions
+    - message_entropy
+    - topographic_similarity
+    - minimal_pair_consistency
+    - symbol_ablation_effect
+    - seed_variance
+  secondary:
+    - training_latency
+    - inference_latency
+
+controls:
+  shuffled_messages_expected_exact_match_max: 0.01
+  consistent_symbol_permutation_preserves_performance: true
+  receiver_cannot_access:
+    - meaning
+    - meaning_id
+    - episode_id
+    - wall_clock
+    - sender_state
+    - shared_files
+    - shared_random_generator
+  log_every_message: true
+  isolate_final_evaluation: true
+
+outcome_thresholds:
+  strong_evidence:
+    minimum_valid_runs: 4
+    known_exact_match_min: 0.99
+    compositional_exact_match_min: 0.90
+    translator_compositional_exact_match_min: 0.85
+  negative_result_if_no_generalization_above_lookup: true
+  thresholds_may_change_after_test_access: false
+
+artifacts:
+  meaning_schema: schemas/meaning.schema.json
+  message_schema: schemas/message.schema.json
+  episode_schema: schemas/episode.schema.json
+  run_directory: runs

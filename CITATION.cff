@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software or extend the experiments, please cite this repository."
+title: "AI Taal ECP: Reproducible Emergent Communication Experiments"
+type: software
+authors:
+  - family-names: Ligtvoet
+    given-names: Fatih
+repository-code: "https://github.com/FatosLocos/ai-taal-ecp"
+url: "https://github.com/FatosLocos/ai-taal-ecp"
+license: MIT
+version: 0.1.0
+date-released: 2026-07-18
+abstract: >-
+  A reproducible PyTorch research framework for discrete emergent communication,
+  compositional generalization, universal protocol induction and exact channel
+  efficiency in synthetic multi-agent worlds.
+keywords:
+  - emergent communication
+  - multi-agent systems
+  - compositional generalization
+  - artificial intelligence
+  - reproducible research

@@ -1,0 +1,85 @@
+extends: ecp2.yaml
+
+experiment:
+  id: ecp3
+  title: Ontwikkeling injectief geleerd permutationslotprotocol
+  status: development_test_sealed
+  frozen_at_utc: null
+  parent_experiment: ecp2
+  arm: injective_slot_and_atom_consensus
+  objective: >-
+    Test of vrij geleerde, injectieve atoomcodes de lokale symboolbotsingen uit
+    ECP-2 verwijderen en robuuste compositionele communicatie opleveren.
+
+reproducibility:
+  dataset_seed: 18072029
+
+dataset:
+  excluded_color_shape_pairs:
+    # ECP-0-testmatching
+    - {color: 0, shape: 3}
+    - {color: 1, shape: 0}
+    - {color: 2, shape: 4}
+    - {color: 3, shape: 1}
+    - {color: 4, shape: 5}
+    - {color: 5, shape: 2}
+    - {color: 6, shape: 6}
+    - {color: 7, shape: 7}
+    # ECP-1-testmatching
+    - {color: 0, shape: 5}
+    - {color: 1, shape: 2}
+    - {color: 2, shape: 0}
+    - {color: 3, shape: 7}
+    - {color: 4, shape: 3}
+    - {color: 5, shape: 4}
+    - {color: 6, shape: 1}
+    - {color: 7, shape: 6}
+    # ECP-2-validatiematching, gebruikt voor modelontwikkeling
+    - {color: 0, shape: 6}
+    - {color: 1, shape: 7}
+    - {color: 2, shape: 3}
+    - {color: 3, shape: 2}
+    - {color: 4, shape: 0}
+    - {color: 5, shape: 1}
+    - {color: 6, shape: 5}
+    - {color: 7, shape: 4}
+    # ECP-2-testmatching
+    - {color: 0, shape: 1}
+    - {color: 1, shape: 3}
+    - {color: 2, shape: 6}
+    - {color: 3, shape: 0}
+    - {color: 4, shape: 4}
+    - {color: 5, shape: 7}
+    - {color: 6, shape: 2}
+    - {color: 7, shape: 5}
+
+agents:
+  sender:
+    family: injective_permutation_slot_sender
+
+training:
+  discrete_estimator: straight_through_sinkhorn_and_hard_assignment
+  atom_code_consensus:
+    enabled: true
+    weight: 5.0
+    warmup_steps: 400
+    sharpness_weight: 0.1
+
+baselines:
+  - ecp3_same_split_injective_sender_without_consensus
+  - ecp2_confirmatory
+  - packed_factor_code_10_bit
+  - handcrafted_compositional_code
+
+metrics:
+  diagnostic:
+    - sender_binding_matrices
+    - sender_atom_codebooks
+    - pair_accuracy_matrix
+    - sender_message_agreement
+    - sender_protocol_statistics
+    - receiver_transfer_curve
+    - seed_variance
+
+outcome_thresholds:
+  compositional_mean_reference: 0.660546875

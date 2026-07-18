@@ -1,0 +1,10 @@
+extends: ecp2.yaml
+
+experiment:
+  title: Confirmatieve permutationslotcontrole zonder bindingsconsensus
+  arm: slot_sender_no_consensus_control
+
+training:
+  slot_binding_consensus:
+    enabled: false
+    weight: 0.0

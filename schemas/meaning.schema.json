@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ai-taal/schemas/meaning.schema.json",
+  "title": "ECP meaning",
+  "description": "Canonieke betekenis zonder natuurlijke-taallabels.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meaning_id", "color", "shape", "size", "texture"],
+  "properties": {
+    "meaning_id": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^c[0-9]+$"
+    },
+    "shape": {
+      "type": "string",
+      "pattern": "^s[0-9]+$"
+    },
+    "size": {
+      "type": "string",
+      "pattern": "^z[0-9]+$"
+    },
+    "texture": {
+      "type": "string",
+      "pattern": "^t[0-9]+$"
+    }
+  }
+}

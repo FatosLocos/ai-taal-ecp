@@ -1,0 +1,127 @@
+extends: ecp3.yaml
+
+experiment:
+  id: ecp4
+  title: Ontwikkeling minimaal 10-bit permutationslotprotocol
+  status: development_test_sealed
+  frozen_at_utc: null
+  parent_experiment: ecp3
+  arm: minimal_factor_local_code
+  objective: >-
+    Bereik de exacte 10-bitbronondergrens met factor-geisoleerde decodering,
+    zonder compositionele generalisatie of universele vertaling te verliezen.
+
+reproducibility:
+  dataset_seed: 18072030
+
+dataset:
+  excluded_color_shape_pairs:
+    - {color: 0, shape: 3}
+    - {color: 1, shape: 0}
+    - {color: 2, shape: 4}
+    - {color: 3, shape: 1}
+    - {color: 4, shape: 5}
+    - {color: 5, shape: 2}
+    - {color: 6, shape: 6}
+    - {color: 7, shape: 7}
+    - {color: 0, shape: 5}
+    - {color: 1, shape: 2}
+    - {color: 2, shape: 0}
+    - {color: 3, shape: 7}
+    - {color: 4, shape: 3}
+    - {color: 5, shape: 4}
+    - {color: 6, shape: 1}
+    - {color: 7, shape: 6}
+    - {color: 0, shape: 6}
+    - {color: 1, shape: 7}
+    - {color: 2, shape: 3}
+    - {color: 3, shape: 2}
+    - {color: 4, shape: 0}
+    - {color: 5, shape: 1}
+    - {color: 6, shape: 5}
+    - {color: 7, shape: 4}
+    - {color: 0, shape: 1}
+    - {color: 1, shape: 3}
+    - {color: 2, shape: 6}
+    - {color: 3, shape: 0}
+    - {color: 4, shape: 4}
+    - {color: 5, shape: 7}
+    - {color: 6, shape: 2}
+    - {color: 7, shape: 5}
+    - {color: 0, shape: 2}
+    - {color: 1, shape: 6}
+    - {color: 2, shape: 1}
+    - {color: 3, shape: 5}
+    - {color: 4, shape: 7}
+    - {color: 5, shape: 0}
+    - {color: 6, shape: 4}
+    - {color: 7, shape: 3}
+    - {color: 0, shape: 0}
+    - {color: 1, shape: 4}
+    - {color: 2, shape: 5}
+    - {color: 3, shape: 6}
+    - {color: 4, shape: 1}
+    - {color: 5, shape: 3}
+    - {color: 6, shape: 7}
+    - {color: 7, shape: 2}
+  explicit_validation_color_shape_pairs:
+    - {color: 0, shape: 4}
+    - {color: 1, shape: 5}
+    - {color: 2, shape: 7}
+    - {color: 3, shape: 3}
+    - {color: 4, shape: 2}
+    - {color: 5, shape: 6}
+    - {color: 6, shape: 0}
+    - {color: 7, shape: 1}
+  explicit_test_color_shape_pairs:
+    - {color: 0, shape: 7}
+    - {color: 1, shape: 1}
+    - {color: 2, shape: 2}
+    - {color: 3, shape: 4}
+    - {color: 4, shape: 6}
+    - {color: 5, shape: 5}
+    - {color: 6, shape: 3}
+    - {color: 7, shape: 0}
+
+channel:
+  type: factor_local_discrete_fixed_length
+  vocabulary_size: 8
+  symbol_min: 0
+  symbol_max: 7
+  message_length: 4
+  bits_per_symbol: null
+  factor_alphabet_sizes: [8, 8, 4, 4]
+  bits_per_symbol_by_factor: [3, 3, 2, 2]
+  bits_per_message: 10
+
+agents:
+  sender:
+    family: minimal_permutation_slot_sender
+  receiver:
+    family: factorized_permutation_slot_receiver
+  translator:
+    family: factorized_permutation_slot_receiver
+
+training:
+  discrete_estimator: straight_through_minimal_permutations
+
+baselines:
+  - ecp4_same_split_16_bit_factorized_control
+  - ecp3_confirmatory
+  - packed_factor_code_10_bit
+  - handcrafted_compositional_code
+
+metrics:
+  diagnostic:
+    - sender_binding_matrices
+    - sender_atom_codebooks
+    - receiver_binding_matrices
+    - pair_accuracy_matrix
+    - sender_message_agreement
+    - sender_protocol_statistics
+    - receiver_transfer_curve
+    - seed_variance
+
+outcome_thresholds:
+  compositional_mean_reference: 0.8900390625
+  paired_control_required: true

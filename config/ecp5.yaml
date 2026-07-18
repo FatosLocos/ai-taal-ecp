@@ -1,0 +1,8 @@
+extends: ecp5-development.yaml
+
+experiment:
+  title: Confirmatief gekalibreerd universeel 10-bitprotocol
+  status: frozen_for_confirmatory
+  frozen_at_utc: "2026-07-18T06:27:09Z"
+  arm: calibrated_binding
+

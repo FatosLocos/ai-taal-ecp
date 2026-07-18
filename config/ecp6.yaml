@@ -1,0 +1,7 @@
+extends: ecp6-development.yaml
+
+experiment:
+  title: Confirmatief schaalbaar minimaal 14-bitprotocol
+  status: frozen_for_confirmatory
+  frozen_at_utc: "2026-07-18T06:58:14Z"
+  arm: scaled_16384_meaning_world

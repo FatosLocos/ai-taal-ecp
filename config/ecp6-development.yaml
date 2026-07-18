@@ -1,0 +1,110 @@
+extends: ecp5.yaml
+
+experiment:
+  id: ecp6
+  title: Ontwikkeling schaalbaar minimaal 14-bitprotocol
+  status: development_test_sealed
+  frozen_at_utc: null
+  parent_experiment: ecp5
+  arm: scaled_16384_meaning_world
+  objective: >-
+    Test of het gekalibreerde minimale protocol zestienmaal meer betekenissen
+    foutloos kan dragen bij exact de nieuwe 14-bitbronondergrens.
+
+reproducibility:
+  dataset_seed: 18072032
+
+world:
+  distribution: uniform
+  factors:
+    color:
+      values: [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15]
+      model_sees_display_labels: false
+    shape:
+      values: [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15]
+      model_sees_display_labels: false
+    size:
+      values: [z0, z1, z2, z3, z4, z5, z6, z7]
+      model_sees_display_labels: false
+    texture:
+      values: [t0, t1, t2, t3, t4, t5, t6, t7]
+      model_sees_display_labels: false
+  meaning_count: 16384
+  source_entropy_bits: 14
+
+dataset:
+  split_strategy: dual_explicit_new_value_color_shape_matchings
+  train_meanings: 14336
+  validation_meanings: 1024
+  compositional_test_meanings: 1024
+  holdout_factors: [color, shape]
+  held_out_factor_pairs: 16
+  validation_held_out_factor_pairs: 16
+  variants_per_held_out_pair: 64
+  excluded_factor_pairs: []
+  explicit_validation_factor_pairs:
+    - {color: 0, shape: 8}
+    - {color: 1, shape: 9}
+    - {color: 2, shape: 10}
+    - {color: 3, shape: 11}
+    - {color: 4, shape: 12}
+    - {color: 5, shape: 13}
+    - {color: 6, shape: 14}
+    - {color: 7, shape: 15}
+    - {color: 8, shape: 0}
+    - {color: 9, shape: 1}
+    - {color: 10, shape: 2}
+    - {color: 11, shape: 3}
+    - {color: 12, shape: 4}
+    - {color: 13, shape: 5}
+    - {color: 14, shape: 6}
+    - {color: 15, shape: 7}
+  explicit_test_factor_pairs:
+    - {color: 0, shape: 9}
+    - {color: 1, shape: 10}
+    - {color: 2, shape: 11}
+    - {color: 3, shape: 12}
+    - {color: 4, shape: 13}
+    - {color: 5, shape: 14}
+    - {color: 6, shape: 15}
+    - {color: 7, shape: 8}
+    - {color: 8, shape: 1}
+    - {color: 9, shape: 2}
+    - {color: 10, shape: 3}
+    - {color: 11, shape: 4}
+    - {color: 12, shape: 5}
+    - {color: 13, shape: 6}
+    - {color: 14, shape: 7}
+    - {color: 15, shape: 0}
+
+channel:
+  type: factor_local_discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: null
+  factor_alphabet_sizes: [16, 16, 8, 8]
+  bits_per_symbol_by_factor: [4, 4, 3, 3]
+  bits_per_message: 14
+
+transfer:
+  meaning_budgets: [32, 128, 512, 2048]
+
+baselines:
+  - ecp5_1024_meaning_confirmatory
+  - packed_factor_code_optimal
+  - factor_local_compositional_code
+  - dutch_template_utf8
+  - canonical_json_utf8
+
+outcome_thresholds:
+  compositional_mean_reference: 0.99
+  paired_control_required: false
+
+controls:
+  log_every_message: false
+  raw_matrices_cover_all_evaluated_messages: true
+
+artifacts:
+  episode_logging_splits: [validation, compositional_test]

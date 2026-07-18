@@ -1,0 +1,28 @@
+{
+  "canonical_json_utf8": {
+    "maximum_bits_per_message": 448.0,
+    "mean_bits_per_message": 438.0,
+    "minimum_bits_per_message": 432.0
+  },
+  "dutch_template_utf8": {
+    "maximum_bits_per_message": 344.0,
+    "mean_bits_per_message": 334.0,
+    "minimum_bits_per_message": 328.0
+  },
+  "factor_local_compositional_code": {
+    "bits_per_message": 14,
+    "compositional_exact_match": 1.0,
+    "known_exact_match": 1.0,
+    "unique_message_count": 16384
+  },
+  "packed_factor_code_optimal": {
+    "bits_per_message": 14,
+    "compositional_exact_match": 1.0,
+    "known_exact_match": 1.0
+  },
+  "random_lookup_code": {
+    "bits_per_message": 14,
+    "compositional_exact_match": 0.0,
+    "known_exact_match": 1.0
+  }
+}

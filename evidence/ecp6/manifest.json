@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "experiment_id": "ecp6",
+  "classification": "strong_evidence",
+  "confirmatory_run": "20260718T070018Z-ecp6-experiment",
+  "frozen_at_utc": "2026-07-18T06:58:14Z",
+  "config_sha256": "994ca086e1542e4608fec935ec5b72471b2e2cf73c2193f99ab6997044c40133",
+  "split_sha256": "da751db7853ddbb84f000464c2627d4880eb154aef2158fb958d9a3779117d33",
+  "world": {
+    "factor_sizes": [16, 16, 8, 8],
+    "meaning_count": 16384,
+    "source_entropy_bits": 14
+  },
+  "channel": {
+    "type": "factor_local_discrete_fixed_length",
+    "factor_alphabet_sizes": [16, 16, 8, 8],
+    "bits_per_symbol_by_factor": [4, 4, 3, 3],
+    "bits_per_message": 14
+  },
+  "splits": {
+    "train": 14336,
+    "validation": 1024,
+    "compositional_test": 1024
+  },
+  "seeds": {
+    "11": {"classification": "strong_evidence", "population_test": 1.0, "worst_agent_pair_test": 1.0, "translator_test": 1.0},
+    "23": {"classification": "strong_evidence", "population_test": 1.0, "worst_agent_pair_test": 1.0, "translator_test": 1.0},
+    "37": {"classification": "strong_evidence", "population_test": 1.0, "worst_agent_pair_test": 1.0, "translator_test": 1.0},
+    "53": {"classification": "strong_evidence", "population_test": 1.0, "worst_agent_pair_test": 1.0, "translator_test": 1.0},
+    "71": {"classification": "strong_evidence", "population_test": 1.0, "worst_agent_pair_test": 1.0, "translator_test": 1.0}
+  },
+  "protocol": {
+    "unique_messages_per_sender": 16384,
+    "collision_count": 0,
+    "message_entropy_bits": 14.0,
+    "topographic_similarity": 1.0,
+    "calibration_score_bits": 14.0,
+    "calibration_runner_up_bits": 8.0
+  },
+  "transfer_test_accuracy": {
+    "32": {"mean": 0.7625, "median": 0.75},
+    "128": {"mean": 1.0, "median": 1.0},
+    "512": {"mean": 1.0, "median": 1.0},
+    "2048": {"mean": 1.0, "median": 1.0}
+  },
+  "integrity": {
+    "checked_artifact_hashes": 309,
+    "all_artifact_hashes_match": true,
+    "episode_count": 163840,
+    "all_factor_local_messages_valid": true,
+    "channel_violations": 0,
+    "topographic_null_tests": 20,
+    "topographic_null_repetitions_each": 100,
+    "topographic_empirical_one_sided_p": 0.009900990099009901
+  },
+  "artifact_policy": "Large generated runs are excluded from Git; reproduce with config/ecp6.yaml and verify the recorded hashes."
+}

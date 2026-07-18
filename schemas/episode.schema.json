@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ai-taal/schemas/episode.schema.json",
+  "title": "ECP evaluated episode",
+  "description": "Eén discrete evaluatie met bronbetekenis, bericht en reconstructie.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "episode_id",
+    "run_id",
+    "seed",
+    "split",
+    "meaning",
+    "message",
+    "reconstruction",
+    "exact_match"
+  ],
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "split": {
+      "enum": ["train", "validation", "compositional_test"]
+    },
+    "meaning": {
+      "$ref": "meaning.schema.json"
+    },
+    "message": {
+      "$ref": "message.schema.json"
+    },
+    "reconstruction": {
+      "$ref": "meaning.schema.json"
+    },
+    "exact_match": {
+      "type": "boolean"
+    },
+    "factor_correct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["color", "shape", "size", "texture"],
+      "properties": {
+        "color": { "type": "boolean" },
+        "shape": { "type": "boolean" },
+        "size": { "type": "boolean" },
+        "texture": { "type": "boolean" }
+      }
+    }
+  }
+}

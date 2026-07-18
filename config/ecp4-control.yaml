@@ -1,0 +1,23 @@
+extends: ecp4.yaml
+
+experiment:
+  title: Gepaarde ECP-4-controle met 16-bitkanaal
+  arm: factorized_16_bit_control
+
+channel:
+  type: discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: 4
+  factor_alphabet_sizes: null
+  bits_per_symbol_by_factor: null
+  bits_per_message: 16
+
+agents:
+  sender:
+    family: injective_permutation_slot_sender
+
+training:
+  discrete_estimator: straight_through_sinkhorn_and_hard_assignment

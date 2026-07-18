@@ -1,0 +1,215 @@
+schema_version: "0.1"
+experiment:
+  id: ecp2
+  title: Confirmatief geleerd permutationslotprotocol
+  status: frozen_for_confirmatory
+  frozen_at_utc: "2026-07-18T01:31:00Z"
+  parent_experiment: ecp1
+  arm: slot_binding_consensus
+  objective: >-
+    Test of onafhankelijk geleerde factor-slotpermutaties met betekenisvrije
+    populatieconsensus een betrouwbaar, compositioneel en vertaalbaar discreet
+    protocol vormen.
+
+reproducibility:
+  dataset_seed: 18072028
+  training_seeds: [11, 23, 37, 53, 71]
+  deterministic_evaluation: true
+  retain_failed_runs: true
+  parallel_seed_workers: 2
+
+world:
+  distribution: uniform
+  factors:
+    color:
+      values: [c0, c1, c2, c3, c4, c5, c6, c7]
+      model_sees_display_labels: false
+    shape:
+      values: [s0, s1, s2, s3, s4, s5, s6, s7]
+      model_sees_display_labels: false
+    size:
+      values: [z0, z1, z2, z3]
+      model_sees_display_labels: false
+    texture:
+      values: [t0, t1, t2, t3]
+      model_sees_display_labels: false
+  meaning_count: 1024
+  source_entropy_bits: 10
+
+dataset:
+  split_strategy: dual_held_out_color_shape_matchings
+  train_meanings: 768
+  validation_meanings: 128
+  compositional_test_meanings: 128
+  held_out_color_shape_pairs: 8
+  validation_held_out_color_shape_pairs: 8
+  variants_per_held_out_pair: 16
+  excluded_color_shape_pairs:
+    - {color: 0, shape: 3}
+    - {color: 1, shape: 0}
+    - {color: 2, shape: 4}
+    - {color: 3, shape: 1}
+    - {color: 4, shape: 5}
+    - {color: 5, shape: 2}
+    - {color: 6, shape: 6}
+    - {color: 7, shape: 7}
+    - {color: 0, shape: 5}
+    - {color: 1, shape: 2}
+    - {color: 2, shape: 0}
+    - {color: 3, shape: 7}
+    - {color: 4, shape: 3}
+    - {color: 5, shape: 4}
+    - {color: 6, shape: 1}
+    - {color: 7, shape: 6}
+  test_is_sealed: true
+
+channel:
+  type: discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: 4
+  bits_per_message: 16
+  natural_language_allowed: false
+  continuous_values_allowed_at_evaluation: false
+
+task:
+  type: exact_factor_reconstruction
+  sender_input: [color, shape, size, texture]
+  receiver_input: [message]
+  receiver_outputs: [color, shape, size, texture]
+  exact_match_requires_all_factors: true
+
+agents:
+  pretrained: false
+  shared_parameters: false
+  shared_embeddings: false
+  shared_hidden_state: false
+  sender:
+    family: learned_permutation_slot_sender
+  receiver:
+    family: sequence_encoder_multihead_classifier
+  population:
+    enabled: true
+    sender_count: 4
+    receiver_count: 4
+    pairing: all_senders_all_receivers
+    pairings_per_step: 16
+  translator:
+    family: sequence_encoder_multihead_classifier
+    scope: all_senders
+    trained_after_protocol_freeze: true
+    sees_receiver_parameters: false
+    sees_test_meanings_during_training: false
+
+training:
+  discrete_estimator: straight_through_gumbel_softmax
+  selection_metric: compositional_validation_subject_to_known_thresholds
+  selection_known_mean_min: 0.97
+  selection_known_worst_pair_min: 0.95
+  selection_never_uses_test: true
+  evaluation_uses_hard_symbols_only: true
+  device: cpu
+  batch_size: 128
+  max_steps: 5000
+  evaluation_interval: 200
+  patience_steps: 1600
+  minimum_steps: 2000
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  gradient_clip_norm: 1.0
+  temperature_start: 1.5
+  temperature_end: 0.8
+  factor_embedding_dim: 16
+  symbol_embedding_dim: 24
+  hidden_dim: 128
+  algebraic_consistency:
+    enabled: false
+    weight: 0.0
+    warmup_steps: 800
+    relaxed_temperature: 1.0
+    batch_size: 32
+    quadruple_pool_size: 8192
+  cultural_transmission:
+    enabled: false
+    replacement_interval: 600
+    minimum_full_turnovers: 1
+    maximum_replacements: 0
+  slot_binding_consensus:
+    enabled: true
+    weight: 5.0
+    warmup_steps: 400
+    sharpness_weight: 0.1
+
+translator_training:
+  batch_size: 128
+  max_steps: 2500
+  evaluation_interval: 100
+  patience_steps: 700
+  minimum_steps: 600
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  gradient_clip_norm: 1.0
+
+transfer:
+  enabled: true
+  meaning_budgets: [32, 128, 512, 768]
+  max_steps: 2000
+  minimum_steps: 500
+  patience_steps: 600
+
+baselines:
+  - ecp2_same_split_slot_sender_without_binding_consensus
+  - ecp1_confirmatory
+  - dutch_template_utf8
+  - canonical_json_utf8
+  - packed_factor_code_10_bit
+  - random_lookup_code
+  - handcrafted_compositional_code
+
+metrics:
+  primary:
+    - population_known_mean_exact
+    - population_known_worst_pair_exact
+    - population_compositional_validation_mean_exact
+    - population_compositional_test_mean_exact
+    - universal_translator_compositional_exact
+  diagnostic:
+    - sender_binding_matrices
+    - pair_accuracy_matrix
+    - sender_message_agreement
+    - sender_protocol_statistics
+    - receiver_transfer_curve
+    - seed_variance
+
+controls:
+  shuffled_messages_expected_exact_match_max: 0.01
+  consistent_symbol_permutation_preserves_performance: true
+  receiver_cannot_access:
+    - meaning
+    - meaning_id
+    - episode_id
+    - wall_clock
+    - sender_state
+    - shared_files
+    - shared_random_generator
+  log_every_message: true
+  isolate_final_evaluation: true
+
+outcome_thresholds:
+  strong_evidence:
+    minimum_valid_runs: 4
+    population_known_mean_min: 0.97
+    population_known_worst_pair_min: 0.95
+    population_compositional_mean_min: 0.80
+    universal_translator_compositional_min: 0.70
+  compositional_mean_reference: 0.10126953125
+  paired_control_required: true
+  thresholds_may_change_after_test_access: false
+
+artifacts:
+  meaning_schema: schemas/meaning.schema.json
+  message_schema: schemas/message.schema.json
+  episode_schema: schemas/episode.schema.json
+  run_directory: runs

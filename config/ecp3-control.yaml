@@ -1,0 +1,14 @@
+extends: ecp3.yaml
+
+experiment:
+  title: Gepaarde ECP-3-controle zonder protocolconsensus
+  arm: no_protocol_consensus
+
+training:
+  slot_binding_consensus:
+    enabled: false
+    weight: 0.0
+  atom_code_consensus:
+    enabled: false
+    weight: 0.0
+
