@@ -704,3 +704,54 @@ sealed-test requirement fails. No alternative start step, warmup, weight,
 normalization, duration, architecture, utilization, optimizer, data, translator
 or seed may be tried inside Batch 16. Failure is recorded without confirmatory
 test access.
+
+## Batch 17 preregistration — Late global collision-pair replay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 14:35:00 UTC<br>
+Configuration: `config/ecp7-b17-development.yaml`<br>
+Raw configuration SHA-256: `81bc1c36f7fd19afdecd61eb917fe41925db8266d8ac8b2bc96e70178e39c412`<br>
+Effective configuration SHA-256: `70921261774f38f5ca22f122d05a2b9f1f0bc7c9ca6ea4c327097b7619715d5b`
+
+Batch 16 showed that late semantic factor reweighting slightly improves
+texture but disrupts color generalization and does not make the code injective.
+Batch 17 therefore returns to the complete Batch 15 base and targets only the
+remaining complete-message collisions. It revisits the Batch 4 question after
+a mature high-entropy protocol exists, but replaces Batch 4's sparse random
+minibatch signal with deterministic training-codebook mining.
+
+At step 15,000 and every 200-step registered evaluation boundary thereafter,
+each sender encodes all 14,336 training meanings with hard argmax symbols. For
+each complete message, every unordered pair of distinct training meanings that
+shares that message enters that sender's replay bank. Validation meanings,
+factor labels, factor identities and validation outcomes never enter mining.
+
+For every subsequent population update, a separate seed-derived generator
+samples 32 mined pairs with replacement per sender. The sender produces relaxed
+message distributions at temperature `1.0`. For pair `(x,y)`, the new loss is
+the probability that all four relaxed symbols agree:
+
+`L_replay(x,y) = product_s <p_s(x), p_s(y)>`
+
+The loss averages over sampled pairs and senders. It specifies no desired
+symbol, target slot, semantic codebook or factor-to-slot binding. Reducing it
+requires at least one message position to distinguish each replayed pair.
+
+ECP7-B17-I keeps every Batch 15 architecture, task and utilization loss,
+optimizer, data, temperature schedule, 30,000-step duration, selection window,
+translator and threshold. Collision-replay weight is exactly `0` through step
+15,000, rises linearly to `1.0` over steps 15,000–20,000, and then holds. The
+separate replay sampler does not alter the registered task-batch sampler. The
+trajectory through step 15,000 must therefore match Batch 15 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B17-I with late global collision-pair replay on the complete B15 base.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative mining source, refresh interval,
+pair batch size, temperature, weight, warmup, architecture, duration, optimizer,
+data, translator or seed may be tried inside Batch 17. Failure is recorded
+without confirmatory test access.

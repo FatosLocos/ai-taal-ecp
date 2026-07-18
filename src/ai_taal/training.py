@@ -174,6 +174,9 @@ def train_population_system(
     evaluation_interval = min(training["evaluation_interval"], max_steps)
     minimum_steps = min(training["minimum_steps"], max_steps)
     batch_generator = torch.Generator(device="cpu").manual_seed(seed + 101)
+    collision_replay_generator = torch.Generator(device="cpu").manual_seed(
+        seed + 919
+    )
     consistency_config = training.get("algebraic_consistency", {})
     consistency_enabled = bool(consistency_config.get("enabled", False))
     consistency_quadruples = None
@@ -210,6 +213,14 @@ def train_population_system(
         joint_collision_config.get("weight", 0.0)
     ) < 0:
         raise ValueError("Joint-collision weight cannot be negative.")
+    collision_replay_config = training.get("global_collision_replay", {})
+    collision_replay_enabled = bool(
+        collision_replay_config.get("enabled", False)
+    )
+    if collision_replay_enabled and float(
+        collision_replay_config.get("weight", 0.0)
+    ) < 0:
+        raise ValueError("Global collision-replay weight cannot be negative.")
     sender_consensus_config = training.get("sender_message_consensus", {})
     sender_consensus_enabled = bool(sender_consensus_config.get("enabled", False))
     if sender_consensus_enabled and float(
@@ -246,6 +257,10 @@ def train_population_system(
     best_step = 0
     best_state: dict[str, Any] | None = None
     history: list[dict[str, Any]] = []
+    collision_replay_pairs = [
+        torch.empty((0, 2), dtype=torch.long, device=device)
+        for _ in population.senders
+    ]
     started = time.perf_counter()
 
     for step in range(1, max_steps + 1):
@@ -384,6 +399,42 @@ def train_population_system(
             joint_collision_weight = float(
                 joint_collision_config["weight"]
             ) * min(step / joint_collision_warmup, 1.0)
+        collision_replay_loss = torch.zeros((), device=device)
+        collision_replay_weight = 0.0
+        if collision_replay_enabled:
+            collision_replay_weight = _scheduled_collision_replay_weight(
+                collision_replay_config, step
+            )
+            if collision_replay_weight > 0:
+                replay_losses = []
+                replay_batch_size = int(
+                    collision_replay_config["pair_batch_size"]
+                )
+                replay_temperature = float(
+                    collision_replay_config["relaxed_temperature"]
+                )
+                for sender, pairs in zip(
+                    population.senders, collision_replay_pairs, strict=True
+                ):
+                    if len(pairs) == 0:
+                        replay_losses.append(torch.zeros((), device=device))
+                        continue
+                    replay_indices = torch.randint(
+                        len(pairs),
+                        (replay_batch_size,),
+                        generator=collision_replay_generator,
+                        device="cpu",
+                    ).to(device)
+                    replay_meanings = train_values[pairs[replay_indices]].reshape(
+                        replay_batch_size * 2, -1
+                    )
+                    replay_messages = sender.relaxed_message(
+                        replay_meanings, temperature=replay_temperature
+                    ).reshape(replay_batch_size, 2, *messages[0].shape[1:])
+                    replay_losses.append(
+                        relaxed_collision_pair_probability(replay_messages)
+                    )
+                collision_replay_loss = torch.stack(replay_losses).mean()
         sender_consensus_loss = torch.zeros((), device=device)
         sender_consensus_weight = 0.0
         if sender_consensus_enabled:
@@ -402,6 +453,7 @@ def train_population_system(
             + atom_consensus_weight * atom_consensus_loss
             + utilization_weight * utilization_loss
             + joint_collision_weight * joint_collision_loss
+            + collision_replay_weight * collision_replay_loss
             + sender_consensus_weight * sender_consensus_loss
         )
         optimizer.zero_grad(set_to_none=True)
@@ -416,6 +468,15 @@ def train_population_system(
             continue
         train_metrics = evaluate_population(population, train_values)
         validation_metrics = evaluate_population(population, validation_values)
+        if (
+            collision_replay_enabled
+            and step >= int(collision_replay_config["start_step"])
+            and step % int(collision_replay_config["refresh_interval"]) == 0
+        ):
+            collision_replay_pairs = [
+                mine_sender_collision_pairs(sender, train_values)
+                for sender in population.senders
+            ]
         history.append(
             {
                 "step": step,
@@ -441,6 +502,15 @@ def train_population_system(
                     joint_collision_loss.detach().cpu()
                 ),
                 "joint_message_collision_weight": float(joint_collision_weight),
+                "global_collision_replay_loss": float(
+                    collision_replay_loss.detach().cpu()
+                ),
+                "global_collision_replay_weight": float(
+                    collision_replay_weight
+                ),
+                "global_collision_replay_pair_counts": [
+                    len(pairs) for pairs in collision_replay_pairs
+                ],
                 "sender_message_consensus_loss": float(
                     sender_consensus_loss.detach().cpu()
                 ),
@@ -678,6 +748,40 @@ def straight_through_joint_collision_loss(
     same_input = meanings[:, None, :].eq(meanings[None, :, :]).all(dim=-1)
     distinct_input = (~same_input).to(full_message_agreement.dtype)
     return (full_message_agreement * distinct_input).sum() / meanings.shape[0]
+
+
+def collision_pairs_from_messages(messages: Tensor) -> Tensor:
+    """Return every unordered input pair sharing one complete hard message."""
+    if messages.ndim != 2:
+        raise ValueError("Collision mining messages must have shape [items,slots].")
+    buckets: dict[tuple[int, ...], list[int]] = {}
+    for index, message in enumerate(messages.detach().cpu().tolist()):
+        buckets.setdefault(tuple(message), []).append(index)
+    pairs = [
+        (indices[left], indices[right])
+        for indices in buckets.values()
+        for left in range(len(indices))
+        for right in range(left + 1, len(indices))
+    ]
+    if not pairs:
+        return torch.empty((0, 2), dtype=torch.long, device=messages.device)
+    return torch.tensor(pairs, dtype=torch.long, device=messages.device)
+
+
+@torch.no_grad()
+def mine_sender_collision_pairs(sender: SenderModel, meanings: Tensor) -> Tensor:
+    """Mine sender collisions from hard messages over training meanings only."""
+    return collision_pairs_from_messages(encode_meanings(sender, meanings))
+
+
+def relaxed_collision_pair_probability(message_pairs: Tensor) -> Tensor:
+    """Average relaxed probability that each mined pair keeps one full code."""
+    if message_pairs.ndim != 4 or message_pairs.shape[1] != 2:
+        raise ValueError(
+            "Collision-replay messages must have shape [pairs,2,slots,vocab]."
+        )
+    per_slot_agreement = (message_pairs[:, 0] * message_pairs[:, 1]).sum(dim=-1)
+    return per_slot_agreement.prod(dim=-1).mean()
 
 
 def straight_through_sender_consensus_loss(
@@ -1079,3 +1183,14 @@ def _scheduled_factor_minimax_weight(
     )
     progress = min((step - start_step) / warmup_steps, 1.0)
     return float(factor_minimax_config["weight"]) * progress
+
+
+def _scheduled_collision_replay_weight(
+    collision_replay_config: dict[str, Any], step: int
+) -> float:
+    start_step = int(collision_replay_config["start_step"])
+    if step <= start_step:
+        return 0.0
+    warmup_steps = int(collision_replay_config["warmup_steps"])
+    progress = min((step - start_step) / warmup_steps, 1.0)
+    return float(collision_replay_config["weight"]) * progress

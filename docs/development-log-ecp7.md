@@ -24,6 +24,7 @@ this log.
 | ECP7-B14-I | Intervention | B10 with late learning-rate decay | Position-aware MLP | completed; gate failed |
 | ECP7-B15-I | Intervention | B10 with 30,000-step optimization | Position-aware MLP | completed; gate failed |
 | ECP7-B16-I | Intervention | B15 with late normalized factor minimax | Position-aware MLP | completed; gate failed |
+| ECP7-B17-I | Intervention | B15 with late global collision-pair replay | Position-aware MLP | completed; gate failed |
 
 ## Batch 1 preregistration
 
@@ -1161,3 +1162,99 @@ then penalize their relaxed full-message collision probability. This directly
 addresses the sparse-minibatch limitation observed in Batch 4 while assigning
 no semantic factor to any channel slot. Architecture, base losses, duration,
 data, translator and thresholds must remain unchanged.
+
+## Batch 17 preregistration
+
+Preregistered: July 18, 2026 at 14:35:00 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Replay start: step `15,000`<br>
+Replay weight: `0` through step `15,000`, linear to `1.0` at step `20,000`, then hold<br>
+Replay pairs per sender and update: `32`<br>
+Training-codebook refresh interval: `200` steps<br>
+Relaxed replay temperature: `1.0`<br>
+Raw configuration SHA-256: `81bc1c36f7fd19afdecd61eb917fe41925db8266d8ac8b2bc96e70178e39c412`<br>
+Effective configuration SHA-256: `70921261774f38f5ca22f122d05a2b9f1f0bc7c9ca6ea4c327097b7619715d5b`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B17-I returns to every Batch 15 setting and adds exactly one late
+factor-agnostic collision-replay intervention. At registered evaluation
+boundaries from step 15,000 onward, each sender's hard code over training
+meanings is mined for every unordered colliding pair. A deterministic separate
+sampler replays 32 pairs per sender and update; their relaxed full-message
+collision probability is penalized. Validation and confirmatory meanings never
+enter the replay bank. The unchanged positive control is rerun, and no
+alternative replay or accompanying intervention is admitted into this batch.
+
+## Batch 17 results
+
+Positive-control run: `runs/ecp7-batch17-control-development/20260718T143730Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch17-intervention-development/20260718T143730Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B17-I |
+|---|---:|---:|
+| Population train, mean | 100% | 83.1456% |
+| Population train, worst link | 100% | 82.5753% |
+| Population validation, mean | 100% | 77.0935% |
+| Population validation, worst link | 100% | 76.3672% |
+| Universal translator, validation | 100% | 83.0078% |
+| Exact sender-message agreement | 100% | 89.42% |
+| Unique messages per sender | 15,360 | 12,944–13,259 |
+| Collision meanings per sender | 0 | 2,101–2,416 |
+| Message entropy | 13.91 bits | 13.58–13.61 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B17-I retained a passing
+universal-translator score, but failed known-meaning train exactness, validation
+and injectivity. It remains a negative sealed-development result and does not
+authorize confirmatory access.
+
+The trajectory through step 15,000 matches B15 exactly. The first global mining
+pass found 3,015, 3,005, 3,434 and 2,644 unordered colliding training pairs for
+the four senders. At step 15,200, replay weight was `0.04` and the relaxed
+collision probability was still `0.9977`, confirming that the hard-collision
+pairs also had nearly identical soft codes.
+
+The selected checkpoint was step 16,200. Replay weight was `0.24`, replay loss
+was `0.83844`, task loss was `0.07453`, and utilization loss was `-0.74019`.
+The weighted replay term was therefore approximately `0.201`, substantially
+larger than the remaining task loss. The mined pair banks had fallen to
+2,564, 2,255, 2,248 and 2,407 pairs, so the intervention did separate many
+targeted collisions.
+
+That benefit did not remain stable. As replay reached full weight, old pairs
+separated but new collisions formed. At the final step 21,200, pair-bank sizes
+were 3,493, 3,956, 2,215 and 1,194; validation had fallen to 71.60%. The
+registered patience rule then stopped training 5,000 steps after the best
+checkpoint.
+
+Compared with B15, every selected sender used more unique messages and fewer
+collision meanings, but no sender became injective. Sender agreement fell from
+92.33% to 89.42%, while validation fell from 82.5867% to 77.0935%. Population
+validation factor accuracies were
+`[92.24%, 99.85%, 98.44%, 84.52%]`; universal-translator factor accuracies were
+`[99.73%, 100%, 98.44%, 84.69%]`.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 17 decision
+
+ECP7-B17-I is rejected under the joint gate. Global collision mining fixed the
+sparse-signal problem from Batch 4 and modestly improved hard code use, but its
+registered coefficient overpowered the remaining task objective and caused
+collision churn rather than injectivity. Batch 15 remains the strongest base,
+and the confirmatory split remains sealed.
+
+A future ECP7-B18 may keep the complete B17 mining and replay mechanism while
+returning to B15 and changing only the final replay coefficient from `1.0` to
+`0.1`. Weight would remain `0` through step 15,000, warm linearly to `0.1` at
+step 20,000 and then hold. This makes an initially near-one replay loss
+comparable to the remaining task loss instead of several times larger. No
+mining, pair batch, refresh, architecture, base loss, duration, data, translator
+or threshold change may accompany that coefficient test.

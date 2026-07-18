@@ -1,0 +1,19 @@
+extends: ecp7-b15-development.yaml
+
+experiment:
+  title: ECP-7 late global collision-pair replay
+  arm: late_global_collision_pair_replay
+  objective: >-
+    Test whether replaying globally mined training-code collisions after the
+    high-entropy Batch 15 protocol is established can resolve injectivity
+    without factor labels, slot assignments, or validation-driven sampling.
+
+training:
+  global_collision_replay:
+    enabled: true
+    weight: 1.0
+    start_step: 15000
+    warmup_steps: 5000
+    pair_batch_size: 32
+    refresh_interval: 200
+    relaxed_temperature: 1.0
