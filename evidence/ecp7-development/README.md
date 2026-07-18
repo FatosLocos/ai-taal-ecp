@@ -93,6 +93,11 @@ It improved hard code use modestly but regressed to 83.15% train exactness,
 77.09% validation and 83.01% translator validation without reaching
 injectivity. Exact identities and hashes are in `batch17-manifest.json`.
 
+Batch 18 reduced final replay weight to 0.1. It recovered 84.08% train
+exactness, 80.71% validation and a new-best 84.06% translator validation, but
+still failed train thresholds and injectivity. Exact identities and hashes are
+in `batch18-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

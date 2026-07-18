@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 100 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 102 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 17
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 18
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -110,11 +110,15 @@ validation and 77.76% translator validation without solving injectivity. Batch
 It modestly improved unique-message use but regressed to 83.15% train, 77.09%
 validation and 83.01% translator validation without becoming injective. The
 confirmatory ECP-7 test is still sealed.
+ECP7-B18-I reduced replay weight to `0.1` and recovered 84.08% train, 80.71%
+validation and a new-best 84.06% translator validation. Validation and
+translator gates pass, but train and injectivity do not. Batch 15 retains the
+best validation result, and the confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B18 intervention and its failure criterion.
+2. Define exactly one ECP7-B19 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -127,25 +131,25 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 15 remains the strongest weak-structure result. Batch 17 shows that global
-collision replay provides a usable signal and modestly improves code use, but
-its full weight overwhelms the remaining task objective and causes collision
-churn. The clean next question is whether the same mechanism works at a
-task-scale coefficient. A clean ECP7-B18 progression is:
+Batch 18 shows that replay at task-loss scale avoids B17's early collapse and
+improves train and translator scores, but validation peaks at step 22,400 and
+then declines while replay remains active. The clean next question is whether a
+bounded replay pulse can preserve early collision reduction and then return to
+unperturbed semantic refinement. A clean ECP7-B19 progression is:
 
 - keep the same world and bit budget;
 - keep the complete B15 architecture, horizon and base losses;
 - keep the complete B17 training-only collision mining, replay batch,
   temperature and refresh mechanism;
 - keep replay weight `0` through step 15,000, warm only to `0.1` at step 20,000,
-  then hold;
+  then decay linearly to `0` at step 25,000 and hold;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
 Continue to use training meanings only for pair mining. Do not change the
 mining source, pair sampler, architecture, base utilization, optimizer, data,
 temperature, duration, validation cadence or development thresholds, and do
-not combine the coefficient change with factor reweighting, variable-length
+not combine the schedule change with factor reweighting, variable-length
 messages or negotiation.
 
 ## 7. Definition of done for any contribution

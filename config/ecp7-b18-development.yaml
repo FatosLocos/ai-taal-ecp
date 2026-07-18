@@ -1,0 +1,13 @@
+extends: ecp7-b17-development.yaml
+
+experiment:
+  title: ECP-7 attenuated late global collision-pair replay
+  arm: attenuated_late_global_collision_pair_replay
+  objective: >-
+    Test whether keeping the complete Batch 17 collision-replay mechanism but
+    limiting its final coefficient to task-loss scale can improve injectivity
+    without disrupting the Batch 15 semantic trajectory.
+
+training:
+  global_collision_replay:
+    weight: 0.1
