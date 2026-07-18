@@ -1,4 +1,4 @@
-"""Orkestratie, isolatie, artefacten en classificatie van ECP-0-runs."""
+"""Orchestration, isolation, artifacts, and classification for ECP runs."""
 
 from __future__ import annotations
 
@@ -56,11 +56,11 @@ def run_experiment(
     seeds: list[int] | None = None,
 ) -> Path:
     if smoke and development:
-        raise ValueError("Een run kan niet tegelijk smoke en development zijn.")
+        raise ValueError("A run cannot be both smoke and development.")
     if not smoke and not development and not unseal_test:
-        raise ValueError("Een volledige run vereist de expliciete vlag --unseal-test.")
+        raise ValueError("A full run requires the explicit --unseal-test flag.")
     if (smoke or development) and unseal_test:
-        raise ValueError("Een niet-confirmatieve run mag de testset niet openen.")
+        raise ValueError("A non-confirmatory run must not open the test set.")
 
     split = build_splits(config)
     mode = "smoke" if smoke else "development" if development else "experiment"
@@ -417,7 +417,7 @@ def validate_schemas(schema_directory: str | Path) -> None:
         registry = registry.with_resource(schema["$id"], Resource.from_contents(schema))
         schemas.append(schema)
     if not schemas:
-        raise ValueError("Geen JSON-schema's gevonden.")
+        raise ValueError("No JSON Schemas found.")
 
 
 def _validate_episodes(episodes: list[dict[str, Any]], config: dict[str, Any]) -> None:
@@ -449,23 +449,23 @@ def _validate_episodes(episodes: list[dict[str, Any]], config: dict[str, Any]) -
             ):
                 value = int(meaning[factor_name][len(prefix) :])
                 if value < 0 or value >= len(factor_specs[factor_name]["values"]):
-                    raise ValueError("Episode bevat een factorwaarde buiten de wereld.")
+                    raise ValueError("Episode contains a factor value outside the world.")
                 factors.append(value)
             expected_meaning = meaning_from_factors(factors, config)
             if expected_meaning.meaning_id != meaning["meaning_id"]:
-                raise ValueError("Episode bevat een inconsistente meaning_id.")
+                raise ValueError("Episode contains an inconsistent meaning_id.")
         message = episode["message"]
         if message["channel_bits"] != config["channel"]["bits_per_message"]:
-            raise ValueError("Episode bevat een onjuiste kanaalbitlengte.")
+            raise ValueError("Episode contains an incorrect channel bit length.")
         symbols = message["symbols"]
         if len(symbols) != config["channel"]["message_length"]:
-            raise ValueError("Episode bevat een onjuiste berichtlengte.")
+            raise ValueError("Episode contains an incorrect message length.")
         if any(
             symbol < config["channel"]["symbol_min"]
             or symbol > config["channel"]["symbol_max"]
             for symbol in symbols
         ):
-            raise ValueError("Episode bevat een symbool buiten het kanaalalfabet.")
+            raise ValueError("Episode contains a symbol outside the channel alphabet.")
 
 
 def _classify_seed(
@@ -539,7 +539,7 @@ def _render_report(
     development: bool,
 ) -> str:
     title = (
-        "ECP-0 technische proefrun"
+        "ECP-0 technical smoke run"
         if smoke
         else "ECP-0 ontwikkelrun"
         if development
@@ -548,9 +548,9 @@ def _render_report(
     lines = [
         f"# {title}",
         "",
-        f"Classificatie: **{summary['overall_classification']}**",
+        f"Classification: **{summary['overall_classification']}**",
         "",
-        "| Seed | Bekend exact | Validatie exact | Compositie exact | Vertaler compositie | Classificatie |",
+        "| Seed | Known exact | Validation exact | Compositional exact | Translator compositional | Classification |",
         "|---:|---:|---:|---:|---:|---|",
     ]
     for result in results:
@@ -574,24 +574,24 @@ def _render_report(
     lines.extend(
         [
             "",
-            "## Methodologische status",
+            "## Methodological status",
             "",
-            "De zender en ontvanger zijn voor iedere gerapporteerde evaluatie als afzonderlijke "
-            "processen uitgevoerd. De ontvanger ontving uitsluitend de discrete symboolmatrix.",
+            "The sender and receiver ran as separate processes for every reported evaluation. "
+            "The receiver received only the discrete symbol matrix.",
             "",
         ]
     )
     if smoke:
         lines.append(
-            "Deze korte run controleert uitsluitend de technische keten en heeft de compositionele testset niet geopend."
+            "This short run checks only the technical pipeline and did not open the compositional test set."
         )
     elif development:
         lines.append(
-            "Deze ontwikkelrun gebruikte alleen train en validatie. De compositionele testset bleef verzegeld."
+            "This development run used training and validation only. The compositional test set remained sealed."
         )
     else:
         lines.append(
-            "De compositionele testset is voor deze confirmatieve run expliciet ontzegeld en niet voor modelselectie gebruikt."
+            "The compositional test set was explicitly unsealed for this confirmatory run and was not used for model selection."
         )
     lines.append("")
     return "\n".join(lines)

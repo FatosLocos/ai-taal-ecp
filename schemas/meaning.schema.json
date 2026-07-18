@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.ai-taal/schemas/meaning.schema.json",
   "title": "ECP meaning",
-  "description": "Canonieke betekenis zonder natuurlijke-taallabels.",
+  "description": "Canonical meaning without natural-language labels.",
   "type": "object",
   "additionalProperties": false,
   "required": ["meaning_id", "color", "shape", "size", "texture"],

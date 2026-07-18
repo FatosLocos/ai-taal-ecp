@@ -1,4 +1,4 @@
-"""Reproduceerbare post-runanalyse van een voltooid ECP-0-experiment."""
+"""Reproducible post-run analysis of a completed ECP experiment."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def analyze_run(
 
     metrics_paths = sorted(run_directory.glob("seed-*/metrics.json"))
     if not metrics_paths:
-        raise ValueError(f"Geen seedmetrics gevonden in {run_directory}.")
+        raise ValueError(f"No seed metrics found in {run_directory}.")
     first_metrics = _read_json(metrics_paths[0])
     if "population" in first_metrics:
         return _analyze_population_run(
@@ -126,7 +126,7 @@ def compare_population_runs(
     intervention_split = _read_json(intervention_directory / "split_manifest.json")
     control_split = _read_json(control_directory / "split_manifest.json")
     if intervention_split["sha256"] != control_split["sha256"]:
-        raise ValueError("Interventie en controle gebruiken niet dezelfde datasplit.")
+        raise ValueError("Intervention and control do not use the same data split.")
 
     intervention_metrics = {
         int(metrics["seed"]): metrics
@@ -139,7 +139,7 @@ def compare_population_runs(
         for metrics in [_read_json(path)]
     }
     if intervention_metrics.keys() != control_metrics.keys():
-        raise ValueError("Interventie en controle bevatten niet dezelfde seeds.")
+        raise ValueError("Intervention and control do not contain the same seeds.")
 
     rows = []
     for seed in sorted(intervention_metrics):
@@ -235,7 +235,7 @@ def compare_population_runs(
 
 def _paired_sign_flip_test(differences: list[float]) -> dict[str, Any]:
     if not differences:
-        raise ValueError("Minstens één gepaard verschil is vereist.")
+        raise ValueError("At least one paired difference is required.")
     observed = statistics.mean(differences)
     null_values = [
         statistics.mean(

@@ -1,4 +1,4 @@
-"""Configuratie laden en de preregistratie-invarianten bewaken."""
+"""Load configurations and enforce preregistration invariants."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import yaml
 
 
 class ConfigError(ValueError):
-    """De experimentconfiguratie is intern tegenstrijdig."""
+    """The experiment configuration is internally inconsistent."""
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
@@ -22,12 +22,12 @@ def load_config(path: str | Path) -> dict[str, Any]:
 
 def _load_config(config_path: Path, *, seen: set[Path]) -> dict[str, Any]:
     if config_path in seen:
-        raise ConfigError(f"Cyclische configuratie-erfenis via {config_path}.")
+        raise ConfigError(f"Cyclic configuration inheritance through {config_path}.")
     seen.add(config_path)
     with config_path.open("r", encoding="utf-8") as handle:
         config = yaml.safe_load(handle)
     if not isinstance(config, dict):
-        raise ConfigError("De configuratie moet een YAML-object zijn.")
+        raise ConfigError("The configuration must be a YAML object.")
     parent = config.pop("extends", None)
     if parent is not None:
         parent_path = (config_path.parent / str(parent)).resolve()
@@ -55,12 +55,12 @@ def validate_config(config: dict[str, Any]) -> None:
         split = config["dataset"]
         channel = config["channel"]
     except (KeyError, TypeError) as exc:
-        raise ConfigError(f"Verplicht configuratieveld ontbreekt: {exc}") from exc
+        raise ConfigError(f"Required configuration field is missing: {exc}") from exc
 
     calculated_meanings = math.prod(factor_sizes)
     if calculated_meanings != meaning_count:
         raise ConfigError(
-            f"Wereld bevat {calculated_meanings} combinaties, niet {meaning_count}."
+            f"World contains {calculated_meanings} combinations, not {meaning_count}."
         )
 
     split_total = sum(
@@ -72,37 +72,37 @@ def validate_config(config: dict[str, Any]) -> None:
         )
     )
     if split_total != meaning_count:
-        raise ConfigError(f"Datasplitsingen tellen op tot {split_total}, niet {meaning_count}.")
+        raise ConfigError(f"Data splits total {split_total}, not {meaning_count}.")
 
     if channel["type"] == "factor_local_discrete_fixed_length":
         alphabet_sizes = channel["factor_alphabet_sizes"]
         if alphabet_sizes != factor_sizes:
-            raise ConfigError("Lokale factoralfabetten passen niet bij de wereld.")
+            raise ConfigError("Factor-local alphabets do not match the world.")
         expected_message_bits = sum(
             math.ceil(math.log2(size)) for size in alphabet_sizes
         )
         if channel["vocabulary_size"] != max(alphabet_sizes):
-            raise ConfigError("Globale tokenruimte past niet bij lokale alfabetten.")
+            raise ConfigError("Global token space does not match the local alphabets.")
     else:
         expected_bits_per_symbol = math.ceil(math.log2(channel["vocabulary_size"]))
         if expected_bits_per_symbol != channel["bits_per_symbol"]:
-            raise ConfigError("bits_per_symbol past niet bij vocabulary_size.")
+            raise ConfigError("bits_per_symbol does not match vocabulary_size.")
         expected_message_bits = channel["message_length"] * channel["bits_per_symbol"]
     if expected_message_bits != channel["bits_per_message"]:
-        raise ConfigError("bits_per_message past niet bij lengte en symboolkosten.")
+        raise ConfigError("bits_per_message does not match message length and symbol cost.")
 
     entropy = math.log2(meaning_count)
     if not math.isclose(entropy, config["world"]["source_entropy_bits"]):
-        raise ConfigError("source_entropy_bits past niet bij de uniforme wereld.")
+        raise ConfigError("source_entropy_bits does not match the uniform world.")
 
     seeds = config["reproducibility"]["training_seeds"]
     if len(seeds) != len(set(seeds)):
-        raise ConfigError("Iedere trainingsrun moet een unieke seed hebben.")
+        raise ConfigError("Every training run must use a unique seed.")
 
     if config["training"]["selection_never_uses_test"] is not True:
-        raise ConfigError("Testdata mag niet voor modelselectie worden gebruikt.")
+        raise ConfigError("Test data must not be used for model selection.")
     if config["training"]["evaluation_uses_hard_symbols_only"] is not True:
-        raise ConfigError("Evaluatie moet uitsluitend harde symbolen gebruiken.")
+        raise ConfigError("Evaluation must use hard symbols only.")
 
 
 def file_sha256(path: str | Path) -> str:

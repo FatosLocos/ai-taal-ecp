@@ -1,4 +1,4 @@
-"""Trainingslussen die de compositionele testset nooit voor selectie gebruiken."""
+"""Training loops that never use the compositional test set for selection."""
 
 from __future__ import annotations
 
@@ -138,7 +138,7 @@ def train_communication_system(
             break
 
     if best_state is None:
-        raise RuntimeError("Training leverde geen selecteerbaar model op.")
+        raise RuntimeError("Training produced no selectable model.")
     system.load_state_dict(best_state)
     system.eval()
     return system, TrainingResult(
@@ -189,7 +189,7 @@ def train_population_system(
     atom_consensus_enabled = bool(atom_consensus_config.get("enabled", False))
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
-            "Populatietraining ondersteunt alleen all_senders_all_receivers."
+            "Population training supports all_senders_all_receivers only."
         )
     transmission_config = training.get("cultural_transmission", {})
     transmission_enabled = bool(transmission_config.get("enabled", False))
@@ -197,7 +197,7 @@ def train_population_system(
     maximum_replacements = int(transmission_config.get("maximum_replacements", 0))
     if transmission_enabled and replacement_interval < evaluation_interval:
         raise ValueError(
-            "Vervangingsinterval moet minstens één evaluatie-interval beslaan."
+            "Replacement interval must span at least one evaluation interval."
         )
     required_replacements = (
         max(len(population.senders), len(population.receivers))
@@ -387,7 +387,7 @@ def train_population_system(
             optimizer = _population_optimizer(population, training)
 
     if best_state is None:
-        raise RuntimeError("Populatietraining leverde geen selecteerbaar model op.")
+        raise RuntimeError("Population training produced no selectable model.")
     population.load_state_dict(best_state)
     population.eval()
     return population, PopulationTrainingResult(
@@ -416,7 +416,7 @@ def _replace_population_members(
     receiver_index: int,
     device: str,
 ) -> None:
-    """Vervang één generatiepaar zonder toestand van overlevende agents te delen."""
+    """Replace one generational pair without sharing surviving-agent state."""
     population.senders[sender_index] = make_sender(population.spec).to(device)
     population.receivers[receiver_index] = make_receiver(population.spec).to(device)
 
@@ -429,7 +429,7 @@ def slot_binding_consensus_loss(
         method = getattr(sender, "soft_binding_matrix", None)
         if method is None:
             raise ValueError(
-                "Bindingsconsensus vereist learned_permutation_slot_sender."
+                "Binding consensus requires learned_permutation_slot_sender."
             )
         bindings.append(method())
     stacked = torch.stack(bindings)
@@ -441,13 +441,13 @@ def slot_binding_consensus_loss(
 def atom_code_consensus_loss(
     population: PopulationSystem, *, sharpness_weight: float
 ) -> Tensor:
-    """Lijn vrije, injectieve waardecodes tussen onafhankelijke zenders uit."""
+    """Align free injective value codes across independent senders."""
     codebooks_by_sender = []
     for sender in population.senders:
         method = getattr(sender, "soft_codebook_matrices", None)
         if method is None:
             raise ValueError(
-                "Atoomcodeconsensus vereist injective_permutation_slot_sender."
+                "Atomic-code consensus requires injective_permutation_slot_sender."
             )
         codebooks_by_sender.append(method())
     losses = []
@@ -468,14 +468,14 @@ def build_algebraic_quadruples(
     sample_count: int,
     seed: int,
 ) -> Tensor:
-    """Bouw contextparen voor dezelfde atomaire betekenisverandering.
+    """Build contextual pairs for the same atomic meaning change.
 
-    Iedere rij bevat A, B, A' en B'. A→A' en B→B' veranderen exact
-    dezelfde factorwaarde, maar in verschillende contexten. Uitsluitend
-    betekenissen uit de trainingsset worden opgenomen.
+    Every row contains A, B, A', and B'. A→A' and B→B' change exactly
+    the same factor value, but in different contexts. Only meanings from
+    the training set are included.
     """
     if sample_count < 1:
-        raise ValueError("Minstens één algebraïsch viertal is vereist.")
+        raise ValueError("At least one algebraic quadruple is required.")
     lookup = {meaning.factors: meaning.factors for meaning in train_meanings}
     transitions: dict[
         tuple[int, int, int], list[tuple[tuple[int, ...], tuple[int, ...]]]
@@ -495,7 +495,7 @@ def build_algebraic_quadruples(
                     ).append((factors, changed_tuple))
     valid = [(key, pairs) for key, pairs in transitions.items() if len(pairs) >= 2]
     if not valid:
-        raise ValueError("Trainingsset bevat geen herhaalde atomaire transities.")
+        raise ValueError("Training set contains no repeated atomic transitions.")
 
     rng = random.Random(seed)
     quadruples = []
@@ -511,9 +511,9 @@ def build_algebraic_quadruples(
 def algebraic_consistency_loss(
     sender: Sender, quadruples: Tensor, *, temperature: float
 ) -> Tensor:
-    """Maak dezelfde factoraanpassing contextinvariant in berichtverdeling."""
+    """Make the same factor change context-invariant in message distribution."""
     if quadruples.ndim != 3 or quadruples.shape[1:] != (4, 4):
-        raise ValueError("Algebraïsche viertallen moeten vorm [batch,4,4] hebben.")
+        raise ValueError("Algebraic quadruples must have shape [batch,4,4].")
     batch_size = quadruples.shape[0]
     distributions = sender.relaxed_message(
         quadruples.reshape(batch_size * 4, 4), temperature=temperature
@@ -614,7 +614,7 @@ def train_translator(
             break
 
     if best_state is None:
-        raise RuntimeError("Vertalertraining leverde geen selecteerbaar model op.")
+        raise RuntimeError("Translator training produced no selectable model.")
     translator.load_state_dict(best_state)
     translator.eval()
     return translator, TrainingResult(
@@ -635,13 +635,13 @@ def calibrate_receiver_binding(
     confidence: float,
     freeze: bool,
 ) -> dict[str, Any]:
-    """Kies exact de beste factor-slotpermutatie op empirische informatie."""
+    """Select the exact best factor-slot permutation from empirical information."""
     binding_logits = getattr(receiver, "binding_logits", None)
     permutation_matrices = getattr(receiver, "permutation_matrices", None)
     if binding_logits is None or permutation_matrices is None:
-        raise ValueError("Bindingskalibratie vereist een permutationslotontvanger.")
+        raise ValueError("Binding calibration requires a permutation-slot receiver.")
     if confidence <= 0:
-        raise ValueError("Kalibratieconfidence moet positief zijn.")
+        raise ValueError("Calibration confidence must be positive.")
     factor_count = meanings.shape[1]
     slot_count = messages.shape[1]
     vocabulary_size = receiver.spec.vocabulary_size
@@ -755,6 +755,6 @@ def _factor_loss(logits: tuple[Tensor, ...], targets: Tensor) -> Tensor:
 
 def _geometric_schedule(start: float, end: float, progress: float) -> float:
     if start <= 0 or end <= 0:
-        raise ValueError("Temperaturen moeten positief zijn.")
+        raise ValueError("Temperatures must be positive.")
     return start * math.pow(end / start, progress)
     make_receiver,

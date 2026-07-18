@@ -1,4 +1,4 @@
-"""Geïsoleerde zender- en decoderprocessen voor de definitieve evaluatie."""
+"""Isolated sender and decoder processes for final evaluation."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def _read_matrix(path: Path) -> torch.Tensor:
     with path.open("r", encoding="utf-8") as handle:
         value = json.load(handle)
     if not isinstance(value, list) or any(not isinstance(row, list) for row in value):
-        raise ValueError("Workerinvoer moet een JSON-matrix zijn.")
+        raise ValueError("Worker input must be a JSON matrix.")
     return torch.tensor(value, dtype=torch.long)
 
 
@@ -54,12 +54,12 @@ def main(argv: list[str] | None = None) -> int:
                 MinimalPermutationSlotSender,
             ),
         ):
-            raise TypeError("Zendercheckpoint laadde geen zender.")
+            raise TypeError("Sender checkpoint did not load a sender.")
         output = encode_meanings(agent, matrix)
     else:
         agent = load_agent_checkpoint(args.checkpoint)
         if not isinstance(agent, (Receiver, FactorizedPermutationSlotReceiver)):
-            raise TypeError("Decodercheckpoint laadde geen ontvanger.")
+            raise TypeError("Decoder checkpoint did not load a receiver.")
         output = predict_receiver(agent, matrix)
     _write_matrix(args.output, output)
     return 0

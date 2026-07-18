@@ -1,4 +1,4 @@
-"""Expliciete menselijke, technische en niet-compositionele vergelijkingen."""
+"""Explicit human, technical, and non-compositional comparisons."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ def compute_baselines(meanings: Iterable[Meaning]) -> dict[str, Any]:
     json_bits = []
     for meaning in meanings:
         labels = meaning.to_schema_dict()
+        # This Dutch text is experimental baseline data, not repository UI copy.
         dutch = (
             f"kleur {labels['color']}, vorm {labels['shape']}, "
             f"grootte {labels['size']}, textuur {labels['texture']}"
@@ -59,20 +60,20 @@ def compute_baselines(meanings: Iterable[Meaning]) -> dict[str, Any]:
             "bits_per_message": source_bits,
             "known_exact_match": 1.0,
             "compositional_exact_match": 1.0,
-            "note": "Ontworpen technische referentie en bronondergrens.",
+            "note": "Designed technical reference and source lower bound.",
         },
         "random_lookup_code": {
             "bits_per_message": source_bits,
             "known_exact_match": 1.0,
             "compositional_exact_match": 0.0,
-            "note": "Onbekende betekenissen hebben per definitie geen geleerd codeboekitem.",
+            "note": "Unknown meanings have no learned codebook entry by definition.",
         },
         "factor_local_compositional_code": {
             "bits_per_message": local_factor_bits,
             "known_exact_match": 1.0,
             "compositional_exact_match": 1.0,
             "unique_message_count": int(len(np.unique(handcrafted_messages, axis=0))),
-            "note": "Handmatig factor-lokaal referentieprotocol.",
+            "note": "Hand-crafted factor-local reference protocol.",
         },
     }
     if factor_sizes == (8, 8, 4, 4):
@@ -84,7 +85,7 @@ def compute_baselines(meanings: Iterable[Meaning]) -> dict[str, Any]:
             "known_exact_match": 1.0,
             "compositional_exact_match": 1.0,
             "unique_message_count": int(len(np.unique(handcrafted_messages, axis=0))),
-            "note": "Positie 1=kleur, positie 2=vorm, positie 3=grootte-textuur.",
+            "note": "Position 1=color, position 2=shape, position 3=size-texture.",
         }
     return result
 
@@ -95,5 +96,5 @@ def _size_summary(values: list[int]) -> dict[str, float | str]:
         "mean_bits_per_message": float(array.mean()),
         "minimum_bits_per_message": float(array.min()),
         "maximum_bits_per_message": float(array.max()),
-        "note": "Representatiegrootte; geen vergelijking van algemene expressiviteit.",
+        "note": "Representation size; not a comparison of general expressivity.",
     }

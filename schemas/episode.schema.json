@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.ai-taal/schemas/episode.schema.json",
   "title": "ECP evaluated episode",
-  "description": "Eén discrete evaluatie met bronbetekenis, bericht en reconstructie.",
+  "description": "One discrete evaluation with source meaning, message, and reconstruction.",
   "type": "object",
   "additionalProperties": false,
   "required": [

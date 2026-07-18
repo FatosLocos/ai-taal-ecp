@@ -1,4 +1,4 @@
-"""Zender, ontvanger en veilige afzonderlijke checkpoints voor ECP-0."""
+"""Sender, receiver, and safe independent checkpoints for ECP."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ class ModelSpec:
 
 
 class Sender(nn.Module):
-    """Autoregressieve zender die factorcategorieën naar discrete symbolen omzet."""
+    """Autoregressive sender that maps factor categories to discrete symbols."""
 
     def __init__(self, spec: ModelSpec) -> None:
         super().__init__()
@@ -115,14 +115,14 @@ class Sender(nn.Module):
         return torch.stack(one_hot_messages, dim=1), torch.stack(tokens, dim=1)
 
     def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
-        """Deterministische symboolverdelingen voor structurele trainingsdruk.
+        """Return deterministic symbol distributions for structural training pressure.
 
-        Dit pad verzendt niets tijdens evaluatie. Het maakt uitsluitend zichtbaar
-        hoe de zender zijn waarschijnlijkheidsmassa over het bestaande discrete
-        kanaal verdeelt, zonder Gumbelruis of vooraf toegewezen symboolbetekenis.
+        This path transmits nothing during evaluation. It only exposes how the
+        sender distributes probability mass over the existing discrete channel,
+        without Gumbel noise or preassigned symbol semantics.
         """
         if temperature <= 0:
-            raise ValueError("Temperatuur moet positief zijn.")
+            raise ValueError("Temperature must be positive.")
         embedded_factors = [
             embedding(meanings[:, index])
             for index, embedding in enumerate(self.factor_embeddings)
@@ -142,13 +142,13 @@ class Sender(nn.Module):
 
 
 class LearnedPermutationSlotSender(nn.Module):
-    """Compositionele slots waarvan de factor-slotkoppeling intern wordt gekozen."""
+    """Compositional slots whose factor-slot binding is selected internally."""
 
     def __init__(self, spec: ModelSpec) -> None:
         super().__init__()
         if spec.message_length != len(spec.factor_sizes):
             raise ValueError(
-                "Een permutationslotzender vereist één slot per betekenisfactor."
+                "A permutation-slot sender requires one slot per meaning factor."
             )
         self.spec = spec
         self.factor_embeddings = nn.ModuleList(
@@ -190,7 +190,7 @@ class LearnedPermutationSlotSender(nn.Module):
 
     def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
         if temperature <= 0:
-            raise ValueError("Temperatuur moet positief zijn.")
+            raise ValueError("Temperature must be positive.")
         return torch.softmax(self._message_logits(meanings) / temperature, dim=-1)
 
     def binding_matrix(self, *, straight_through: bool = True) -> Tensor:
@@ -236,30 +236,30 @@ class LearnedPermutationSlotSender(nn.Module):
 
 
 class InjectivePermutationSlotSender(nn.Module):
-    """Vrij geleerde slots en injectieve atoomcodes zonder semantische labels.
+    """Freely learned slots and injective atomic codes without semantic labels.
 
-    Iedere factor kiest exact één slot. Binnen een factor krijgt iedere waarde
-    exact één ander symbool. De harde toewijzingen worden alleen structureel
-    begrensd; geen slot of symbool krijgt vooraf een menselijke betekenis.
+    Every factor selects exactly one slot. Within a factor, every value receives
+    a distinct symbol. The hard assignments are constrained structurally only;
+    no slot or symbol receives a human meaning in advance.
     """
 
     def __init__(self, spec: ModelSpec) -> None:
         super().__init__()
         if spec.message_length != len(spec.factor_sizes):
             raise ValueError(
-                "Een injectieve permutationslotzender vereist één slot per factor."
+                "An injective permutation-slot sender requires one slot per factor."
             )
         if any(size > spec.vocabulary_size for size in spec.factor_sizes):
             raise ValueError(
-                "Injectieve atoomcodes vereisen minstens zoveel symbolen als waarden."
+                "Injective atomic codes require at least as many symbols as values."
             )
         self.spec = spec
         self.binding_logits = nn.Parameter(
             torch.empty(spec.message_length, len(spec.factor_sizes))
         )
-        # Vierkante matrices bevatten naast echte factorwaarden ook dummy-rijen.
-        # Daardoor kan Sinkhorn een volledige permutatie leren, terwijl alleen de
-        # eerste `factor_size` rijen daadwerkelijk worden uitgezonden.
+        # Square matrices contain dummy rows in addition to real factor values.
+        # This lets Sinkhorn learn a complete permutation while only the first
+        # `factor_size` rows are actually transmitted.
         self.codebook_logits = nn.ParameterList(
             [
                 nn.Parameter(
@@ -301,7 +301,7 @@ class InjectivePermutationSlotSender(nn.Module):
 
     def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
         if temperature <= 0:
-            raise ValueError("Temperatuur moet positief zijn.")
+            raise ValueError("Temperature must be positive.")
         factor_codes = torch.stack(
             [
                 self.soft_codebook_matrix(index, temperature=temperature)[
@@ -331,7 +331,7 @@ class InjectivePermutationSlotSender(nn.Module):
     def codebook_matrix(
         self, factor_index: int, *, straight_through: bool = True
     ) -> Tensor:
-        """Geef de echte waarderijen van een harde één-op-één-symboolcode."""
+        """Return the real value rows of a hard one-to-one symbol code."""
         soft_full = self.soft_codebook_matrix(factor_index)
         hard_full = self._greedy_permutation(soft_full.detach())
         factor_size = self.spec.factor_sizes[factor_index]
@@ -345,7 +345,7 @@ class InjectivePermutationSlotSender(nn.Module):
         self, factor_index: int, *, temperature: float = 1.0
     ) -> Tensor:
         if temperature <= 0:
-            raise ValueError("Temperatuur moet positief zijn.")
+            raise ValueError("Temperature must be positive.")
         return self._sinkhorn(self.codebook_logits[factor_index] / temperature)
 
     def soft_codebook_matrices(self) -> tuple[Tensor, ...]:
@@ -365,7 +365,7 @@ class InjectivePermutationSlotSender(nn.Module):
 
     @staticmethod
     def _greedy_permutation(scores: Tensor) -> Tensor:
-        """Deterministische harde permutatie; gradiënten lopen via Sinkhorn."""
+        """Deterministic hard permutation; gradients flow through Sinkhorn."""
         size = scores.shape[0]
         hard = torch.zeros_like(scores)
         used_rows: set[int] = set()
@@ -380,21 +380,21 @@ class InjectivePermutationSlotSender(nn.Module):
             if len(used_rows) == size:
                 break
         if len(used_rows) != size:
-            raise RuntimeError("Kon geen volledige injectieve symboolcode construeren.")
+            raise RuntimeError("Could not construct a complete injective symbol code.")
         return hard
 
 
 class MinimalPermutationSlotSender(InjectivePermutationSlotSender):
-    """Injectieve lokale factoralfabetten op de exacte bronondergrens."""
+    """Injective factor-local alphabets at the exact source lower bound."""
 
     def __init__(self, spec: ModelSpec) -> None:
         nn.Module.__init__(self)
         if spec.message_length != len(spec.factor_sizes):
             raise ValueError(
-                "Een minimale permutationslotzender vereist één slot per factor."
+                "A minimal permutation-slot sender requires one slot per factor."
             )
         if spec.vocabulary_size < max(spec.factor_sizes):
-            raise ValueError("Globale tokenruimte is kleiner dan een factoralfabet.")
+            raise ValueError("Global token space is smaller than a factor alphabet.")
         self.spec = spec
         self.binding_logits = nn.Parameter(
             torch.empty(spec.message_length, len(spec.factor_sizes))
@@ -428,7 +428,7 @@ class MinimalPermutationSlotSender(InjectivePermutationSlotSender):
 
     def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
         if temperature <= 0:
-            raise ValueError("Temperatuur moet positief zijn.")
+            raise ValueError("Temperature must be positive.")
         factor_codes = self._padded_factor_codes(
             meanings, relaxed=True, temperature=temperature
         )
@@ -485,7 +485,7 @@ def make_sender(spec: ModelSpec) -> SenderModel:
 
 
 class Receiver(nn.Module):
-    """Ontvanger die uitsluitend een discrete symboolreeks naar factoren decodeert."""
+    """Receiver that decodes only a discrete symbol sequence into factors."""
 
     def __init__(self, spec: ModelSpec) -> None:
         super().__init__()
@@ -508,20 +508,20 @@ class Receiver(nn.Module):
         elif message.ndim == 3:
             embedded = message @ self.symbol_embedding.weight
         else:
-            raise ValueError("Bericht moet [batch,lengte] of [batch,lengte,vocab] zijn.")
+            raise ValueError("Message must have shape [batch,length] or [batch,length,vocab].")
         _, hidden = self.recurrent(embedded)
         representation = hidden[-1]
         return tuple(head(representation) for head in self.factor_heads)
 
 
 class FactorizedPermutationSlotReceiver(nn.Module):
-    """Decodeert iedere factor uit exact één vrij gekozen berichtslot."""
+    """Decode each factor from exactly one freely selected message slot."""
 
     def __init__(self, spec: ModelSpec) -> None:
         super().__init__()
         if spec.message_length != len(spec.factor_sizes):
             raise ValueError(
-                "Een factorontvanger vereist één berichtslot per factor."
+                "A factorized receiver requires one message slot per factor."
             )
         self.spec = spec
         self.symbol_embedding = nn.Embedding(
@@ -548,7 +548,7 @@ class FactorizedPermutationSlotReceiver(nn.Module):
         elif message.ndim == 3:
             embedded = message @ self.symbol_embedding.weight
         else:
-            raise ValueError("Bericht moet [batch,lengte] of [batch,lengte,vocab] zijn.")
+            raise ValueError("Message must have shape [batch,length] or [batch,length,vocab].")
         factors = torch.einsum("fs,bse->bfe", self.binding_matrix(), embedded)
         return tuple(
             head(factors[:, index])
@@ -594,12 +594,12 @@ class CommunicationSystem(nn.Module):
 
 
 class PopulationSystem(nn.Module):
-    """Volledig onafhankelijke zenders en ontvangers met één gedeeld kanaal."""
+    """Fully independent senders and receivers with one shared channel."""
 
     def __init__(self, spec: ModelSpec, *, sender_count: int, receiver_count: int) -> None:
         super().__init__()
         if sender_count < 2 or receiver_count < 2:
-            raise ValueError("Een populatie vereist minstens twee zenders en ontvangers.")
+            raise ValueError("A population requires at least two senders and two receivers.")
         self.spec = spec
         self.senders = nn.ModuleList(make_sender(spec) for _ in range(sender_count))
         self.receivers = nn.ModuleList(
@@ -627,7 +627,7 @@ def save_agent_checkpoint(
     kind: str,
 ) -> None:
     if kind not in {"sender", "receiver", "translator"}:
-        raise ValueError(f"Onbekend agenttype: {kind}")
+        raise ValueError(f"Unknown agent type: {kind}")
     payload = {
         "format_version": 1,
         "kind": kind,
@@ -643,7 +643,7 @@ def load_agent_checkpoint(
     payload = torch.load(Path(path), map_location=device, weights_only=True)
     kind = payload["kind"]
     if expected_kind is not None and kind != expected_kind:
-        raise ValueError(f"Checkpoint bevat {kind}, verwacht {expected_kind}.")
+        raise ValueError(f"Checkpoint contains {kind}; expected {expected_kind}.")
     spec = ModelSpec.from_dict(payload["model_spec"])
     agent: SenderModel | ReceiverModel
     if kind == "sender":
@@ -651,7 +651,7 @@ def load_agent_checkpoint(
     elif kind in {"receiver", "translator"}:
         agent = make_receiver(spec)
     else:
-        raise ValueError(f"Checkpoint bevat onbekend agenttype: {kind}")
+        raise ValueError(f"Checkpoint contains unknown agent type: {kind}")
     agent.load_state_dict(payload["state_dict"])
     agent.to(device)
     agent.eval()

@@ -1,4 +1,4 @@
-"""Protocolmetingen die verder gaan dan alleen taaknauwkeurigheid."""
+"""Protocol measurements that go beyond task accuracy alone."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ def prediction_metrics(
     targets = np.asarray([meaning.factors for meaning in meanings], dtype=np.int64)
     predictions = np.asarray(predictions, dtype=np.int64)
     if predictions.shape != targets.shape:
-        raise ValueError(f"Voorspellingen hebben vorm {predictions.shape}, verwacht {targets.shape}.")
+        raise ValueError(f"Predictions have shape {predictions.shape}; expected {targets.shape}.")
     correct = predictions == targets
     return {
         "exact_match": float(np.mean(np.all(correct, axis=1))),
@@ -36,7 +36,7 @@ def protocol_statistics(
     semantic = np.asarray([meaning.factors for meaning in meanings], dtype=np.int16)
     messages = np.asarray(messages, dtype=np.int16)
     if messages.ndim != 2 or messages.shape[0] != semantic.shape[0]:
-        raise ValueError("Berichten en betekenissen hebben incompatibele vormen.")
+        raise ValueError("Messages and meanings have incompatible shapes.")
 
     message_tuples = [tuple(int(value) for value in row) for row in messages]
     counts = Counter(message_tuples)
@@ -80,13 +80,13 @@ def topographic_permutation_test(
     repetitions: int,
     seed: int,
 ) -> dict[str, Any]:
-    """Vergelijk de waargenomen semantische geometrie met willekeurige koppelingen."""
+    """Compare observed semantic geometry with random assignments."""
     if repetitions < 1:
-        raise ValueError("Minstens één permutatie is vereist.")
+        raise ValueError("At least one permutation is required.")
     semantic = np.asarray(semantic, dtype=np.int16)
     messages = np.asarray(messages, dtype=np.int16)
     if semantic.shape[0] != messages.shape[0]:
-        raise ValueError("Betekenissen en berichten moeten evenveel rijen hebben.")
+        raise ValueError("Meanings and messages must have the same number of rows.")
 
     left_indices, right_indices, sampling = _topographic_pair_indices(
         len(semantic), max_pairs=MAX_TOPOGRAPHIC_PAIRS, seed=seed + 31
@@ -147,11 +147,11 @@ def _topographic_similarity(
 def _topographic_pair_indices(
     row_count: int, *, max_pairs: int, seed: int
 ) -> tuple[np.ndarray, np.ndarray, str]:
-    """Geef alle paren of een reproduceerbare uniforme steekproef zonder teruglegging."""
+    """Return all pairs or a reproducible uniform sample without replacement."""
     if row_count < 2:
-        raise ValueError("Topografische gelijkenis vereist minstens twee rijen.")
+        raise ValueError("Topographic similarity requires at least two rows.")
     if max_pairs < 1:
-        raise ValueError("max_pairs moet positief zijn.")
+        raise ValueError("max_pairs must be positive.")
 
     total_pairs = row_count * (row_count - 1) // 2
     if total_pairs <= max_pairs:
