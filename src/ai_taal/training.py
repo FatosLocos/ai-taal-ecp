@@ -97,10 +97,7 @@ def train_communication_system(
             len(train_values), (batch_size,), generator=generator, device="cpu"
         ).to(device)
         batch = train_values[indices]
-        progress = (step - 1) / max(max_steps - 1, 1)
-        temperature = _geometric_schedule(
-            training["temperature_start"], training["temperature_end"], progress
-        )
+        temperature = _scheduled_temperature(training, step, max_steps)
         logits, _ = system(batch, temperature=temperature)
         loss = _factor_loss(logits, batch)
         optimizer.zero_grad(set_to_none=True)
@@ -256,10 +253,7 @@ def train_population_system(
             device="cpu",
         ).to(device)
         batch = train_values[indices]
-        progress = (step - 1) / max(max_steps - 1, 1)
-        temperature = _geometric_schedule(
-            training["temperature_start"], training["temperature_end"], progress
-        )
+        temperature = _scheduled_temperature(training, step, max_steps)
         messages = [
             sender(batch, temperature=temperature, sample=True)[0]
             for sender in population.senders
@@ -1020,4 +1014,14 @@ def _geometric_schedule(start: float, end: float, progress: float) -> float:
     if start <= 0 or end <= 0:
         raise ValueError("Temperatures must be positive.")
     return start * math.pow(end / start, progress)
+
+
+def _scheduled_temperature(
+    training: dict[str, Any], step: int, max_steps: int
+) -> float:
+    schedule_steps = int(training.get("temperature_schedule_steps", max_steps))
+    progress = min((step - 1) / max(schedule_steps - 1, 1), 1.0)
+    return _geometric_schedule(
+        training["temperature_start"], training["temperature_end"], progress
+    )
     make_receiver,

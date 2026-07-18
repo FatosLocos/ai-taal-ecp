@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 73 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 76 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 9
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 10
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -89,12 +89,16 @@ parallel joint-context sender. It increased train exactness to 9.60% and used
 final-state decoder with a generic position-aware MLP. It is the first major
 weak-structure result: 71.27% train exactness, 52.39% validation, 54.81%
 translator validation and 10,834–11,017 messages. It still failed all joint
-performance and injectivity gates. The confirmatory ECP-7 test is still sealed.
+performance and injectivity gates. ECP7-B10-I kept B9's original temperature
+schedule and extended population optimization to 15,000 steps. It reached
+82.08% train exactness, 72.98% validation, 75.15% translator validation and
+12,358–12,906 messages. The translator gate passed, but train, validation and
+injectivity did not. The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B10 intervention and its failure criterion.
+2. Define exactly one ECP7-B11 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -107,26 +111,26 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 9 is the strongest weak-structure result. Its selected checkpoint was the
-final registered step 5,000, exactness was still improving, no factor remained
-near chance, and each sender used about 11,000 high-entropy messages. The most
-informative next step is therefore one isolated optimization-budget change. A
-clean ECP7-B10 progression is:
+Batch 10 is the strongest weak-structure result. It passed the translator gate
+and selected the final registered checkpoint, but validation plateaued near 73%
+after step 12,000. Its final full-weight utilization term was about ten times
+the remaining task loss, while the code still used 12,358–12,906 high-entropy
+messages. The most informative next step is one isolated loss-schedule change.
+A clean ECP7-B11 progression is:
 
 - keep the same world and bit budget;
-- keep the complete B9 sender, position-aware receiver, translator and losses;
-- preserve the original temperature annealing through step 5,000, then hold its
-  final value;
-- extend only population optimization to 15,000 steps with a preregistered
-  longer selection window;
+- keep the complete B10 architecture, duration, temperature schedule and
+  selection window;
+- keep code-utilization weight `1.0` through step 5,000;
+- decay only that coefficient linearly to `0.1` at step 15,000;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not change the architecture, loss weights, data, translator, temperature
-endpoints, validation cadence or development thresholds. Do not restore the
-Batch 4 through Batch 6 or Batch 8 terms, and do not combine the longer horizon
-with resizing, variable-length messages or negotiation. That would make its
-effect uninterpretable.
+Do not change the architecture, task loss, data, translator, temperature,
+duration, validation cadence or development thresholds. Do not restore the
+Batch 4 through Batch 6 or Batch 8 terms, and do not combine the utilization
+schedule with resizing, variable-length messages or negotiation. That would
+make its effect uninterpretable.
 
 ## 7. Definition of done for any contribution
 

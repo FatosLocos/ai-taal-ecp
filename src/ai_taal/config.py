@@ -126,6 +126,19 @@ def validate_config(config: dict[str, Any]) -> None:
     if training["evaluation_uses_hard_symbols_only"] is not True:
         raise ConfigError("Evaluation must use hard symbols only.")
 
+    temperature_schedule_steps = training.get("temperature_schedule_steps")
+    if temperature_schedule_steps is not None:
+        if (
+            isinstance(temperature_schedule_steps, bool)
+            or not isinstance(temperature_schedule_steps, int)
+            or temperature_schedule_steps < 2
+        ):
+            raise ConfigError(
+                "Temperature schedule steps must be an integer of at least 2."
+            )
+        if temperature_schedule_steps > training["max_steps"]:
+            raise ConfigError("Temperature schedule steps cannot exceed max_steps.")
+
     utilization = training.get("code_utilization", {})
     if utilization.get("enabled", False):
         if utilization.get("weight", -1) < 0:

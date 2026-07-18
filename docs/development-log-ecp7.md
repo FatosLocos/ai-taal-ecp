@@ -637,3 +637,80 @@ its original 5,000-step temperature annealing, and extend only the population
 optimization horizon to 15,000 steps with a preregistered longer selection
 window. No architecture, decoder, loss, data, translator or threshold may
 change in that batch.
+
+## Batch 10 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `15,000`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Minimum selection steps: `5,000`<br>
+Early-stopping patience: `3,000` steps<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B10-I keeps the complete Batch 9 model, loss, optimizer, data, translator
+and gate definitions. It extends only population optimization and its selection
+window. The temperature at every step through 5,000 is identical to B9 and
+holds the B9 endpoint thereafter, avoiding a second annealing-rate change. The
+unchanged positive control is rerun. No alternative horizon or accompanying
+intervention is admitted into this batch.
+
+## Batch 10 results
+
+Positive-control run: `runs/ecp7-batch10-control-development/20260718T122855Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch10-intervention-development/20260718T122855Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B10-I |
+|---|---:|---:|
+| Population train, mean | 100% | 82.0836% |
+| Population train, worst link | 100% | 80.5455% |
+| Population validation, mean | 100% | 72.9797% |
+| Population validation, worst link | 100% | 71.4844% |
+| Universal translator, validation | 100% | 75.1465% |
+| Exact sender-message agreement | 100% | 92.31% |
+| Unique messages per sender | 15,360 | 12,358–12,906 |
+| Collision meanings per sender | 0 | 2,454–3,002 |
+| Message entropy | 13.91 bits | 13.48–13.57 bits |
+| Development gate | pass | **fail** |
+
+The unchanged positive control passed every gate at 100%. ECP7-B10-I passed
+the universal-translator threshold for the first time, but missed the train,
+validation and injectivity requirements. Because every threshold must pass
+together, the batch remains a negative development result and does not
+authorize confirmatory access.
+
+The isolated longer horizon raised train exactness from B9's 71.2734% to
+82.0836%, validation from 52.3865% to 72.9797%, worst-link validation from
+50.8789% to 71.4844%, and translator validation from 54.8096% to 75.1465%.
+Sender agreement rose from 89.51% to 92.31%, and collisions fell substantially.
+
+Population validation factor accuracies were
+`[87.24%, 99.93%, 98.44%, 86.18%]`; universal-translator factor accuracies were
+`[94.41%, 100%, 97.73%, 81.69%]`. Shape became essentially perfect while color
+and size remained the residual errors.
+
+The selected checkpoint was again the final registered step, now 15,000. Its
+task loss was `0.0765` and its full-weight code-utilization term was `-0.7548`.
+Validation plateaued near 73% after step 12,000 even as train exactness continued
+to improve slowly. Each sender still used 12,358–12,906 messages at 13.48–13.57
+bits of entropy, and no collision bucket contained more than four meanings.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 10 decision
+
+ECP7-B10-I is retained as the new strongest weak-structure base but is not a
+passing ECP-7 design. Its large improvement establishes that B9 was
+underoptimized, while the late plateau makes another duration-only extension a
+weak next test. The confirmatory split remains sealed.
+
+A future ECP7-B11 may keep the complete B10 design and alter only the
+code-utilization coefficient after the already reproduced B9 horizon. It may
+hold weight `1.0` through step 5,000, then decay linearly to `0.1` at step
+15,000. This keeps anti-collapse pressure while bringing the surrogate's final
+weighted magnitude close to the remaining task loss. No other loss,
+architecture, duration, annealing, data, translator or threshold may change.

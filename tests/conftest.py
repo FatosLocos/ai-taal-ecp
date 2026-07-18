@@ -88,3 +88,8 @@ def ecp7_b8_config():
 @pytest.fixture(scope="session")
 def ecp7_b9_config():
     return load_config(PROJECT_ROOT / "config" / "ecp7-b9-development.yaml")
+
+
+@pytest.fixture(scope="session")
+def ecp7_b10_config():
+    return load_config(PROJECT_ROOT / "config" / "ecp7-b10-development.yaml")

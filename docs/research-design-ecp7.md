@@ -437,3 +437,42 @@ The batch contains exactly two seed-11 runs:
 All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No sender, loss, hidden-size,
 duration or alternative decoder variant may be tried inside Batch 9.
+
+## Batch 10 preregistration — Extended optimization horizon
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b10-development.yaml`<br>
+Raw configuration SHA-256: `ac1faed6538fcd7bcdd5dfe16a952ec317286629dcb3ecee7e9ec94e73939a2d`<br>
+Effective configuration SHA-256: `415092b9215f7544f7a54f4b3d954a3a1e69ad90c43781c93dbcf8d3892cc76b`
+
+Batch 9 selected its final registered checkpoint at step 5,000 while task loss
+and exactness were still improving. It used about 11,000 high-entropy messages,
+its largest collision bucket contained only 8–9 meanings, and no factor remained
+near chance. Batch 10 therefore tests one explanation: the B9 design was
+underoptimized at the registered stopping horizon.
+
+ECP7-B10-I keeps the complete B9 architecture, sender, position-aware receiver,
+translator, losses, optimizer, batch size, learning rate, data, evaluation
+interval, channel, thresholds and seed. It changes only the population
+optimization horizon and its associated checkpoint-selection window:
+
+- maximum population steps increase from 5,000 to 15,000;
+- minimum selection steps increase from 2,000 to 5,000;
+- early-stopping patience increases from 1,600 to 3,000 steps;
+- the original geometric temperature schedule remains exactly unchanged from
+  steps 1 through 5,000, then holds its registered final value of `0.8`.
+
+Translator training remains unchanged. The schedule hold prevents the longer
+horizon from also becoming a slower-annealing intervention. Smoke runs are
+mechanical only and may not authorize tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B10-I with the extended B9 population optimization horizon.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative horizon, patience,
+annealing schedule, architecture, loss, optimizer or seed may be tried inside
+Batch 10.
