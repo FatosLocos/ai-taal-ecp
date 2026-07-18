@@ -30,6 +30,7 @@ ecp3 = "ai_taal.cli:main"
 ecp4 = "ai_taal.cli:main"
 ecp5 = "ai_taal.cli:main"
 ecp6 = "ai_taal.cli:main"
+ecp7 = "ai_taal.cli:main"
 
 [project.urls]
 Repository = "https://github.com/FatosLocos/ai-taal-ecp"

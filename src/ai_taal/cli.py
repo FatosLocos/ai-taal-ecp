@@ -74,6 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--sender-family",
         choices=(
             "categorical_encoder_autoregressive_sender",
+            "bounded_autoregressive_sender",
             "learned_permutation_slot_sender",
             "injective_permutation_slot_sender",
             "minimal_permutation_slot_sender",

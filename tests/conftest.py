@@ -36,3 +36,15 @@ def ecp4_config():
 @pytest.fixture(scope="session")
 def ecp6_config():
     return load_config(PROJECT_ROOT / "config" / "ecp6-development.yaml")
+
+
+@pytest.fixture(scope="session")
+def ecp7_config():
+    return load_config(PROJECT_ROOT / "config" / "ecp7-development.yaml")
+
+
+@pytest.fixture(scope="session")
+def ecp7_positive_control_config():
+    return load_config(
+        PROJECT_ROOT / "config" / "ecp7-positive-control-development.yaml"
+    )

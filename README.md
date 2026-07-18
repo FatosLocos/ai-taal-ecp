@@ -19,11 +19,18 @@ Within this research, a protocol only counts as a serious new form of communicat
 
 ## Current status
 
-**ECP-6 is the successful scale replication of the fully efficient protocol.** All five seeds reconstruct known and completely new factor combinations for 100%. The universal translator and the worst agent pair also achieve 100%. The predetermined classification is **strong evidence**.
+**ECP-6 remains the latest confirmed result and successful scale replication of the fully efficient protocol.** All five seeds reconstruct known and completely new factor combinations for 100%. The universal translator and the worst agent pair also achieve 100%. The predetermined classification is **strong evidence**.
 
 The protocol uses no words or alphabet, but four meaning-free local symbols. For `16 × 16 × 8 × 8 = 16,384` uniform meanings it uses exactly `4+4+3+3=14` bits: the information-theoretic lower bound. For this defined task, this is on average 23.9 times more compact than the Dutch text template.
 
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
+
+ECP-7 development now tests how much of that result depends on the explicit
+one-factor-per-slot architecture. Its first sealed batch produced a valid
+negative result: the frozen ECP-6 positive control remained perfect, while a
+joint autoregressive sender with a generic receiver collapsed to 130–139
+messages and failed the registered development gate. The ECP-7 confirmatory
+test remains sealed. See [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
 
@@ -61,6 +68,10 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`docs/development-log-ecp6.md`](docs/development-log-ecp6.md) — scale invariants and sealed 14-bit development.
 - [`docs/results-ecp6.md`](docs/results-ecp6.md) — 5/5 error-free scale replications and integrity analysis.
 - [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) — machine code, 14-bit wire format and induction procedure.
+- [`docs/research-design-ecp7.md`](docs/research-design-ecp7.md) — preregistered weak-structure question, paired control and sealed split.
+- [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md) — the first negative weak-structure batch and integrity checks.
+- [`config/ecp7-development.yaml`](config/ecp7-development.yaml) — sealed weak-structure intervention configuration.
+- [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
 - [`config/ecp3.yaml`](config/ecp3.yaml) — frozen configuration of the first successful base model.
@@ -136,6 +147,11 @@ The three output modes deliberately access the data differently:
 # ECP-6: 16,384 meanings at the exact 14-bit lower bound
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 .venv/bin/ecp6 --config config/ecp6.yaml analyze runs/<ecp6-run-id> --permutations 100
+
+# ECP-7 sealed development; never add --unseal-test to these configs
+.venv/bin/ecp7 --config config/ecp7-development.yaml validate
+.venv/bin/ecp7 --config config/ecp7-development.yaml develop --seed 11
+.venv/bin/ecp7 --config config/ecp7-development.yaml analyze runs/<ecp7-development-run-id> --permutations 100
 ```
 
 Each run writes configuration, environment, checkpoints, raw messages, checks, hashes, metrics, and a report to a new folder under `runs/`.

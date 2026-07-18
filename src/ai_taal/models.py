@@ -20,6 +20,7 @@ class ModelSpec:
     hidden_dim: int
     vocabulary_size: int
     message_length: int
+    slot_alphabet_sizes: tuple[int, ...] = ()
     sender_family: str = "categorical_encoder_autoregressive_sender"
     receiver_family: str = "sequence_encoder_multihead_classifier"
 
@@ -35,6 +36,11 @@ class ModelSpec:
             hidden_dim=training["hidden_dim"],
             vocabulary_size=channel["vocabulary_size"],
             message_length=channel["message_length"],
+            slot_alphabet_sizes=tuple(
+                channel.get("slot_alphabet_sizes")
+                or channel.get("factor_alphabet_sizes")
+                or [channel["vocabulary_size"]] * channel["message_length"]
+            ),
             sender_family=config["agents"]["sender"].get(
                 "family", "categorical_encoder_autoregressive_sender"
             ),
@@ -52,6 +58,10 @@ class ModelSpec:
             hidden_dim=value["hidden_dim"],
             vocabulary_size=value["vocabulary_size"],
             message_length=value["message_length"],
+            slot_alphabet_sizes=tuple(
+                value.get("slot_alphabet_sizes")
+                or [value["vocabulary_size"]] * value["message_length"]
+            ),
             sender_family=value.get(
                 "sender_family", "categorical_encoder_autoregressive_sender"
             ),
@@ -135,6 +145,111 @@ class Sender(nn.Module):
             hidden = self.recurrent(torch.cat((previous, context), dim=-1), hidden)
             distribution = torch.softmax(
                 self.symbol_head(hidden) / temperature, dim=-1
+            )
+            distributions.append(distribution)
+            previous = distribution @ self.symbol_embedding.weight
+        return torch.stack(distributions, dim=1)
+
+
+class BoundedAutoregressiveSender(nn.Module):
+    """Joint sender constrained only by each message slot's symbol capacity.
+
+    Every slot is generated from a shared representation of all meaning factors.
+    Unlike the permutation-slot senders, this architecture has no factor-slot
+    binding, factor-specific message head, or factor-local codebook.
+    """
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__()
+        if len(spec.slot_alphabet_sizes) != spec.message_length:
+            raise ValueError(
+                "A bounded autoregressive sender requires one alphabet size per slot."
+            )
+        if any(
+            size < 2 or size > spec.vocabulary_size
+            for size in spec.slot_alphabet_sizes
+        ):
+            raise ValueError(
+                "Every slot alphabet must fit within the global token space."
+            )
+        self.spec = spec
+        self.factor_embeddings = nn.ModuleList(
+            nn.Embedding(size, spec.factor_embedding_dim) for size in spec.factor_sizes
+        )
+        combined_dim = len(spec.factor_sizes) * spec.factor_embedding_dim
+        self.context_projection = nn.Linear(combined_dim, spec.hidden_dim)
+        self.symbol_embedding = nn.Embedding(
+            spec.vocabulary_size, spec.symbol_embedding_dim
+        )
+        self.start_embedding = nn.Parameter(torch.empty(spec.symbol_embedding_dim))
+        self.recurrent = nn.GRUCell(
+            spec.symbol_embedding_dim + spec.hidden_dim, spec.hidden_dim
+        )
+        self.slot_heads = nn.ModuleList(
+            nn.Linear(spec.hidden_dim, alphabet_size)
+            for alphabet_size in spec.slot_alphabet_sizes
+        )
+        nn.init.normal_(self.start_embedding, mean=0.0, std=0.02)
+
+    def _context(self, meanings: Tensor) -> Tensor:
+        embedded_factors = [
+            embedding(meanings[:, index])
+            for index, embedding in enumerate(self.factor_embeddings)
+        ]
+        return torch.tanh(
+            self.context_projection(torch.cat(embedded_factors, dim=-1))
+        )
+
+    def forward(
+        self,
+        meanings: Tensor,
+        *,
+        temperature: float = 1.0,
+        sample: bool = True,
+    ) -> tuple[Tensor, Tensor]:
+        if temperature <= 0:
+            raise ValueError("Temperature must be positive.")
+        context = self._context(meanings)
+        hidden = context
+        previous = self.start_embedding.unsqueeze(0).expand(meanings.shape[0], -1)
+        padded_symbols: list[Tensor] = []
+        tokens: list[Tensor] = []
+        for head, alphabet_size in zip(
+            self.slot_heads, self.spec.slot_alphabet_sizes, strict=True
+        ):
+            hidden = self.recurrent(torch.cat((previous, context), dim=-1), hidden)
+            logits = head(hidden)
+            if sample:
+                local_symbol = F.gumbel_softmax(
+                    logits, tau=temperature, hard=True, dim=-1
+                )
+            else:
+                token = logits.argmax(dim=-1)
+                local_symbol = F.one_hot(token, alphabet_size).to(logits.dtype)
+            token = local_symbol.argmax(dim=-1)
+            symbol = F.pad(
+                local_symbol, (0, self.spec.vocabulary_size - alphabet_size)
+            )
+            padded_symbols.append(symbol)
+            tokens.append(token)
+            previous = symbol @ self.symbol_embedding.weight
+        return torch.stack(padded_symbols, dim=1), torch.stack(tokens, dim=1)
+
+    def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
+        if temperature <= 0:
+            raise ValueError("Temperature must be positive.")
+        context = self._context(meanings)
+        hidden = context
+        previous = self.start_embedding.unsqueeze(0).expand(meanings.shape[0], -1)
+        distributions: list[Tensor] = []
+        for head, alphabet_size in zip(
+            self.slot_heads, self.spec.slot_alphabet_sizes, strict=True
+        ):
+            hidden = self.recurrent(torch.cat((previous, context), dim=-1), hidden)
+            local_distribution = torch.softmax(head(hidden) / temperature, dim=-1)
+            distribution = F.pad(
+                local_distribution,
+                (0, self.spec.vocabulary_size - alphabet_size),
             )
             distributions.append(distribution)
             previous = distribution @ self.symbol_embedding.weight
@@ -466,6 +581,7 @@ class MinimalPermutationSlotSender(InjectivePermutationSlotSender):
 
 SenderModel = (
     Sender
+    | BoundedAutoregressiveSender
     | LearnedPermutationSlotSender
     | InjectivePermutationSlotSender
     | MinimalPermutationSlotSender
@@ -475,13 +591,15 @@ SenderModel = (
 def make_sender(spec: ModelSpec) -> SenderModel:
     if spec.sender_family == "categorical_encoder_autoregressive_sender":
         return Sender(spec)
+    if spec.sender_family == "bounded_autoregressive_sender":
+        return BoundedAutoregressiveSender(spec)
     if spec.sender_family == "learned_permutation_slot_sender":
         return LearnedPermutationSlotSender(spec)
     if spec.sender_family == "injective_permutation_slot_sender":
         return InjectivePermutationSlotSender(spec)
     if spec.sender_family == "minimal_permutation_slot_sender":
         return MinimalPermutationSlotSender(spec)
-    raise ValueError(f"Onbekende zenderarchitectuur: {spec.sender_family}")
+    raise ValueError(f"Unknown sender architecture: {spec.sender_family}")
 
 
 class Receiver(nn.Module):
@@ -577,7 +695,7 @@ def make_receiver(spec: ModelSpec) -> ReceiverModel:
         return Receiver(spec)
     if spec.receiver_family == "factorized_permutation_slot_receiver":
         return FactorizedPermutationSlotReceiver(spec)
-    raise ValueError(f"Onbekende ontvangerarchitectuur: {spec.receiver_family}")
+    raise ValueError(f"Unknown receiver architecture: {spec.receiver_family}")
 
 
 class CommunicationSystem(nn.Module):

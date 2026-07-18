@@ -88,3 +88,38 @@ def test_ecp6_scales_the_exact_channel_to_fourteen_bits(ecp6_config):
     assert ecp6_config["channel"]["bits_per_message"] == ecp6_config["world"][
         "source_entropy_bits"
     ]
+
+
+def test_ecp7_weakens_structure_without_changing_capacity(
+    ecp7_config, ecp7_positive_control_config
+):
+    assert ecp7_config["world"] == ecp7_positive_control_config["world"]
+    assert ecp7_config["dataset"] == ecp7_positive_control_config["dataset"]
+    assert ecp7_config["channel"]["type"] == "slot_local_discrete_fixed_length"
+    assert ecp7_config["channel"]["slot_alphabet_sizes"] == [16, 16, 8, 8]
+    assert ecp7_config["channel"]["bits_per_symbol_by_slot"] == [4, 4, 3, 3]
+    assert ecp7_config["channel"]["bits_per_message"] == 14
+    assert ecp7_config["agents"]["sender"]["family"] == (
+        "bounded_autoregressive_sender"
+    )
+    assert ecp7_config["agents"]["receiver"]["family"] == (
+        "sequence_encoder_multihead_classifier"
+    )
+    assert ecp7_positive_control_config["agents"]["sender"]["family"] == (
+        "minimal_permutation_slot_sender"
+    )
+    assert ecp7_positive_control_config["channel"]["bits_per_message"] == 14
+
+
+def test_slot_local_channel_rejects_an_invalid_capacity(ecp7_config):
+    invalid = deepcopy(ecp7_config)
+    invalid["channel"]["slot_alphabet_sizes"] = [16, 16, 8, 9]
+    with pytest.raises(ConfigError, match="bits_per_symbol_by_slot"):
+        validate_config(invalid)
+
+
+def test_slot_local_channel_rejects_too_few_distinct_messages(ecp7_config):
+    invalid = deepcopy(ecp7_config)
+    invalid["channel"]["slot_alphabet_sizes"] = [15, 16, 8, 8]
+    with pytest.raises(ConfigError, match="cannot represent every world meaning"):
+        validate_config(invalid)

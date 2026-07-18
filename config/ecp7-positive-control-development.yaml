@@ -1,0 +1,8 @@
+extends: ecp7-base-development.yaml
+
+experiment:
+  title: ECP-7 factorized positive-control development
+  arm: ecp6_factorized_positive_control
+  objective: >-
+    Verify that the frozen ECP-6 architecture still solves the new ECP-7
+    validation split under the unchanged 14-bit channel and training budget.

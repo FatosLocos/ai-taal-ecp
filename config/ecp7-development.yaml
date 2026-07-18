@@ -1,0 +1,45 @@
+extends: ecp7-base-development.yaml
+
+experiment:
+  title: ECP-7 weak-structure intervention development
+  arm: bounded_autoregressive_intervention
+
+agents:
+  sender:
+    family: bounded_autoregressive_sender
+  receiver:
+    family: sequence_encoder_multihead_classifier
+  translator:
+    family: sequence_encoder_multihead_classifier
+
+channel:
+  type: slot_local_discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: null
+  bits_per_message: 14
+  factor_alphabet_sizes: null
+  bits_per_symbol_by_factor: null
+  slot_alphabet_sizes: [16, 16, 8, 8]
+  bits_per_symbol_by_slot: [4, 4, 3, 3]
+
+training:
+  discrete_estimator: straight_through_bounded_autoregressive
+  slot_binding_consensus:
+    enabled: false
+    weight: 0.0
+    warmup_steps: 400
+    sharpness_weight: 0.1
+  atom_code_consensus:
+    enabled: false
+    weight: 0.0
+    warmup_steps: 400
+    sharpness_weight: 0.1
+
+translator_training:
+  binding_calibration:
+    enabled: false
+    confidence: 8.0
+    freeze: false

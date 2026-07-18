@@ -3,6 +3,7 @@ from copy import deepcopy
 import torch
 
 from ai_taal.models import (
+    BoundedAutoregressiveSender,
     CommunicationSystem,
     FactorizedPermutationSlotReceiver,
     InjectivePermutationSlotSender,
@@ -192,3 +193,48 @@ def test_minimal_sender_and_factorized_receiver_checkpoint_round_trip(
         load_agent_checkpoint(receiver_path, expected_kind="receiver"),
         FactorizedPermutationSlotReceiver,
     )
+
+
+def test_bounded_sender_uses_slot_capacity_without_factor_binding(ecp7_config):
+    sender = BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_config))
+    meanings = meanings_tensor(build_splits(ecp7_config).train[:32])
+    symbols, tokens = sender(meanings, sample=False)
+
+    assert symbols.shape == (32, 4, 16)
+    assert tokens.shape == (32, 4)
+    assert [head.out_features for head in sender.slot_heads] == [16, 16, 8, 8]
+    assert int(tokens[:, 0].max()) < 16
+    assert int(tokens[:, 1].max()) < 16
+    assert int(tokens[:, 2].max()) < 8
+    assert int(tokens[:, 3].max()) < 8
+    assert not hasattr(sender, "binding_matrix")
+    assert not hasattr(sender, "codebook_matrix")
+    assert sender.context_projection.in_features == 4 * sender.spec.factor_embedding_dim
+
+
+def test_bounded_sender_checkpoint_round_trip(ecp7_config, tmp_path):
+    sender = BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_config))
+    path = tmp_path / "bounded-sender.pt"
+    save_agent_checkpoint(path, sender, kind="sender")
+
+    loaded = load_agent_checkpoint(path, expected_kind="sender")
+
+    assert isinstance(loaded, BoundedAutoregressiveSender)
+    assert loaded.spec.slot_alphabet_sizes == (16, 16, 8, 8)
+
+    input_path = tmp_path / "input.json"
+    output_path = tmp_path / "output.json"
+    input_path.write_text("[[0,0,0,0],[15,15,7,7]]\n", encoding="utf-8")
+    exit_code = worker_main(
+        [
+            "encode",
+            "--checkpoint",
+            str(path),
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+        ]
+    )
+    assert exit_code == 0
+    assert output_path.read_text(encoding="utf-8").startswith("[[")

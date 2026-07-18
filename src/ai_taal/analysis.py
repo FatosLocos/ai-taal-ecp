@@ -28,6 +28,14 @@ def analyze_run(
         raise ValueError(f"No seed metrics found in {run_directory}.")
     first_metrics = _read_json(metrics_paths[0])
     if "population" in first_metrics:
+        if not first_metrics.get("test_unsealed", False):
+            return _analyze_population_development_run(
+                run_directory,
+                summary,
+                metrics_paths,
+                mismatches,
+                permutations=permutations,
+            )
         return _analyze_population_run(
             run_directory,
             summary,
@@ -112,6 +120,194 @@ def analyze_run(
         json.dumps(analysis, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    return analysis
+
+
+def _analyze_population_development_run(
+    run_directory: Path,
+    summary: dict[str, Any],
+    metrics_paths: list[Path],
+    mismatches: list[str],
+    *,
+    permutations: int,
+) -> dict[str, Any]:
+    config = yaml.safe_load(
+        (run_directory / "effective_config.yaml").read_text(encoding="utf-8")
+    )
+    thresholds = config["outcome_thresholds"]["strong_evidence"]
+    registered_thresholds = {
+        "population_known_mean_min": thresholds["population_known_mean_min"],
+        "population_known_worst_pair_min": thresholds[
+            "population_known_worst_pair_min"
+        ],
+        "population_validation_mean_min": thresholds[
+            "population_compositional_mean_min"
+        ],
+        "universal_translator_validation_min": thresholds[
+            "universal_translator_compositional_min"
+        ],
+    }
+
+    rows = []
+    for metrics_path in metrics_paths:
+        metrics = _read_json(metrics_path)
+        episode_path = metrics_path.parent / "episodes.jsonl"
+        sender_matrices, episode_count = _population_episode_matrices(episode_path)
+        topology = {
+            sender_id: topographic_permutation_test(
+                semantic,
+                messages,
+                repetitions=permutations,
+                seed=metrics["seed"] + 9_001 + int(sender_id.rsplit("-", 1)[1]),
+            )
+            for sender_id, (semantic, messages) in sender_matrices.items()
+        }
+        channel_audit = _factor_local_channel_audit(
+            episode_path, metrics, config
+        )
+        protocols = metrics["sender_protocols"]
+        all_senders_injective = all(
+            protocol["collision_meaning_count"] == 0
+            and protocol["unique_message_count"] == protocol["meaning_count"]
+            for protocol in protocols.values()
+        )
+        episode_splits = _episode_split_names(episode_path)
+        test_metrics_absent = not _contains_mapping_key(
+            metrics, "compositional_test"
+        )
+        known_mean = metrics["population"]["train"]["mean_exact_match"]
+        known_worst = metrics["population"]["train"][
+            "worst_pair_exact_match"
+        ]
+        validation_mean = metrics["population"]["validation"][
+            "mean_exact_match"
+        ]
+        validation_worst = metrics["population"]["validation"][
+            "worst_pair_exact_match"
+        ]
+        translator_validation = metrics["universal_translator"]["validation"][
+            "exact_match"
+        ]
+        gate_checks = {
+            "population_known_mean": (
+                known_mean >= registered_thresholds["population_known_mean_min"]
+            ),
+            "population_known_worst_pair": (
+                known_worst
+                >= registered_thresholds["population_known_worst_pair_min"]
+            ),
+            "population_validation_mean": (
+                validation_mean
+                >= registered_thresholds["population_validation_mean_min"]
+            ),
+            "universal_translator_validation": (
+                translator_validation
+                >= registered_thresholds["universal_translator_validation_min"]
+            ),
+            "all_senders_injective": all_senders_injective,
+            "channel_messages_valid": channel_audit["valid"],
+            "test_metrics_absent": test_metrics_absent,
+            "validation_only_episodes": episode_splits == ["validation"],
+        }
+        rows.append(
+            {
+                "seed": metrics["seed"],
+                "classification": metrics["classification"],
+                "population_known_mean_exact_match": known_mean,
+                "population_known_worst_pair_exact_match": known_worst,
+                "population_validation_mean_exact_match": validation_mean,
+                "population_validation_worst_pair_exact_match": validation_worst,
+                "universal_translator_validation_exact_match": (
+                    translator_validation
+                ),
+                "sender_message_agreement": metrics["sender_message_agreement"][
+                    "mean_exact_message_agreement"
+                ],
+                "transfer_validation_exact_match": {
+                    budget: result["validation"]["exact_match"]
+                    for budget, result in metrics["transfer_curve"].items()
+                },
+                "sender_topographic_permutation_tests": topology,
+                "episode_count": episode_count,
+                "episode_splits": episode_splits,
+                "channel_audit": channel_audit,
+                "all_senders_injective": all_senders_injective,
+                "test_metrics_absent": test_metrics_absent,
+                "development_gate_checks": gate_checks,
+                "development_gate_passed": all(gate_checks.values()),
+            }
+        )
+
+    metric_names = (
+        "population_known_mean_exact_match",
+        "population_known_worst_pair_exact_match",
+        "population_validation_mean_exact_match",
+        "population_validation_worst_pair_exact_match",
+        "universal_translator_validation_exact_match",
+        "sender_message_agreement",
+    )
+    aggregates = {
+        name: {
+            "mean": statistics.mean(row[name] for row in rows),
+            "median": statistics.median(row[name] for row in rows),
+            "minimum": min(row[name] for row in rows),
+            "maximum": max(row[name] for row in rows),
+        }
+        for name in metric_names
+    }
+    budgets = sorted(rows[0]["transfer_validation_exact_match"], key=int)
+    aggregates["transfer_validation_exact_match"] = {
+        budget: {
+            "mean": statistics.mean(
+                row["transfer_validation_exact_match"][budget] for row in rows
+            ),
+            "median": statistics.median(
+                row["transfer_validation_exact_match"][budget] for row in rows
+            ),
+        }
+        for budget in budgets
+    }
+
+    analysis = {
+        "analysis_type": "sealed_population_development_diagnostic",
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "run_directory": str(run_directory),
+        "primary_summary_classification": summary["overall_classification"],
+        "integrity": {
+            "checked_artifact_count": len(summary["artifact_sha256"]),
+            "hash_mismatches": mismatches,
+            "all_artifacts_match": not mismatches,
+            "episode_counts": {
+                str(row["seed"]): row["episode_count"] for row in rows
+            },
+            "total_episode_count": sum(row["episode_count"] for row in rows),
+            "channel_audits": {
+                str(row["seed"]): row["channel_audit"] for row in rows
+            },
+            "all_channel_messages_valid": all(
+                row["channel_audit"]["valid"] for row in rows
+            ),
+            "all_test_metrics_absent": all(
+                row["test_metrics_absent"] for row in rows
+            ),
+            "all_episode_logs_validation_only": all(
+                row["episode_splits"] == ["validation"] for row in rows
+            ),
+        },
+        "registered_development_thresholds": registered_thresholds,
+        "development_gate": {
+            "passed_seed_count": sum(
+                row["development_gate_passed"] for row in rows
+            ),
+            "seed_count": len(rows),
+            "all_seeds_passed": all(
+                row["development_gate_passed"] for row in rows
+            ),
+        },
+        "aggregates": aggregates,
+        "seeds": rows,
+    }
+    _write_analysis(run_directory, analysis)
     return analysis
 
 
@@ -466,14 +662,41 @@ def _population_episode_matrices(
     }, episode_count
 
 
+def _episode_split_names(path: Path) -> list[str]:
+    splits = set()
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            splits.add(json.loads(line)["split"])
+    return sorted(splits)
+
+
+def _contains_mapping_key(value: Any, key: str) -> bool:
+    if isinstance(value, dict):
+        return key in value or any(
+            _contains_mapping_key(child, key) for child in value.values()
+        )
+    if isinstance(value, list):
+        return any(_contains_mapping_key(child, key) for child in value)
+    return False
+
+
 def _factor_local_channel_audit(
     path: Path, metrics: dict[str, Any], config: dict[str, Any]
 ) -> dict[str, Any]:
     channel = config["channel"]
-    if channel["type"] != "factor_local_discrete_fixed_length":
+    if channel["type"] not in {
+        "factor_local_discrete_fixed_length",
+        "slot_local_discrete_fixed_length",
+    }:
         return {"applicable": False, "valid": True}
-    factor_sizes = channel["factor_alphabet_sizes"]
-    bindings = metrics["sender_binding_diagnostics"]["hard_factor_by_slot"]
+    if channel["type"] == "factor_local_discrete_fixed_length":
+        factor_sizes = channel["factor_alphabet_sizes"]
+        bindings = metrics["sender_binding_diagnostics"]["hard_factor_by_slot"]
+        alphabet_sizes_by_slot = None
+    else:
+        factor_sizes = None
+        bindings = None
+        alphabet_sizes_by_slot = channel["slot_alphabet_sizes"]
     violations = []
     checked = 0
     with path.open("r", encoding="utf-8") as handle:
@@ -481,15 +704,24 @@ def _factor_local_channel_audit(
             episode = json.loads(line)
             message = episode["message"]
             sender_index = int(message["sender_id"].rsplit("-", 1)[1])
-            factor_by_slot = bindings[sender_index]
+            factor_by_slot = bindings[sender_index] if bindings is not None else None
             checked += 1
             if message["channel_bits"] != channel["bits_per_message"]:
                 violations.append(
                     {"line": line_number, "reason": "incorrect_channel_bits"}
                 )
             for slot_index, symbol in enumerate(message["symbols"]):
-                factor_index = factor_by_slot[slot_index]
-                if symbol < 0 or symbol >= factor_sizes[factor_index]:
+                factor_index = (
+                    factor_by_slot[slot_index]
+                    if factor_by_slot is not None
+                    else None
+                )
+                alphabet_size = (
+                    factor_sizes[factor_index]
+                    if factor_sizes is not None and factor_index is not None
+                    else alphabet_sizes_by_slot[slot_index]
+                )
+                if symbol < 0 or symbol >= alphabet_size:
                     violations.append(
                         {
                             "line": line_number,
@@ -497,7 +729,7 @@ def _factor_local_channel_audit(
                             "slot": slot_index,
                             "factor": factor_index,
                             "symbol": symbol,
-                            "alphabet_size": factor_sizes[factor_index],
+                            "alphabet_size": alphabet_size,
                         }
                     )
             if len(violations) >= 20:
@@ -506,8 +738,10 @@ def _factor_local_channel_audit(
         "applicable": True,
         "valid": not violations,
         "checked_episode_messages": checked,
+        "channel_type": channel["type"],
         "bits_per_message": channel["bits_per_message"],
         "factor_alphabet_sizes": factor_sizes,
+        "slot_alphabet_sizes": alphabet_sizes_by_slot,
         "violation_count_capped_at_20": len(violations),
         "violations": violations,
     }
