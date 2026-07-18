@@ -88,6 +88,11 @@ regressed to 82.80% train exactness, 76.46% validation and 77.76% translator
 validation, while injectivity still failed. Batch 15 remains strongest. Exact
 identities and hashes are in `batch16-manifest.json`.
 
+Batch 17 replayed globally mined training-code collisions after step 15,000.
+It improved hard code use modestly but regressed to 83.15% train exactness,
+77.09% validation and 83.01% translator validation without reaching
+injectivity. Exact identities and hashes are in `batch17-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

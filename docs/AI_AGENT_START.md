@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 93 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 100 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 16
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 17
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -106,12 +106,15 @@ validation. Its validation and translator gates pass, but train and injectivity
 do not. ECP7-B16-I added late normalized factor-minimax pressure. It slightly
 improved texture but disrupted color, regressing to 82.80% train, 76.46%
 validation and 77.76% translator validation without solving injectivity. Batch
-15 remains strongest, and the confirmatory ECP-7 test is still sealed.
+15 remains strongest. ECP7-B17-I replayed globally mined training collisions.
+It modestly improved unique-message use but regressed to 83.15% train, 77.09%
+validation and 83.01% translator validation without becoming injective. The
+confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B17 intervention and its failure criterion.
+2. Define exactly one ECP7-B18 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -124,27 +127,26 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 15 remains the strongest weak-structure result. Batch 16 shows that late
-worst-factor pressure improves texture slightly but harms color generalization
-and does not resolve collisions. The next clean question is whether the global
-collisions can be made trainable without factor-to-slot supervision. A clean
-ECP7-B17 progression is:
+Batch 15 remains the strongest weak-structure result. Batch 17 shows that global
+collision replay provides a usable signal and modestly improves code use, but
+its full weight overwhelms the remaining task objective and causes collision
+churn. The clean next question is whether the same mechanism works at a
+task-scale coefficient. A clean ECP7-B18 progression is:
 
 - keep the same world and bit budget;
 - keep the complete B15 architecture, horizon and base losses;
-- mine complete-message collision pairs from each sender's training-only
-  codebook after step 15,000 and refresh them only at registered evaluation
-  boundaries;
-- apply one relaxed full-message collision-probability loss to those mined
-  pairs, with a preregistered deterministic sampler and coefficient schedule;
+- keep the complete B17 training-only collision mining, replay batch,
+  temperature and refresh mechanism;
+- keep replay weight `0` through step 15,000, warm only to `0.1` at step 20,000,
+  then hold;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Use training meanings only for pair mining. Do not use validation to choose
-pairs, and do not change architecture, base utilization, optimizer, data,
-temperature, duration, validation cadence or development thresholds. Do not
-combine collision replay with factor reweighting, variable-length messages or
-negotiation.
+Continue to use training meanings only for pair mining. Do not change the
+mining source, pair sampler, architecture, base utilization, optimizer, data,
+temperature, duration, validation cadence or development thresholds, and do
+not combine the coefficient change with factor reweighting, variable-length
+messages or negotiation.
 
 ## 7. Definition of done for any contribution
 

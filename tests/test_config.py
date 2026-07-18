@@ -566,3 +566,52 @@ def test_factor_minimax_schedule_must_fit_the_training_horizon(
     invalid_end["training"]["factor_minimax"]["start_step"] = 26000
     with pytest.raises(ConfigError, match="complete within max_steps"):
         validate_config(invalid_end)
+
+
+def test_ecp7_b17_adds_only_late_global_collision_replay(
+    ecp7_b15_config, ecp7_b17_config
+):
+    assert ecp7_b17_config["world"] == ecp7_b15_config["world"]
+    assert ecp7_b17_config["dataset"] == ecp7_b15_config["dataset"]
+    assert ecp7_b17_config["channel"] == ecp7_b15_config["channel"]
+    assert ecp7_b17_config["agents"] == ecp7_b15_config["agents"]
+    b15_training = deepcopy(ecp7_b15_config["training"])
+    b17_training = deepcopy(ecp7_b17_config["training"])
+    assert b17_training.pop("global_collision_replay") == {
+        "enabled": True,
+        "weight": 1.0,
+        "start_step": 15000,
+        "warmup_steps": 5000,
+        "pair_batch_size": 32,
+        "refresh_interval": 200,
+        "relaxed_temperature": 1.0,
+    }
+    assert b17_training == b15_training
+
+
+def test_global_collision_replay_parameters_are_bounded(ecp7_b17_config):
+    invalid_batch_type = deepcopy(ecp7_b17_config)
+    invalid_batch_type["training"]["global_collision_replay"][
+        "pair_batch_size"
+    ] = 1.5
+    with pytest.raises(ConfigError, match="pair batch size must be an integer"):
+        validate_config(invalid_batch_type)
+
+    invalid_end = deepcopy(ecp7_b17_config)
+    invalid_end["training"]["global_collision_replay"]["start_step"] = 26000
+    with pytest.raises(ConfigError, match="complete within max_steps"):
+        validate_config(invalid_end)
+
+    invalid_refresh = deepcopy(ecp7_b17_config)
+    invalid_refresh["training"]["global_collision_replay"][
+        "refresh_interval"
+    ] = 300
+    with pytest.raises(ConfigError, match="evaluation boundaries"):
+        validate_config(invalid_refresh)
+
+    invalid_temperature = deepcopy(ecp7_b17_config)
+    invalid_temperature["training"]["global_collision_replay"][
+        "relaxed_temperature"
+    ] = 0
+    with pytest.raises(ConfigError, match="temperature must be positive"):
+        validate_config(invalid_temperature)

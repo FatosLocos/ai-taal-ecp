@@ -1,0 +1,49 @@
+{
+  "batch": "ECP7-B17",
+  "confirmatory_test_unsealed": false,
+  "config_effective_sha256": "70921261774f38f5ca22f122d05a2b9f1f0bc7c9ca6ea4c327097b7619715d5b",
+  "config_raw_sha256": "81bc1c36f7fd19afdecd61eb917fe41925db8266d8ac8b2bc96e70178e39c412",
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "34ee60734776fa29d822af25446dbb08127c8954184307f6598b55db6fcd0b69",
+      "seed-11/metrics.json": "d2d5f354a51e6f1996ab7eeabbda91946b04b355f053d9d15dd5b65c3a455d63",
+      "summary.json": "92bf4c092667cb2cf35a0a1d1ca7fba7700de61d1d06496bda6d857a3c52ccd2"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T143730Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "22e60c7b9d3ee98c26644c10bc342aa7f6bd116299b9ef5833759853b8a538ea",
+      "posthoc-analysis.json": "3b76a48f1a7541398bf502f00c3dcf4c7b72b3be90b411e5627be1d2ffe575df",
+      "seed-11/metrics.json": "13d1bb2ab9b5ad2d5415cab1a4d1a694e9506a563368c008dd84c82a944fb7ee",
+      "summary.json": "dcdb2d9a35780bbb28caf9e562877463900f05a2ce6e79b712125b110b837acd"
+    },
+    "best_code_utilization_loss": -0.7401911020278931,
+    "best_global_collision_replay_loss": 0.8384425640106201,
+    "best_global_collision_replay_pair_counts": [2564, 2255, 2248, 2407],
+    "best_global_collision_replay_weight": 0.24,
+    "best_step": 16200,
+    "collision_meanings_per_sender": [2396, 2416, 2414, 2101],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.8941840277777778,
+    "final_step": 21200,
+    "message_entropy_bits_per_sender": [13.577088544776561, 13.591063919173408, 13.592321947333073, 13.609622220705216],
+    "population_train_mean_exact_match": 0.8314557756696429,
+    "population_train_worst_link_exact_match": 0.8257533482142857,
+    "population_validation_factor_accuracy": [0.92242431640625, 0.99853515625, 0.984375, 0.84515380859375],
+    "population_validation_mean_exact_match": 0.77093505859375,
+    "population_validation_worst_link_exact_match": 0.763671875,
+    "run_id": "20260718T143730Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.830078125,
+    "unique_messages_per_sender": [12964, 12944, 12946, 13259]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

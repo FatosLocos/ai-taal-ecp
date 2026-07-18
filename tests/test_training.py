@@ -12,6 +12,7 @@ from ai_taal.models import (
 )
 from ai_taal.training import (
     _scheduled_code_utilization_weight,
+    _scheduled_collision_replay_weight,
     _scheduled_factor_minimax_weight,
     _scheduled_learning_rate,
     _scheduled_temperature,
@@ -19,8 +20,11 @@ from ai_taal.training import (
     atom_code_consensus_loss,
     build_algebraic_quadruples,
     calibrate_receiver_binding,
+    collision_pairs_from_messages,
     factor_agnostic_code_utilization_loss,
+    mine_sender_collision_pairs,
     normalized_factor_minimax_loss,
+    relaxed_collision_pair_probability,
     slot_binding_consensus_loss,
     straight_through_joint_collision_loss,
     straight_through_sender_consensus_loss,
@@ -292,6 +296,69 @@ def test_joint_collision_loss_backpropagates_through_hard_messages(ecp7_b4_confi
     assert any(parameter.grad is not None for parameter in sender.parameters())
 
 
+def test_collision_pair_mining_returns_all_unordered_collisions():
+    messages = torch.tensor(
+        [[0, 0], [1, 1], [0, 0], [0, 0], [1, 1], [2, 2]]
+    )
+
+    pairs = collision_pairs_from_messages(messages)
+
+    assert pairs.tolist() == [[0, 2], [0, 3], [2, 3], [1, 4]]
+
+
+def test_collision_pair_mining_uses_a_senders_hard_training_code(
+    ecp7_b17_config,
+):
+    sender = BoundedParallelSender(ModelSpec.from_config(ecp7_b17_config))
+    with torch.no_grad():
+        for parameter in sender.parameters():
+            parameter.zero_()
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 0, 0, 0], [2, 1, 0, 0], [3, 1, 1, 0]],
+        dtype=torch.long,
+    )
+
+    pairs = mine_sender_collision_pairs(sender, meanings)
+
+    assert len(pairs) == 6
+
+
+def test_relaxed_collision_replay_measures_full_message_probability():
+    symbol_pairs = torch.tensor(
+        [
+            [[0, 1], [0, 1]],
+            [[0, 1], [1, 1]],
+        ]
+    )
+    message_pairs = torch.nn.functional.one_hot(
+        symbol_pairs, num_classes=2
+    ).to(torch.float32)
+
+    loss = relaxed_collision_pair_probability(message_pairs)
+
+    assert abs(float(loss) - 0.5) < 1e-6
+
+
+def test_relaxed_collision_replay_backpropagates(ecp7_b17_config):
+    sender = BoundedParallelSender(ModelSpec.from_config(ecp7_b17_config))
+    pair_meanings = torch.tensor(
+        [
+            [[0, 0, 0, 0], [1, 0, 0, 0]],
+            [[2, 3, 4, 5], [2, 4, 4, 5]],
+        ],
+        dtype=torch.long,
+    )
+    messages = sender.relaxed_message(
+        pair_meanings.reshape(4, 4), temperature=1.0
+    ).reshape(2, 2, 4, 16)
+
+    loss = relaxed_collision_pair_probability(messages)
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert any(parameter.grad is not None for parameter in sender.parameters())
+
+
 def test_sender_consensus_loss_measures_pairwise_symbol_disagreement():
     left_symbols = torch.tensor([[0, 0], [1, 1]])
     right_symbols = torch.tensor([[0, 0], [0, 1]])
@@ -366,6 +433,20 @@ def test_factor_minimax_schedule_preserves_zero_start_behavior():
     assert _scheduled_factor_minimax_weight(schedule, 1) == 1 / 400
     assert _scheduled_factor_minimax_weight(schedule, 400) == 1.0
     assert _scheduled_factor_minimax_weight(schedule, 5000) == 1.0
+
+
+def test_late_collision_replay_weight_starts_warms_and_holds():
+    schedule = {
+        "weight": 1.0,
+        "start_step": 15000,
+        "warmup_steps": 5000,
+    }
+
+    assert _scheduled_collision_replay_weight(schedule, 1) == 0.0
+    assert _scheduled_collision_replay_weight(schedule, 15000) == 0.0
+    assert _scheduled_collision_replay_weight(schedule, 17500) == 0.5
+    assert _scheduled_collision_replay_weight(schedule, 20000) == 1.0
+    assert _scheduled_collision_replay_weight(schedule, 30000) == 1.0
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

@@ -208,6 +208,53 @@ def validate_config(config: dict[str, Any]) -> None:
         if joint_collision.get("warmup_steps", 0) < 1:
             raise ConfigError("Joint-collision warmup must be positive.")
 
+    collision_replay = training.get("global_collision_replay", {})
+    if collision_replay.get("enabled", False):
+        if collision_replay.get("weight", -1) < 0:
+            raise ConfigError("Global collision-replay weight cannot be negative.")
+        start_step = collision_replay.get("start_step", -1)
+        warmup_steps = collision_replay.get("warmup_steps", 0)
+        pair_batch_size = collision_replay.get("pair_batch_size", 0)
+        refresh_interval = collision_replay.get("refresh_interval", 0)
+        for value, label in (
+            (start_step, "start"),
+            (warmup_steps, "warmup"),
+            (pair_batch_size, "pair batch size"),
+            (refresh_interval, "refresh interval"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ConfigError(
+                    f"Global collision-replay {label} must be an integer."
+                )
+        if start_step < 0:
+            raise ConfigError("Global collision-replay start cannot be negative.")
+        if warmup_steps < 1:
+            raise ConfigError("Global collision-replay warmup must be positive.")
+        if start_step + warmup_steps > training["max_steps"]:
+            raise ConfigError(
+                "Global collision-replay warmup must complete within max_steps."
+            )
+        if pair_batch_size < 1:
+            raise ConfigError(
+                "Global collision-replay pair batch size must be positive."
+            )
+        if refresh_interval < 1:
+            raise ConfigError(
+                "Global collision-replay refresh interval must be positive."
+            )
+        evaluation_interval = training["evaluation_interval"]
+        if (
+            start_step % evaluation_interval != 0
+            or refresh_interval % evaluation_interval != 0
+        ):
+            raise ConfigError(
+                "Global collision replay must start and refresh on evaluation boundaries."
+            )
+        if collision_replay.get("relaxed_temperature", 0) <= 0:
+            raise ConfigError(
+                "Global collision-replay temperature must be positive."
+            )
+
     sender_consensus = training.get("sender_message_consensus", {})
     if sender_consensus.get("enabled", False):
         if sender_consensus.get("weight", -1) < 0:
