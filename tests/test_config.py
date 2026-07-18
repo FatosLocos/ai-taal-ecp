@@ -123,3 +123,28 @@ def test_slot_local_channel_rejects_too_few_distinct_messages(ecp7_config):
     invalid["channel"]["slot_alphabet_sizes"] = [15, 16, 8, 8]
     with pytest.raises(ConfigError, match="cannot represent every world meaning"):
         validate_config(invalid)
+
+
+def test_ecp7_b2_changes_only_factor_agnostic_code_utilization(
+    ecp7_config, ecp7_b2_config
+):
+    assert ecp7_b2_config["world"] == ecp7_config["world"]
+    assert ecp7_b2_config["dataset"] == ecp7_config["dataset"]
+    assert ecp7_b2_config["channel"] == ecp7_config["channel"]
+    assert ecp7_b2_config["agents"] == ecp7_config["agents"]
+    assert ecp7_b2_config["training"]["code_utilization"] == {
+        "enabled": True,
+        "weight": 1.0,
+        "warmup_steps": 400,
+        "relaxed_temperature": 1.0,
+        "independence_weight": 1.0,
+    }
+    assert ecp7_b2_config["training"]["slot_binding_consensus"]["enabled"] is False
+    assert ecp7_b2_config["training"]["atom_code_consensus"]["enabled"] is False
+
+
+def test_ecp7_b2_rejects_negative_code_utilization_weight(ecp7_b2_config):
+    invalid = deepcopy(ecp7_b2_config)
+    invalid["training"]["code_utilization"]["weight"] = -0.1
+    with pytest.raises(ConfigError, match="Code-utilization weight"):
+        validate_config(invalid)

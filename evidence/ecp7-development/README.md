@@ -13,6 +13,12 @@ The confirmatory test stayed sealed: both runs have `test_unsealed=false`, no
 test metrics, and validation-only episode logs. The complete generated runs,
 checkpoints and raw episode logs remain local under `runs/` and are not tracked.
 
+Batch 2 added a factor-agnostic soft code-utilization loss. The positive control
+again achieved 100%, but the intervention used only 85–104 hard messages and
+failed the same registered gate. Its improved soft utilization objective did
+not transfer to the discrete protocol. Exact Batch 2 identities and hashes are
+in `batch2-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

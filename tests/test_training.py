@@ -2,16 +2,22 @@ from copy import deepcopy
 
 import torch
 
-from ai_taal.models import ModelSpec, PopulationSystem, Sender
+from ai_taal.models import (
+    BoundedAutoregressiveSender,
+    FactorizedPermutationSlotReceiver,
+    ModelSpec,
+    PopulationSystem,
+    Sender,
+)
 from ai_taal.training import (
     algebraic_consistency_loss,
     atom_code_consensus_loss,
     build_algebraic_quadruples,
     calibrate_receiver_binding,
+    factor_agnostic_code_utilization_loss,
     slot_binding_consensus_loss,
     train_communication_system,
 )
-from ai_taal.models import FactorizedPermutationSlotReceiver
 from ai_taal.world import build_splits, enumerate_world
 
 
@@ -107,6 +113,55 @@ def test_atom_code_consensus_loss_backpropagates(ecp2_config):
         all(logits.grad is not None for logits in sender.codebook_logits)
         for sender in population.senders
     )
+
+
+def test_factor_agnostic_code_utilization_backpropagates(ecp7_b2_config):
+    sender = BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_b2_config))
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]], dtype=torch.long
+    )
+
+    loss = factor_agnostic_code_utilization_loss(
+        sender,
+        meanings,
+        temperature=1.0,
+        independence_weight=1.0,
+    )
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert any(parameter.grad is not None for parameter in sender.parameters())
+
+
+def test_code_utilization_prefers_independent_balanced_slots():
+    class FixedSender:
+        class Spec:
+            slot_alphabet_sizes = (2, 2)
+            message_length = 2
+
+        spec = Spec()
+
+        def __init__(self, symbols):
+            self.distributions = torch.nn.functional.one_hot(
+                torch.tensor(symbols), num_classes=2
+            ).to(torch.float32)
+
+        def relaxed_message(self, meanings, *, temperature):
+            return self.distributions
+
+    meanings = torch.zeros((4, 4), dtype=torch.long)
+    independent = FixedSender([[0, 0], [0, 1], [1, 0], [1, 1]])
+    correlated = FixedSender([[0, 0], [0, 0], [1, 1], [1, 1]])
+
+    independent_loss = factor_agnostic_code_utilization_loss(
+        independent, meanings, temperature=1.0, independence_weight=1.0
+    )
+    correlated_loss = factor_agnostic_code_utilization_loss(
+        correlated, meanings, temperature=1.0, independence_weight=1.0
+    )
+
+    assert abs(float(independent_loss) + 1.0) < 1e-6
+    assert abs(float(correlated_loss)) < 1e-6
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

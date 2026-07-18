@@ -54,6 +54,7 @@ def validate_config(config: dict[str, Any]) -> None:
         meaning_count = config["world"]["meaning_count"]
         split = config["dataset"]
         channel = config["channel"]
+        training = config["training"]
     except (KeyError, TypeError) as exc:
         raise ConfigError(f"Required configuration field is missing: {exc}") from exc
 
@@ -120,10 +121,21 @@ def validate_config(config: dict[str, Any]) -> None:
     if len(seeds) != len(set(seeds)):
         raise ConfigError("Every training run must use a unique seed.")
 
-    if config["training"]["selection_never_uses_test"] is not True:
+    if training["selection_never_uses_test"] is not True:
         raise ConfigError("Test data must not be used for model selection.")
-    if config["training"]["evaluation_uses_hard_symbols_only"] is not True:
+    if training["evaluation_uses_hard_symbols_only"] is not True:
         raise ConfigError("Evaluation must use hard symbols only.")
+
+    utilization = training.get("code_utilization", {})
+    if utilization.get("enabled", False):
+        if utilization.get("weight", -1) < 0:
+            raise ConfigError("Code-utilization weight cannot be negative.")
+        if utilization.get("independence_weight", -1) < 0:
+            raise ConfigError("Slot-independence weight cannot be negative.")
+        if utilization.get("warmup_steps", 0) < 1:
+            raise ConfigError("Code-utilization warmup must be positive.")
+        if utilization.get("relaxed_temperature", 0) <= 0:
+            raise ConfigError("Code-utilization temperature must be positive.")
 
 
 def file_sha256(path: str | Path) -> str:
