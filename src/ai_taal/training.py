@@ -167,6 +167,12 @@ def train_population_system(
         sender_count=population_config["sender_count"],
         receiver_count=population_config["receiver_count"],
     ).to(device)
+    residual_activation_config = training.get("sender_residual_activation", {})
+    residual_activation_enabled = bool(
+        residual_activation_config.get("enabled", False)
+    )
+    if residual_activation_enabled:
+        _set_sender_residual_parameter_gradients(population, enabled=False)
     optimizer = _population_optimizer(population, training)
     train_values = meanings_tensor(train_meanings, device)
     validation_values = meanings_tensor(validation_meanings, device)
@@ -283,6 +289,17 @@ def train_population_system(
 
     for step in range(1, max_steps + 1):
         population.train()
+        sender_residual_parameter_gradients = (
+            _sender_residual_parameter_gradients(
+                residual_activation_config, step
+            )
+            if residual_activation_enabled
+            else True
+        )
+        if residual_activation_enabled:
+            _set_sender_residual_parameter_gradients(
+                population, enabled=sender_residual_parameter_gradients
+            )
         learning_rate = _scheduled_learning_rate(training, step)
         for parameter_group in optimizer.param_groups:
             parameter_group["lr"] = learning_rate
@@ -615,6 +632,9 @@ def train_population_system(
                 ),
                 "global_hard_meaning_replay_sender_message_gradients": (
                     hard_meaning_replay_sender_message_gradients
+                ),
+                "sender_residual_parameter_gradients": (
+                    sender_residual_parameter_gradients
                 ),
                 "sender_message_consensus_loss": float(
                     sender_consensus_loss.detach().cpu()
@@ -1356,6 +1376,32 @@ def _scheduled_factor_minimax_weight(
     )
     progress = min((step - start_step) / warmup_steps, 1.0)
     return float(factor_minimax_config["weight"]) * progress
+
+
+def _sender_residual_parameter_gradients(
+    activation_config: dict[str, Any], step: int
+) -> bool:
+    """Return whether a preregistered residual sender branch is trainable."""
+    if not activation_config.get("enabled", False):
+        return True
+    return step > int(activation_config["start_step"])
+
+
+def _set_sender_residual_parameter_gradients(
+    population: PopulationSystem, *, enabled: bool
+) -> None:
+    """Toggle only the shared residual parameters in every population sender."""
+    parameter_count = 0
+    for sender in population.senders:
+        for name in ("residual_weight", "residual_bias"):
+            parameter = getattr(sender, name, None)
+            if parameter is not None:
+                parameter.requires_grad_(enabled)
+                parameter_count += 1
+    if parameter_count != 2 * len(population.senders):
+        raise ValueError(
+            "Residual activation requires two residual parameters per sender."
+        )
 
 
 def _scheduled_collision_replay_weight(

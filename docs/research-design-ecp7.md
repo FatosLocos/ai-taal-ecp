@@ -1,6 +1,6 @@
 # Research Design ECP-7 — Weakening the Factor-Slot Bias
 
-Status: **preregistered for sealed development**<br>
+Status: **development closed; confirmatory test remains sealed**<br>
 Preregistered: July 18, 2026<br>
 Intervention configuration: `config/ecp7-development.yaml`<br>
 Positive-control configuration: `config/ecp7-positive-control-development.yaml`
@@ -1262,3 +1262,61 @@ injectivity gate without accessing the confirmatory split.
 This closes generic sender-depth changes active from the start of training. A
 future residual experiment is justified only as a single late-activation test
 that preserves the complete established shallow trajectory before unfreezing.
+
+## Batch 29 preregistration — Late residual sender activation
+
+Status: **completed sealed development; valid negative; ECP-7 development closed**<br>
+Preregistered: July 18, 2026 at 18:47:04 UTC<br>
+Configuration: `config/ecp7-b29-development.yaml`<br>
+Raw configuration SHA-256: `4c4e32dc054eb4af400e04fccc5c312edea0e5cbfa9c39fbee6e2615d56258b9`<br>
+Effective configuration SHA-256: `6483d2cf84f2e7e1d0365e90aeefc99641fb9255c3617d8d3928623af5db3947`
+
+Batch 28 proves that a residual interaction trainable from the first update
+destroys compositional learning. It does not test whether the same capacity can
+split collisions after the successful shallow protocol is already established.
+Batch 29 is the single permitted temporal isolation of that hypothesis.
+
+ECP7-B29-I inherits the complete Batch 28 representation and Batch 25 training
+setup. The sole change is a registered residual-parameter activation boundary:
+
+1. residual weight and bias are frozen at exact zero through step 30,000;
+2. residual weight and bias receive gradients from step 30,001 onward.
+
+All original sender and receiver parameters remain trainable at every step.
+The residual branch consumes no random draws, and at zero it leaves context and
+messages unchanged. The complete trajectory through step 30,000 must therefore
+match Batch 25 across all shared history fields. After activation, no scaling,
+warmup or added loss is used. The existing hard-meaning replay remains
+receiver-only after step 20,000, so residual parameters are changed only by the
+ordinary joint task.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B29-I with late residual activation.
+
+All existing validity and development gates remain unchanged. Additionally,
+the late-capacity claim requires the selected minimum unique-message count to
+exceed Batch 25's 12,720 while worst-link validation is at least Batch 25's
+82.7148%. No alternative boundary, gradual activation, residual architecture,
+collision replay, replay route, base loss, receiver, optimizer, horizon, data,
+translator or seed may be tried inside Batch 29. If it fails, ECP-7 development
+closes without confirmatory test access; no further residual schedule is
+admitted.
+
+### Batch 29 outcome and development closure
+
+The registered seed-11 intervention exactly matched all 151 shared Batch 25
+history records through step 30,000, with residual gradients disabled at every
+record. After activation it selected step 31,000 and reached 84.89% mean train,
+82.28% worst-link train, 84.74% mean validation, 81.74% worst-link validation
+and 85.01% universal-translator validation. Its sender codebooks used 13,163,
+12,960, 12,720 and 13,439 unique messages, a net loss relative to Batch 25.
+It failed the train, injectivity and added late-capacity/worst-link gates without
+accessing the confirmatory split.
+
+No ECP-7 development variant passes the full registered gate. The development
+phase is closed after Batch 29; no confirmatory ECP-7 configuration is frozen
+and the confirmatory split remains sealed. Any future work must begin with a
+new ECP-8 research question, split and preregistration rather than another
+ECP-7 variant.

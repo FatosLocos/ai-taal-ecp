@@ -1,0 +1,14 @@
+extends: ecp7-b28-development.yaml
+
+experiment:
+  title: ECP-7 late residual sender activation
+  arm: late_residual_sender_activation
+  objective: >-
+    Test whether residual interaction capacity can split an already established
+    shallow protocol when kept exactly zero through step 30,000, without
+    disrupting the compositional learning trajectory from the start.
+
+training:
+  sender_residual_activation:
+    enabled: true
+    start_step: 30000

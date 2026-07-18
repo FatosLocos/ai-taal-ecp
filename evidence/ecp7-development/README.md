@@ -165,6 +165,14 @@ and validation to 9.65%. Generic sender depth active from the first update
 therefore promotes memorization rather than compositional generalization. Exact
 identities and hashes are in `batch28-manifest.json`.
 
+Batch 29 froze the same residual branch at exact zero through the complete
+Batch 25 trajectory, then activated only its two parameters. All 151 shared
+history records through step 30,000 matched B25 exactly, but the selected step
+31,000 checkpoint lost occupied codes and worst-link validation fell to
+81.74%. This final residual test failed, so ECP-7 development closed without
+opening its confirmatory split. Exact identities and hashes are in
+`batch29-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
