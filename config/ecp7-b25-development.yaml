@@ -1,0 +1,12 @@
+extends: ecp7-b24-development.yaml
+
+experiment:
+  title: ECP-7 extended receiver-only catch-up horizon
+  arm: extended_receiver_only_catchup_horizon
+  objective: >-
+    Test whether the late receiver-only catch-up phase continues improving
+    reconstruction or reaches a non-injective plateau when given enough time
+    for the registered early-stopping patience to operate.
+
+training:
+  max_steps: 45000

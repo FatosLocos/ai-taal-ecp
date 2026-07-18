@@ -1053,3 +1053,41 @@ sealed-test requirement fails. No alternative switch step, gradient route,
 predicate, coefficient, replay batch, refresh, architecture, base loss,
 optimizer, duration, data, translator or seed may be tried inside Batch 24.
 Failure is recorded without confirmatory test access.
+
+## Batch 25 preregistration — Extended receiver-only catch-up horizon
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 17:26:20 UTC<br>
+Configuration: `config/ecp7-b25-development.yaml`<br>
+Raw configuration SHA-256: `3c125aa0e21b29327b332a77f0a367633267804523eb941d5dad9eb622255387`<br>
+Effective configuration SHA-256: `00c9f13c5919f98f5b81c14c8ea2d852a1cd4be55ecbfcaf0d61abed6b9acc91`
+
+Batch 24 established the strongest mean ECP-7 performance, selected its best
+checkpoint at step 29,400, and reached the 30,000-step ceiling before the
+5,000-step patience could assess a late plateau. Batch 25 isolates whether that
+receiver-only catch-up phase is still improving or has already converged to a
+non-injective solution.
+
+ECP7-B25-I inherits the complete Batch 24 implementation, configuration,
+gradient routes, hard-meaning predicate, replay mechanism, architecture,
+ordinary task batch, utilization objective, optimizer, data, temperature
+schedule, coefficient, replay batch, sampler, refresh, warmup, selection,
+translator and thresholds. The sole change is:
+
+- `training.max_steps` increases from 30,000 to 45,000.
+
+The 5,000-step early-stopping patience and 15,000-step minimum remain unchanged.
+The run may therefore finish before step 45,000. The complete optimization
+trajectory through step 30,000 must match Batch 24 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B25-I with the extended receiver-only catch-up ceiling.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative horizon, gradient route,
+predicate, coefficient, replay batch, refresh, architecture, base loss,
+optimizer, data, translator or seed may be tried inside Batch 25. Failure is
+recorded without confirmatory test access.

@@ -32,6 +32,7 @@ this log.
 | ECP7-B22-I | Intervention | B21 replay gradients routed to senders but not receiver parameters | Position-aware MLP | valid negative; shared errors fall but link-specific fragmentation rises |
 | ECP7-B23-I | Intervention | B22 sender-only replay warmup followed by restored joint replay gradients | Position-aware MLP | valid negative; joint phase recreates shared errors without improving accuracy |
 | ECP7-B24-I | Intervention | B23 sender-only warmup followed by receiver-only replay catch-up | Position-aware MLP | valid negative; new-best means but link-specific errors and injectivity fail |
+| ECP7-B25-I | Intervention | B24 receiver-only catch-up with a 45,000-step maximum horizon | Position-aware MLP | valid negative; new-best means reach the non-injective code-cap |
 
 ## Batch 1 preregistration
 
@@ -1982,3 +1983,108 @@ A future ECP7-B25 may inherit Batch 24 unchanged and extend only `max_steps` to
 45,000. This isolates whether the receiver-only phase is still improving or
 merely approaching a non-injective plateau. No coefficient, route, predicate,
 architecture, optimizer or data setting may change with that horizon test.
+
+## Batch 25 preregistration
+
+Preregistered: July 18, 2026 at 17:26:20 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `45,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Hard-meaning predicate: all `16` current population links have an incorrect factor<br>
+Replay sender-message gradients: **enabled through step 20,000; disabled from step 20,001**<br>
+Replay receiver-parameter gradients: **disabled through step 20,000; enabled from step 20,001**<br>
+Ordinary-task sender and receiver gradients: **enabled throughout**<br>
+Replay weight: `0` through step `15,000`, linear to `0.25` at step `20,000`, then hold<br>
+Replay batch size: `64` meanings, uniform with replacement<br>
+Training-only pool refresh interval: `200` steps<br>
+Replay sampler seed offset: `+1211`<br>
+Raw configuration SHA-256: `3c125aa0e21b29327b332a77f0a367633267804523eb941d5dad9eb622255387`<br>
+Effective configuration SHA-256: `00c9f13c5919f98f5b81c14c8ea2d852a1cd4be55ecbfcaf0d61abed6b9acc91`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B25-I inherits Batch 24 and changes only `training.max_steps` from
+`30,000` to `45,000`. The registered 5,000-step early-stopping patience remains
+active, so 45,000 is a ceiling rather than a required duration. All replay
+routes, timing, weights, data and selection criteria remain unchanged. The
+positive control is rerun, and no alternative horizon or accompanying
+intervention is admitted into this batch.
+
+## Batch 25 results
+
+Positive-control run: `runs/ecp7-batch25-control-development/20260718T172746Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch25-intervention-development/20260718T172746Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B25-I |
+|---|---:|---:|
+| Population train, mean | 100% | **85.2631%** |
+| Population train, worst link | 100% | 82.8125% |
+| Population validation, mean | 100% | **85.2417%** |
+| Population validation, worst link | 100% | 82.7148% |
+| Universal translator, validation | 100% | **85.1318%** |
+| Exact sender-message agreement | 100% | 92.16% |
+| Unique messages per sender | 15,360 | 12,720–13,440 |
+| Collision meanings per sender | 0 | 1,920–2,640 |
+| Message entropy | 13.91 bits | 13.54–13.64 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B25-I improves every
+primary B24 accuracy and sender agreement, setting new ECP-7 development bests
+for mean and worst-link train, mean and worst-link validation, and translator
+validation. It still fails both train thresholds and sender injectivity. The
+joint gate fails and confirmatory access remains unauthorized.
+
+All 151 optimization records through step 30,000 match Batch 24 exactly. The
+extended receiver-only phase raises mean validation from 84.45% at step 30,000
+to the selected 85.24% at step 43,800. Training reaches the 45,000-step ceiling
+with 85.09% validation, so the registered patience still does not terminate the
+run before the cap. Improvement after step 30,000 is real but slow and noisy.
+
+The all-link pool contains 1,710 meanings at step 30,000, 1,691 at step 40,000,
+1,677 at selection and 1,659 at the final step. The selected diagnostic finds
+1,677 meanings failed by all links and 2,967 failed by at least one link, with
+11.39 mean failed links per erroneous meaning. Relative to B24, the longer
+phase removes 175 any-link failures but only 13 shared failures.
+
+The selected codebooks explain the plateau. Their unique-message counts are
+13,440, 12,960, 12,720 and 13,440. Even a perfect receiver can therefore decode
+at most 87.50%, 84.38%, 82.81% and 87.50% of each sender's 15,360 training
+meanings. The mean code-cap is 85.55%; observed mean train is already 85.26%,
+and the observed worst link exactly equals the lowest 82.81% code-cap. Longer
+receiver-only optimization cannot satisfy the train gates without first
+changing sender collisions.
+
+Compared with Batch 24, B25 improves mean train by 0.58 percentage points,
+worst-link train by 0.25 points, mean validation by 0.76 points, worst-link
+validation by 0.49 points, translator validation by 0.59 points and sender
+agreement by 0.66 points. Receiver induction has caught up to the existing
+codes, but the remaining performance gap is structurally sender-side.
+
+Selected sender codebooks contain 13,440, 12,960, 12,720 and 13,440 unique
+messages, with 1,920, 2,400, 2,640 and 1,920 collision meanings. Population
+validation factor accuracies were `[99.99%, 100%, 98.44%, 86.82%]`;
+universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 86.69%]`. The stable size collisions and sender-specific
+texture caps remain the limiting structure.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 25 decision
+
+ECP7-B25-I is a valid negative result and the strongest ECP-7 development
+variant so far. The extended catch-up phase improves receiver fit but reaches
+the mathematical ceiling imposed by non-injective sender codebooks. The
+confirmatory split remains sealed, and another horizon-only extension is not
+justified.
+
+A future ECP7-B26 may test one deterministic coordinate-descent cycle while
+keeping Batch 25's 45,000-step ceiling: sender-only replay through step 20,000,
+receiver-only through 30,000, a second sender-only separation pulse through
+35,000, and receiver-only catch-up afterward. The second sender pulse reuses the
+registered 5,000-step duration and directly tests whether saturated receivers
+provide a better fixed target for breaking remaining sender collisions. No
+other setting may change.
