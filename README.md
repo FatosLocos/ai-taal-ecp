@@ -26,12 +26,11 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first three sealed batches are valid
-negative results. A generic sender collapsed to 130–139 messages, soft
-utilization reduced this to 85–104, and straight-through hard utilization
-improved it to 585–972 messages and 1.92% validation. The ECP-6 positive
-controls remained perfect. The direction is informative but still far below
-the development gate, so the ECP-7 confirmatory test remains sealed. See
+one-factor-per-slot architecture. Its first four sealed batches are valid
+negative results. Straight-through hard utilization remains the best weakly
+structured variant at 585–972 messages and 1.92% validation. A direct minibatch
+collision penalty regressed to 426–579 messages and 0.42%. The ECP-6 positive
+controls remained perfect. The ECP-7 confirmatory test remains sealed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -75,6 +74,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-development.yaml`](config/ecp7-development.yaml) — sealed weak-structure intervention configuration.
 - [`config/ecp7-b2-development.yaml`](config/ecp7-b2-development.yaml) — factor-agnostic soft code-utilization intervention.
 - [`config/ecp7-b3-development.yaml`](config/ecp7-b3-development.yaml) — the same utilization formula on straight-through hard messages.
+- [`config/ecp7-b4-development.yaml`](config/ecp7-b4-development.yaml) — direct joint-message collision pressure on top of Batch 3.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

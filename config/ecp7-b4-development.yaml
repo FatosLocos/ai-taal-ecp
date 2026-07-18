@@ -1,0 +1,15 @@
+extends: ecp7-b3-development.yaml
+
+experiment:
+  title: ECP-7 direct joint-message collision development
+  arm: straight_through_joint_collision
+  objective: >-
+    Test whether directly penalizing complete straight-through message
+    collisions between distinct inputs closes the higher-order utilization gap
+    left by marginal entropy and pairwise slot independence.
+
+training:
+  joint_message_collision:
+    enabled: true
+    weight: 1.0
+    warmup_steps: 400

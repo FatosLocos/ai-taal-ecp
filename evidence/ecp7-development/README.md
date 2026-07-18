@@ -24,6 +24,11 @@ It remained below the gate but improved to 585–972 hard messages, 8.20–8.73
 bits of entropy and 1.92% validation. Exact identities and hashes are in
 `batch3-manifest.json`.
 
+Batch 4 added direct minibatch full-message collision pressure. It regressed to
+426–579 messages and 0.42% validation, showing that the sparse local signal was
+not a useful proxy for global codebook occupancy. Exact identities and hashes
+are in `batch4-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
