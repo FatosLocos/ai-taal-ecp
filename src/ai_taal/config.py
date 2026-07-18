@@ -291,6 +291,13 @@ def validate_config(config: dict[str, Any]) -> None:
         batch_size = hard_replay.get("batch_size", 0)
         refresh_interval = hard_replay.get("refresh_interval", 0)
         minimum_failed_links = hard_replay.get("minimum_failed_links", 1)
+        receiver_parameter_gradients = hard_replay.get(
+            "receiver_parameter_gradients", True
+        )
+        if not isinstance(receiver_parameter_gradients, bool):
+            raise ConfigError(
+                "Global hard-meaning replay receiver parameter gradients must be boolean."
+            )
         for value, label in (
             (start_step, "start"),
             (warmup_steps, "warmup"),

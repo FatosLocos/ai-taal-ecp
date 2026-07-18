@@ -117,6 +117,12 @@ validation plus 92.96% sender agreement, but mean train remained 83.71% and the
 target shared-error pool grew. Exact identities and hashes are in
 `batch21-manifest.json`.
 
+Batch 22 blocked receiver-parameter gradients only on the additional all-link
+replay loss. Shared errors fell from 1,745 to 1,513 at selection, but the total
+any-link pool grew to 3,197 and validation regressed to 83.51%. Sender-only
+routing therefore trades shared ambiguity for cross-link fragmentation. Exact
+identities and hashes are in `batch22-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

@@ -739,3 +739,29 @@ def test_hard_meaning_failed_link_threshold_must_fit_population(
     ] = 17
     with pytest.raises(ConfigError, match="must fit the population"):
         validate_config(invalid)
+
+
+def test_ecp7_b22_changes_only_hard_replay_gradient_routing(
+    ecp7_b21_config, ecp7_b22_config
+):
+    assert ecp7_b22_config["world"] == ecp7_b21_config["world"]
+    assert ecp7_b22_config["dataset"] == ecp7_b21_config["dataset"]
+    assert ecp7_b22_config["channel"] == ecp7_b21_config["channel"]
+    assert ecp7_b22_config["agents"] == ecp7_b21_config["agents"]
+    b21_training = deepcopy(ecp7_b21_config["training"])
+    b22_training = deepcopy(ecp7_b22_config["training"])
+    assert b22_training["global_hard_meaning_replay"].pop(
+        "receiver_parameter_gradients"
+    ) is False
+    assert b22_training == b21_training
+
+
+def test_hard_replay_receiver_gradient_routing_must_be_boolean(
+    ecp7_b22_config,
+):
+    invalid = deepcopy(ecp7_b22_config)
+    invalid["training"]["global_hard_meaning_replay"][
+        "receiver_parameter_gradients"
+    ] = 0
+    with pytest.raises(ConfigError, match="gradients must be boolean"):
+        validate_config(invalid)

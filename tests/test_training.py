@@ -27,6 +27,7 @@ from ai_taal.training import (
     mine_sender_collision_pairs,
     normalized_factor_minimax_loss,
     relaxed_collision_pair_probability,
+    routed_population_reconstruction_loss,
     slot_binding_consensus_loss,
     straight_through_joint_collision_loss,
     straight_through_sender_consensus_loss,
@@ -384,6 +385,76 @@ def test_hard_meaning_mining_returns_union_of_population_link_errors():
     )
 
     assert shared_hard_indices.tolist() == [1]
+
+
+def test_sender_only_replay_routes_gradients_around_receiver_parameters(
+    ecp7_b22_config,
+):
+    population = PopulationSystem(
+        ModelSpec.from_config(ecp7_b22_config),
+        sender_count=2,
+        receiver_count=2,
+    )
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]],
+        dtype=torch.long,
+    )
+    messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+
+    loss = routed_population_reconstruction_loss(
+        population,
+        messages,
+        meanings,
+        receiver_parameter_gradients=False,
+    )
+    loss.backward()
+
+    assert any(
+        parameter.grad is not None
+        and bool(torch.any(parameter.grad != 0))
+        for parameter in population.senders.parameters()
+    )
+    assert all(
+        parameter.grad is None
+        for parameter in population.receivers.parameters()
+    )
+    assert all(
+        parameter.requires_grad
+        for parameter in population.receivers.parameters()
+    )
+
+    population.zero_grad(set_to_none=True)
+    base_messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+    base_loss = routed_population_reconstruction_loss(
+        population,
+        base_messages,
+        meanings,
+        receiver_parameter_gradients=True,
+    )
+    replay_messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+    sender_only_loss = routed_population_reconstruction_loss(
+        population,
+        replay_messages,
+        meanings,
+        receiver_parameter_gradients=False,
+    )
+
+    (base_loss + sender_only_loss).backward()
+
+    assert any(
+        parameter.grad is not None
+        and bool(torch.any(parameter.grad != 0))
+        for parameter in population.receivers.parameters()
+    )
 
 
 def test_relaxed_collision_replay_measures_full_message_probability():

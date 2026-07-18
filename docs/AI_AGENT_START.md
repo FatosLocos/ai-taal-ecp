@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 111 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 114 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 21
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 22
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -130,11 +130,16 @@ ECP7-B21-I restricted the same replay budget to meanings failed by all 16
 population links. It reached a new-best 83.63% mean and 82.62% worst-link
 validation and 92.96% sender agreement, but mean train remained 83.71% and the
 target shared-error pool grew. The confirmatory ECP-7 test remains sealed.
+ECP7-B22-I blocked receiver-parameter gradients only for the additional replay
+loss. Its shared-error pool fell from 1,745 to 1,513 at selection, but the total
+any-link pool grew to 3,197, sender agreement fell to 92.06% and validation
+regressed to 83.51%. Train thresholds and injectivity still failed, and the
+confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B22 intervention and its failure criterion.
+2. Define exactly one ECP7-B23 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -147,25 +152,24 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 21 directly targets population-shared errors, but its all-link pool grows
-from 1,745 to 1,997 at the selected checkpoint while validation and sender
-agreement improve. This suggests that joint replay updates align receivers and
-senders around persistent ambiguous codes rather than forcing senders to move.
-The clean next question is whether replay gradients must be sender-only. A clean
-ECP7-B22 progression is:
+Batch 22 confirms that sender-only replay reduces shared errors, but receivers
+cannot follow the moving codes quickly enough: any-link failures rise and
+agreement falls. Batch 21 shows the opposite joint-routing behavior. The clean
+next question is whether routing should be phased rather than permanent. A clean
+ECP7-B23 progression is:
 
-- inherit the complete Batch 21 predicate, Batch 20 replay mechanism and Batch
-  15 base;
-- change only replay-loss gradient routing so receiver parameters are treated as
-  fixed during the additional replay forward pass;
+- inherit the complete Batch 22 implementation, Batch 21 predicate and Batch 15
+  base;
+- keep replay sender-only only during its registered steps 15,000–20,000
+  warmup, then restore receiver-parameter replay gradients after step 20,000;
 - keep ordinary base-task updates to both senders and receivers unchanged;
 - keep weight `0.25`, the 64-meaning replay batch, 200-step refresh,
-  seed-derived sampler, warmup, temperature and horizon unchanged;
+  seed-derived sampler, predicate, temperature and horizon unchanged;
 - continue to mine and replay training meanings only;
-- measure shared-error pool size, train exactness, injectivity, validation and
-  new-reader induction, and rerun the frozen ECP-6 positive control.
+- measure shared and any-link pool sizes, train exactness, injectivity,
+  validation and new-reader induction, and rerun the frozen ECP-6 control.
 
-Do not combine gradient routing with another predicate, coefficient, graded
+Do not combine the routing schedule with another predicate, coefficient, graded
 sampling, collision pressure, a new architecture, factor-specific weights,
 optimizer changes, longer training, variable-length messages or negotiation.
 
