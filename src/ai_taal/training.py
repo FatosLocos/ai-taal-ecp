@@ -362,11 +362,8 @@ def train_population_system(
                     )
                 ]
             ).mean()
-            utilization_warmup = max(
-                int(utilization_config.get("warmup_steps", 1)), 1
-            )
-            utilization_weight = float(utilization_config["weight"]) * min(
-                step / utilization_warmup, 1.0
+            utilization_weight = _scheduled_code_utilization_weight(
+                utilization_config, step
             )
         joint_collision_loss = torch.zeros((), device=device)
         joint_collision_weight = 0.0
@@ -1024,4 +1021,24 @@ def _scheduled_temperature(
     return _geometric_schedule(
         training["temperature_start"], training["temperature_end"], progress
     )
-    make_receiver,
+
+
+def _scheduled_code_utilization_weight(
+    utilization_config: dict[str, Any], step: int
+) -> float:
+    initial_weight = float(utilization_config["weight"])
+    warmup_steps = max(int(utilization_config.get("warmup_steps", 1)), 1)
+    weight = initial_weight * min(step / warmup_steps, 1.0)
+    decay = utilization_config.get("weight_decay", {})
+    if not decay.get("enabled", False):
+        return weight
+
+    start_step = int(decay["start_step"])
+    if step <= start_step:
+        return weight
+    end_step = int(decay["end_step"])
+    final_weight = float(decay["final_weight"])
+    if step >= end_step:
+        return final_weight
+    progress = min((step - start_step) / (end_step - start_step), 1.0)
+    return initial_weight + (final_weight - initial_weight) * progress

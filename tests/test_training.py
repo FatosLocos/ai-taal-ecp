@@ -11,6 +11,7 @@ from ai_taal.models import (
     Sender,
 )
 from ai_taal.training import (
+    _scheduled_code_utilization_weight,
     _scheduled_temperature,
     algebraic_consistency_loss,
     atom_code_consensus_loss,
@@ -58,6 +59,16 @@ def test_extended_horizon_preserves_then_holds_the_registered_temperature(
     assert _scheduled_temperature(ecp7_b10_config["training"], 15000, 15000) == (
         final_temperature
     )
+
+
+def test_utilization_weight_holds_then_decays_linearly(ecp7_b11_config):
+    utilization = ecp7_b11_config["training"]["code_utilization"]
+    assert _scheduled_code_utilization_weight(utilization, 1) == 0.0025
+    assert _scheduled_code_utilization_weight(utilization, 400) == 1.0
+    assert _scheduled_code_utilization_weight(utilization, 5000) == 1.0
+    assert _scheduled_code_utilization_weight(utilization, 10000) == 0.55
+    assert _scheduled_code_utilization_weight(utilization, 15000) == 0.1
+    assert _scheduled_code_utilization_weight(utilization, 16000) == 0.1
 
 
 def test_algebraic_quadruples_use_only_training_meanings_and_same_transition(

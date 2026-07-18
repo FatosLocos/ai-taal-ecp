@@ -391,3 +391,44 @@ def test_temperature_schedule_steps_must_fit_the_training_horizon(
     invalid_long["training"]["temperature_schedule_steps"] = 15001
     with pytest.raises(ConfigError, match="cannot exceed max_steps"):
         validate_config(invalid_long)
+
+
+def test_ecp7_b11_changes_only_the_code_utilization_weight_schedule(
+    ecp7_b10_config, ecp7_b11_config
+):
+    assert ecp7_b11_config["world"] == ecp7_b10_config["world"]
+    assert ecp7_b11_config["dataset"] == ecp7_b10_config["dataset"]
+    assert ecp7_b11_config["channel"] == ecp7_b10_config["channel"]
+    assert ecp7_b11_config["agents"] == ecp7_b10_config["agents"]
+    b10_training = deepcopy(ecp7_b10_config["training"])
+    b11_training = deepcopy(ecp7_b11_config["training"])
+    assert b11_training["code_utilization"].pop("weight_decay") == {
+        "enabled": True,
+        "start_step": 5000,
+        "end_step": 15000,
+        "final_weight": 0.1,
+    }
+    assert b11_training == b10_training
+
+
+def test_code_utilization_weight_decay_must_be_bounded(ecp7_b11_config):
+    before_warmup = deepcopy(ecp7_b11_config)
+    before_warmup["training"]["code_utilization"]["weight_decay"][
+        "start_step"
+    ] = 399
+    with pytest.raises(ConfigError, match="before warmup"):
+        validate_config(before_warmup)
+
+    after_training = deepcopy(ecp7_b11_config)
+    after_training["training"]["code_utilization"]["weight_decay"][
+        "end_step"
+    ] = 15001
+    with pytest.raises(ConfigError, match="fit max_steps"):
+        validate_config(after_training)
+
+    excessive_final = deepcopy(ecp7_b11_config)
+    excessive_final["training"]["code_utilization"]["weight_decay"][
+        "final_weight"
+    ] = 1.0
+    with pytest.raises(ConfigError, match="below its initial weight"):
+        validate_config(excessive_final)

@@ -156,6 +156,27 @@ def validate_config(config: dict[str, Any]) -> None:
             raise ConfigError(
                 "Code-utilization message_source must be relaxed or straight_through."
             )
+        weight_decay = utilization.get("weight_decay", {})
+        if weight_decay.get("enabled", False):
+            start_step = weight_decay.get("start_step", 0)
+            end_step = weight_decay.get("end_step", 0)
+            final_weight = weight_decay.get("final_weight", -1)
+            if not isinstance(start_step, int) or isinstance(start_step, bool):
+                raise ConfigError("Code-utilization decay start must be an integer.")
+            if not isinstance(end_step, int) or isinstance(end_step, bool):
+                raise ConfigError("Code-utilization decay end must be an integer.")
+            if start_step < utilization["warmup_steps"]:
+                raise ConfigError(
+                    "Code-utilization decay cannot start before warmup completes."
+                )
+            if end_step <= start_step or end_step > training["max_steps"]:
+                raise ConfigError(
+                    "Code-utilization decay end must follow its start and fit max_steps."
+                )
+            if final_weight < 0 or final_weight >= utilization["weight"]:
+                raise ConfigError(
+                    "Code-utilization final weight must be non-negative and below its initial weight."
+                )
 
     joint_collision = training.get("joint_message_collision", {})
     if joint_collision.get("enabled", False):

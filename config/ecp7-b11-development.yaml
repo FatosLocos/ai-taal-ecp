@@ -1,0 +1,17 @@
+extends: ecp7-b10-development.yaml
+
+experiment:
+  title: ECP-7 extended optimization with utilization-weight decay
+  arm: extended_optimization_utilization_weight_decay
+  objective: >-
+    Test whether reducing the established code-utilization pressure after the
+    original 5,000-step horizon lets the task objective resolve residual
+    collisions without removing the anti-collapse signal.
+
+training:
+  code_utilization:
+    weight_decay:
+      enabled: true
+      start_step: 5000
+      end_step: 15000
+      final_weight: 0.1
