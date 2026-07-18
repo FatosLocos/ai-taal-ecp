@@ -1,0 +1,14 @@
+extends: ecp7-b10-development.yaml
+
+experiment:
+  title: ECP-7 position-aware decoder with a 30,000-step horizon
+  arm: position_aware_decoder_30000_step_optimization
+  objective: >-
+    Test whether continued constant-rate optimization beyond the strongest
+    15,000-step checkpoint can cross the remaining development gates without
+    changing the architecture, losses, or temperature schedule.
+
+training:
+  max_steps: 30000
+  minimum_steps: 15000
+  patience_steps: 5000

@@ -1,0 +1,43 @@
+{
+  "batch": "ECP7-B15",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "751c592fb1921d6f6fb5d68bd7b7b351523766db3f4aa6be7f1412c3130937a4",
+      "seed-11/metrics.json": "708b3c84a8c4a6b086b34a55f6d388c637fbf65c076555c7a9912526f5684f47",
+      "summary.json": "8cb14faab55e787d62dcaabd9ac2215fa100b21dc58d4bfc6b91505348f4c5c0"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T134437Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "218926e9313ba3dfb7ae3fc52fd3fa8a2f954627253f6d00fbf76109d01aeca5",
+      "posthoc-analysis.json": "b471cb9c8e69fa5bfaf5bf20eff060924911a31969b8ae0a321e6c126b9a4c6b",
+      "seed-11/metrics.json": "baeb1840fab41d08655ec4cff90e77d98b04f45ea33cb2140589c79e7f1dd841",
+      "summary.json": "4565ca20b499167f99ed2463185d097c4e6fbe563611682141630300036a1ff0"
+    },
+    "best_code_utilization_loss": -0.7398611903190613,
+    "best_step": 28800,
+    "collision_meanings_per_sender": [2520, 2490, 2775, 2160],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.9232530381944444,
+    "message_entropy_bits_per_sender": [13.56107291977656, 13.56497916977656, 13.516074677555256, 13.60794791977656],
+    "population_train_mean_exact_match": 0.8346121651785714,
+    "population_train_worst_link_exact_match": 0.8193359375,
+    "population_validation_factor_accuracy": [0.9886474609375, 0.99749755859375, 0.984375, 0.8504638671875],
+    "population_validation_mean_exact_match": 0.82586669921875,
+    "population_validation_worst_link_exact_match": 0.7978515625,
+    "run_id": "20260718T134437Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.833740234375,
+    "unique_messages_per_sender": [12840, 12870, 12585, 13200]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

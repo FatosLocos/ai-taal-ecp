@@ -511,3 +511,21 @@ def test_learning_rate_decay_must_be_bounded(ecp7_b14_config):
     ] = 0.001
     with pytest.raises(ConfigError, match="below its initial value"):
         validate_config(invalid_final)
+
+
+def test_ecp7_b15_changes_only_the_population_optimization_horizon(
+    ecp7_b10_config, ecp7_b15_config
+):
+    assert ecp7_b15_config["world"] == ecp7_b10_config["world"]
+    assert ecp7_b15_config["dataset"] == ecp7_b10_config["dataset"]
+    assert ecp7_b15_config["channel"] == ecp7_b10_config["channel"]
+    assert ecp7_b15_config["agents"] == ecp7_b10_config["agents"]
+    b10_training = deepcopy(ecp7_b10_config["training"])
+    b15_training = deepcopy(ecp7_b15_config["training"])
+    assert b10_training.pop("max_steps") == 15000
+    assert b15_training.pop("max_steps") == 30000
+    assert b10_training.pop("minimum_steps") == 5000
+    assert b15_training.pop("minimum_steps") == 15000
+    assert b10_training.pop("patience_steps") == 3000
+    assert b15_training.pop("patience_steps") == 5000
+    assert b15_training == b10_training

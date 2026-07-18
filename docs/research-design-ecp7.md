@@ -626,3 +626,40 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative final rate, decay
 shape, decay boundary, architecture, loss, duration, optimizer or seed may be
 tried inside Batch 14.
+
+## Batch 15 preregistration — 30,000-step optimization horizon
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b15-development.yaml`<br>
+Raw configuration SHA-256: `2b4ed0979cb1f6a6aac0409e2624bf982fd020306492706f4aa0e6b3a8c9d15d`<br>
+Effective configuration SHA-256: `d60b8a9aebe75514560b35790a3de9674990724fff0a9c52283c91ff429a487b`
+
+Batch 10 selected its final 15,000-step checkpoint. Batch 14 showed that
+decaying late learning rate harms validation, while Batches 11–13 rejected loss
+removal and added capacity. Batch 15 therefore tests one remaining optimization
+hypothesis: the constant-rate B10 trajectory needs more time.
+
+ECP7-B15-I keeps the complete B10 architecture, sender, receiver, translator,
+losses, AdamW settings, data, temperature schedule, evaluation cadence and
+thresholds. It changes only the population optimization horizon and associated
+selection window:
+
+- maximum population steps increase from 15,000 to 30,000;
+- minimum selection steps increase from 5,000 to 15,000;
+- early-stopping patience increases from 3,000 to 5,000 steps;
+- learning rate remains constant at `0.001`;
+- temperature still reaches `0.8` at step 5,000 and holds thereafter.
+
+Translator training remains unchanged. Smoke runs are mechanical only and may
+not authorize tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B15-I with the extended B10 population optimization horizon.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative horizon, patience,
+learning rate, architecture, loss, temperature, optimizer or seed may be tried
+inside Batch 15.

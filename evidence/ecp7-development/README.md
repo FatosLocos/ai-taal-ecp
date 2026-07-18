@@ -78,6 +78,11 @@ exactness, 65.49% validation and 71.02% translator validation. Constant late
 learning rate is therefore retained. Exact identities and hashes are in
 `batch14-manifest.json`.
 
+Batch 15 extended the constant-rate horizon to 30,000 steps. It reached 83.46%
+train exactness, 82.59% validation and 83.37% translator validation. Validation
+and translator gates passed together, but train exactness and injectivity still
+failed. Exact identities and hashes are in `batch15-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
