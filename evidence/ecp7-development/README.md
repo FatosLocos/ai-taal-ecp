@@ -29,6 +29,11 @@ Batch 4 added direct minibatch full-message collision pressure. It regressed to
 not a useful proxy for global codebook occupancy. Exact identities and hashes
 are in `batch4-manifest.json`.
 
+Batch 5 aligned straight-through symbols across independent senders on the
+Batch 3 base. Exact complete-message agreement rose from 2.47% to 44.02%, but
+the shared protocol collapsed to 169–231 messages and 0.48% validation. Exact
+identities and hashes are in `batch5-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

@@ -209,6 +209,12 @@ def train_population_system(
         joint_collision_config.get("weight", 0.0)
     ) < 0:
         raise ValueError("Joint-collision weight cannot be negative.")
+    sender_consensus_config = training.get("sender_message_consensus", {})
+    sender_consensus_enabled = bool(sender_consensus_config.get("enabled", False))
+    if sender_consensus_enabled and float(
+        sender_consensus_config.get("weight", 0.0)
+    ) < 0:
+        raise ValueError("Sender-message consensus weight cannot be negative.")
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
             "Population training supports all_senders_all_receivers only."
@@ -362,6 +368,16 @@ def train_population_system(
             joint_collision_weight = float(
                 joint_collision_config["weight"]
             ) * min(step / joint_collision_warmup, 1.0)
+        sender_consensus_loss = torch.zeros((), device=device)
+        sender_consensus_weight = 0.0
+        if sender_consensus_enabled:
+            sender_consensus_loss = straight_through_sender_consensus_loss(messages)
+            sender_consensus_warmup = max(
+                int(sender_consensus_config.get("warmup_steps", 1)), 1
+            )
+            sender_consensus_weight = float(
+                sender_consensus_config["weight"]
+            ) * min(step / sender_consensus_warmup, 1.0)
         loss = (
             task_loss
             + consistency_weight * consistency_loss
@@ -369,6 +385,7 @@ def train_population_system(
             + atom_consensus_weight * atom_consensus_loss
             + utilization_weight * utilization_loss
             + joint_collision_weight * joint_collision_loss
+            + sender_consensus_weight * sender_consensus_loss
         )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -405,6 +422,12 @@ def train_population_system(
                     joint_collision_loss.detach().cpu()
                 ),
                 "joint_message_collision_weight": float(joint_collision_weight),
+                "sender_message_consensus_loss": float(
+                    sender_consensus_loss.detach().cpu()
+                ),
+                "sender_message_consensus_weight": float(
+                    sender_consensus_weight
+                ),
                 "temperature": float(temperature),
                 "train_mean_exact": train_metrics["mean_exact_match"],
                 "train_worst_pair_exact": train_metrics["worst_pair_exact_match"],
@@ -635,6 +658,30 @@ def straight_through_joint_collision_loss(
     same_input = meanings[:, None, :].eq(meanings[None, :, :]).all(dim=-1)
     distinct_input = (~same_input).to(full_message_agreement.dtype)
     return (full_message_agreement * distinct_input).sum() / meanings.shape[0]
+
+
+def straight_through_sender_consensus_loss(
+    message_distributions: list[Tensor],
+) -> Tensor:
+    """Align complete straight-through messages across independent senders."""
+    if len(message_distributions) < 2:
+        raise ValueError("Sender consensus requires at least two senders.")
+    reference_shape = message_distributions[0].shape
+    if len(reference_shape) != 3:
+        raise ValueError(
+            "Sender-consensus messages must have shape [batch,slots,vocab]."
+        )
+    if any(
+        message.shape != reference_shape for message in message_distributions[1:]
+    ):
+        raise ValueError("Sender-consensus messages must share one shape.")
+
+    pair_losses = []
+    for left_index, left in enumerate(message_distributions):
+        for right in message_distributions[left_index + 1 :]:
+            symbol_agreement = (left * right).sum(dim=-1)
+            pair_losses.append(1.0 - symbol_agreement.mean())
+    return torch.stack(pair_losses).mean()
 
 
 def build_algebraic_quadruples(

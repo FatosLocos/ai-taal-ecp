@@ -268,3 +268,74 @@ confirmatory split remains sealed. The strongest weak-structure variant remains
 ECP7-B3-I. A future ECP7-B5 may add one straight-through sender-consensus loss
 to B3, testing whether a shared factor-agnostic convention helps receivers
 without restoring semantic slot assignments.
+
+## Batch 5 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B5-I returns to the Batch 3 configuration and adds exactly one
+factor-agnostic loss: mean straight-through symbol disagreement between every
+sender pair on the same minibatch. Its fixed formula, weight and warmup are
+recorded in `docs/research-design-ecp7.md`. The Batch 4 collision loss is not
+retained. The unchanged positive control is rerun. Smoke is mechanical only
+and cannot authorize tuning.
+
+## Batch 5 results
+
+Positive-control run: `runs/ecp7-batch5-control-development/20260718T112234Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch5-intervention-development/20260718T112234Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B5-I |
+|---|---:|---:|
+| Population train, mean | 100% | 0.1818% |
+| Population train, worst link | 100% | 0.1256% |
+| Population validation, mean | 100% | 0.4761% |
+| Population validation, worst link | 100% | 0.1953% |
+| Universal translator, validation | 100% | 0.5859% |
+| Exact sender-message agreement | 100% | 44.02% |
+| Unique messages per sender | 15,360 | 169–231 |
+| Collision meanings per sender | 0 | 15,129–15,191 |
+| Message entropy | 13.91 bits | 6.02–6.13 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B5-I failed the
+population, validation, translator and injectivity gates. It stopped at step
+2,000 under the unchanged early-stopping rule, with step 400 selected.
+
+The intervention answered its narrow question: exact complete-message
+agreement between sender pairs increased from Batch 3's 2.47% to 44.02%.
+However, the shared convention was mostly a shared collapse. Unique messages
+fell from Batch 3's 585–972 to 169–231 and entropy fell from 8.20–8.73 to
+6.02–6.13 bits. At the selected checkpoint, sender-consensus loss was `0.2673`
+and hard-utilization loss was only `-0.5350`, compared with Batch 3's selected
+hard-utilization value of approximately `-0.7075`.
+
+Population validation factor accuracies were approximately
+`[6.43%, 6.31%, 64.42%, 78.00%]`. Consensus therefore did not recover color or
+shape and also weakened size and texture. Population validation fell from
+Batch 3's 1.9226% to 0.4761%; translator validation fell from 2.2705% to
+0.5859%.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 5 decision
+
+ECP7-B5-I is recorded as a negative development result and is not retained. It
+shows that inter-sender agreement is not sufficient: without a stronger
+semantic pressure, independent senders can agree by discarding distinctions.
+The confirmatory split remains sealed and ECP7-B3-I remains the strongest
+weak-structure variant.
+
+Across B3–B5, color and especially shape remain the persistent bottleneck while
+size and texture are easier to learn. A future ECP7-B6 may return to B3 and add
+one minimax factor-reconstruction objective that emphasizes the currently
+worst decoded factor without assigning any factor to a channel slot. It must
+not retain the rejected B4 or B5 losses or change the architecture at the same
+time.
