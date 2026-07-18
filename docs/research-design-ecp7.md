@@ -356,3 +356,44 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No receiver change, hidden-size
 change, extra loss, longer duration or alternative parallel architecture may be
 tried inside Batch 7.
+
+## Batch 8 preregistration — Algebraic context invariance
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b8-development.yaml`<br>
+Raw configuration SHA-256: `3eac0d25bf636d4a1aeb6161ad479a4a78f0a3e88788a0274c154c21ff192829`<br>
+Effective configuration SHA-256: `6e8f9ea0e968693bd9f67a4ca1180ab447c6e2d6c2fbc6b9f9a66582aa02fa3c`
+
+Batch 7 greatly improved training exactness and code-space use, but those
+distinctions did not compose across the held-out color-shape matching. Batch 8
+retains the entire B7 architecture and loss set, then activates one existing
+context-invariance objective that was previously disabled.
+
+Every training quadruple contains meanings `A`, `B`, `A'`, and `B'`. The
+transitions `A→A'` and `B→B'` change the same factor value in two different
+contexts, and all four meanings belong to the training split. For relaxed
+message distributions `m`, the objective is:
+
+`L_alg = mean ||(m(A') - m(A)) - (m(B') - m(B))||²`
+
+This encourages the same atomic semantic change to produce the same message
+displacement regardless of the other factor values. It uses factor identities
+only to construct matching transitions. It does not specify a target message,
+symbol, channel slot, factor-to-slot binding or codebook.
+
+The loss weight is fixed at `1.0` with an 800-step linear warmup, relaxed
+temperature `1.0`, 32 quadruples per update and a deterministic pool of 8,192
+training-only quadruples. These values match the dormant inherited settings;
+only `enabled` and `weight` change from B7. The parallel sender, generic
+receiver, hard-utilization loss, channel, split, training duration, selection
+and translator remain unchanged.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B8-I with algebraic context invariance on the B7 parallel sender.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative quadruple sampling,
+weight, warmup, receiver, architecture or duration may be tried inside Batch 8.

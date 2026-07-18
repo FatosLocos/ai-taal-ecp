@@ -1,0 +1,18 @@
+extends: ecp7-b7-development.yaml
+
+experiment:
+  title: ECP-7 parallel sender with context-invariant transitions
+  arm: parallel_sender_algebraic_consistency
+  objective: >-
+    Test whether making the same atomic meaning change produce the same relaxed
+    message displacement across training contexts converts the parallel
+    sender's memorized distinctions into a compositional protocol.
+
+training:
+  algebraic_consistency:
+    enabled: true
+    weight: 1.0
+    warmup_steps: 800
+    relaxed_temperature: 1.0
+    batch_size: 32
+    quadruple_pool_size: 8192

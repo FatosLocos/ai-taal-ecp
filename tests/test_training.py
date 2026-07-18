@@ -4,6 +4,7 @@ import torch
 
 from ai_taal.models import (
     BoundedAutoregressiveSender,
+    BoundedParallelSender,
     FactorizedPermutationSlotReceiver,
     ModelSpec,
     PopulationSystem,
@@ -70,6 +71,26 @@ def test_algebraic_quadruples_use_only_training_meanings_and_same_transition(
 def test_algebraic_consistency_loss_backpropagates(ecp2_config):
     split = build_splits(ecp2_config)
     sender = Sender(ModelSpec.from_config(ecp2_config))
+    quadruples = build_algebraic_quadruples(
+        split.train,
+        factor_sizes=sender.spec.factor_sizes,
+        sample_count=8,
+        seed=456,
+    )
+
+    loss = algebraic_consistency_loss(sender, quadruples, temperature=1.0)
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert loss.item() >= 0.0
+    assert any(parameter.grad is not None for parameter in sender.parameters())
+
+
+def test_algebraic_consistency_supports_the_bounded_parallel_sender(
+    ecp7_b8_config,
+):
+    split = build_splits(ecp7_b8_config)
+    sender = BoundedParallelSender(ModelSpec.from_config(ecp7_b8_config))
     quadruples = build_algebraic_quadruples(
         split.train,
         factor_sizes=sender.spec.factor_sizes,

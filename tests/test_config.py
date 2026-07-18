@@ -297,3 +297,34 @@ def test_ecp7_b7_changes_only_the_sender_generation_architecture(
     assert "joint_message_collision" not in b7_training
     assert "sender_message_consensus" not in b7_training
     assert "factor_minimax" not in b7_training
+
+
+def test_ecp7_b8_adds_only_algebraic_context_invariance(
+    ecp7_b7_config, ecp7_b8_config
+):
+    assert ecp7_b8_config["world"] == ecp7_b7_config["world"]
+    assert ecp7_b8_config["dataset"] == ecp7_b7_config["dataset"]
+    assert ecp7_b8_config["channel"] == ecp7_b7_config["channel"]
+    assert ecp7_b8_config["agents"] == ecp7_b7_config["agents"]
+    b7_training = deepcopy(ecp7_b7_config["training"])
+    b8_training = deepcopy(ecp7_b8_config["training"])
+    assert b7_training.pop("algebraic_consistency") == {
+        "enabled": False,
+        "weight": 0.0,
+        "warmup_steps": 800,
+        "relaxed_temperature": 1.0,
+        "batch_size": 32,
+        "quadruple_pool_size": 8192,
+    }
+    assert b8_training.pop("algebraic_consistency") == {
+        "enabled": True,
+        "weight": 1.0,
+        "warmup_steps": 800,
+        "relaxed_temperature": 1.0,
+        "batch_size": 32,
+        "quadruple_pool_size": 8192,
+    }
+    assert b8_training == b7_training
+    assert "joint_message_collision" not in b8_training
+    assert "sender_message_consensus" not in b8_training
+    assert "factor_minimax" not in b8_training

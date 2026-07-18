@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 68 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 70 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 7
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 8
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -84,12 +84,14 @@ remained near chance and validation reached only 0.46%. All paired ECP-6
 positive controls stayed perfect. ECP7-B7-I replaced autoregression with a
 parallel joint-context sender. It increased train exactness to 9.60% and used
 3,118–3,415 messages, but shape stayed below chance and validation reached only
-0.51%. The confirmatory ECP-7 test is still sealed.
+0.51%. ECP7-B8-I added context-invariant atomic transitions, but regressed to
+857–1,135 messages and 0.32% validation. The confirmatory ECP-7 test is still
+sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B8 intervention and its failure criterion.
+2. Define exactly one ECP7-B9 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -103,20 +105,20 @@ Continue with this sequence:
 ## 6. Recommended next experiment
 
 Batch 7 is the strongest optimization result but still memorizes rather than
-composes: train exactness and code-space use increased sharply, while held-out
-color-shape exactness remained low. The most informative next step is one
-context-invariance objective on the parallel sender. A clean ECP7-B8
-progression is:
+composes. Batch 8 context invariance suppressed that gain. B7 messages change
+when shape changes, and its fresh universal translator decodes shape better
+than its jointly trained recurrent receivers. The most informative next step is
+one generic decoder change. A clean ECP7-B9 progression is:
 
 - keep the same world and bit budget;
 - keep the joint autoregressive sender and generic isolated receiver;
-- keep the B7 sender and receiver, then add the existing algebraic consistency
-  loss for identical atomic factor transitions across different contexts;
+- keep the B7 sender and losses, then replace the GRU final-state decoder with
+  one position-aware MLP over all four embedded message slots;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not restore the Batch 4, Batch 5 or Batch 6 terms, and do not combine
-context-invariance with receiver changes, architectural resizing, longer
+Do not restore the Batch 4 through Batch 6 or Batch 8 terms, and do not combine
+the receiver change with sender changes, architectural resizing, longer
 training, variable-length messages or negotiation. That would make its effect
 uninterpretable.
 
