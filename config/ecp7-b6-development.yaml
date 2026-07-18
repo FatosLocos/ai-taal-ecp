@@ -1,0 +1,15 @@
+extends: ecp7-b3-development.yaml
+
+experiment:
+  title: ECP-7 normalized factor-minimax development
+  arm: normalized_factor_minimax
+  objective: >-
+    Test whether emphasizing the worst relative factor-reconstruction loss
+    prevents the generic communication system from neglecting color or shape
+    without assigning any semantic factor to a channel slot.
+
+training:
+  factor_minimax:
+    enabled: true
+    weight: 1.0
+    warmup_steps: 400

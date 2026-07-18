@@ -34,6 +34,10 @@ Batch 3 base. Exact complete-message agreement rose from 2.47% to 44.02%, but
 the shared protocol collapsed to 169–231 messages and 0.48% validation. Exact
 identities and hashes are in `batch5-manifest.json`.
 
+Batch 6 emphasized the worst normalized factor-reconstruction loss. Color and
+shape remained near chance, and the protocol used only 313–542 messages with
+0.46% validation. Exact identities and hashes are in `batch6-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

@@ -15,6 +15,7 @@ from ai_taal.training import (
     build_algebraic_quadruples,
     calibrate_receiver_binding,
     factor_agnostic_code_utilization_loss,
+    normalized_factor_minimax_loss,
     slot_binding_consensus_loss,
     straight_through_joint_collision_loss,
     straight_through_sender_consensus_loss,
@@ -264,6 +265,21 @@ def test_sender_consensus_loss_backpropagates_through_hard_messages(
         any(parameter.grad is not None for parameter in sender.parameters())
         for sender in senders
     )
+
+
+def test_normalized_factor_minimax_targets_the_worst_relative_factor():
+    easy_logits = torch.tensor([[10.0, -10.0]], requires_grad=True)
+    worst_logits = torch.tensor([[0.0, 0.0]], requires_grad=True)
+    targets = torch.tensor([[0, 0]])
+
+    loss = normalized_factor_minimax_loss((easy_logits, worst_logits), targets)
+    loss.backward()
+
+    assert abs(float(loss.detach()) - 1.0) < 1e-6
+    assert worst_logits.grad is not None
+    assert bool(torch.any(worst_logits.grad != 0))
+    assert easy_logits.grad is not None
+    assert bool(torch.all(easy_logits.grad == 0))
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
