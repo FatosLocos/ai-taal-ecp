@@ -28,6 +28,7 @@ this log.
 | ECP7-B18-I | Intervention | B17 replay with final weight 0.1 | Position-aware MLP | completed; gate failed |
 | ECP7-B19-I | Intervention | B18 with replay decayed to zero after step 20,000 | Position-aware MLP | valid negative; validation 82.04%, train and injectivity fail |
 | ECP7-B20-I | Intervention | Late global replay of population-hard training meanings | Position-aware MLP | valid negative; new-best validation 83.45%, train and injectivity fail |
+| ECP7-B21-I | Intervention | B20 replay restricted to meanings failed by all 16 links | Position-aware MLP | valid negative; new-best validation 83.63%, shared-error pool grows |
 
 ## Batch 1 preregistration
 
@@ -1566,3 +1567,106 @@ the same registered replay budget exclusively on population-shared errors. No
 coefficient, replay batch, refresh, schedule, architecture, base loss,
 optimizer, horizon, data, translator or threshold change may accompany that
 predicate test.
+
+## Batch 21 preregistration
+
+Preregistered: July 18, 2026 at 16:05:33 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Hard-meaning predicate: all `16` current population links have an incorrect factor<br>
+Replay weight: `0` through step `15,000`, linear to `0.25` at step `20,000`, then hold<br>
+Replay batch size: `64` meanings, uniform with replacement<br>
+Training-only pool refresh interval: `200` steps<br>
+Replay sampler seed offset: `+1211`<br>
+Raw configuration SHA-256: `d2d8d8bf3d87aef42b533bfd33eea4033af99444ec00b1cffe3d6f63c5970a5b`<br>
+Effective configuration SHA-256: `913fa521edb8138b8e2319ef52b1ee1533ce13592f53303250d97ef217af0f5b`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B21-I inherits Batch 20 and changes only the failed-link threshold from the
+implicit default `1` to the complete population count `16`. The base random task
+sequence, replay sampler, replay scale and every other setting remain unchanged.
+This directly tests whether the B20 pool's population-wide error concentration
+requires a narrower curriculum. The positive control is rerun, and no
+alternative threshold or accompanying intervention is admitted into this batch.
+
+## Batch 21 results
+
+Positive-control run: `runs/ecp7-batch21-control-development/20260718T160742Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch21-intervention-development/20260718T160742Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B21-I |
+|---|---:|---:|
+| Population train, mean | 100% | **83.7062%** |
+| Population train, worst link | 100% | **82.7916%** |
+| Population validation, mean | 100% | **83.6304%** |
+| Population validation, worst link | 100% | **82.6172%** |
+| Universal translator, validation | 100% | **83.6426%** |
+| Exact sender-message agreement | 100% | **92.96%** |
+| Unique messages per sender | 15,360 | 12,720–13,200 |
+| Collision meanings per sender | 0 | 2,160–2,640 |
+| Message entropy | 13.91 bits | 13.54–13.61 bits |
+| Development gate | pass | **fail** |
+
+The positive control again passed every gate at 100%. ECP7-B21-I establishes
+new-best ECP-7 mean validation, worst-link validation, worst-link train and
+sender agreement. It passes validation and translator thresholds, but mean and
+worst-link train remain far below their registered thresholds and every sender
+remains non-injective. The joint gate fails and confirmatory access remains
+unauthorized.
+
+All 76 optimization records through step 15,000 match Batch 20 exactly across
+the 30 shared non-pool fields. The registered predicate produces the expected
+different first pool at step 15,000: 1,745 meanings fail for all 16 links. That
+pool briefly falls to 1,504 at step 15,600, then grows as replay weight rises,
+reaching 2,031 at full weight on step 20,000.
+
+The selected checkpoint was step 29,400 with 1,997 all-link failures. Task loss
+was `0.07461`, hard-meaning replay loss `0.11821`, replay weight `0.25`, and
+utilization loss `-0.75199`. The replay contribution was approximately `0.0296`,
+well below the ordinary task loss. The run reached step 30,000, finishing with
+2,016 all-link failures and 83.18% validation.
+
+Compared with Batch 20, mean train fell by 0.07 percentage points and translator
+validation by 0.32 points. Mean validation improved by 0.18 points, worst-link
+validation by 0.49 points, worst-link train by 0.08 points and sender agreement
+by 0.57 points. The narrower curriculum therefore continues the cross-link
+alignment effect without improving mean known-meaning reconstruction.
+
+A selected-checkpoint training diagnostic confirms the tradeoff. Batch 21 has
+2,755 meanings failed by at least one link, fewer than Batch 20's 2,848, but
+1,997 fail for all links, more than Batch 20's 1,937. A hard meaning now fails
+for 13.57 links on average, up from 13.07. The all-link replay pool grows 14.4%
+from its step-15,000 value and its selected hard loss is `0.34190`. Directing
+more ordinary joint sender-receiver optimization at shared errors therefore
+reinforces population alignment around the remaining ambiguous mappings rather
+than separating them.
+
+Selected sender codebooks contain 12,840, 12,870, 12,720 and 13,200 unique
+messages, with 2,520, 2,490, 2,640 and 2,160 collision meanings. Population
+validation factor accuracies were `[99.95%, 99.95%, 98.44%, 85.29%]`;
+universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 85.21%]`. Population color and shape are effectively
+complete, while the same size and texture bottlenecks remain.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 21 decision
+
+ECP7-B21-I is a valid negative result. All-link replay slightly improves the
+strongest validation result, but directly falsifies the hypothesis that a
+narrower shared-error curriculum will repair train exactness: its target pool
+grows and becomes more dominant. The confirmatory split remains sealed.
+
+A future ECP7-B22 may keep Batch 21's predicate, replay batch, weight, schedule
+and every Batch 15 setting while stopping replay-loss gradients into receiver
+parameters. Ordinary base-task updates would continue training both sides; only
+the additional all-link replay loss would update senders through temporarily
+fixed receivers. This isolates whether joint coadaptation prevents ambiguous
+sender codes from moving toward already learned decoder distinctions. No other
+parameter or mechanism may change in that test.

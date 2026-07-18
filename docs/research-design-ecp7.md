@@ -888,3 +888,45 @@ sealed-test requirement fails. No alternative predicate, score, replay weight,
 batch size, refresh, schedule, architecture, base loss, optimizer, duration,
 data, translator or seed may be tried inside Batch 20. Failure is recorded
 without confirmatory test access.
+
+## Batch 21 preregistration — Population-shared hard-meaning replay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 16:05:33 UTC<br>
+Configuration: `config/ecp7-b21-development.yaml`<br>
+Raw configuration SHA-256: `d2d8d8bf3d87aef42b533bfd33eea4033af99444ec00b1cffe3d6f63c5970a5b`<br>
+Effective configuration SHA-256: `913fa521edb8138b8e2319ef52b1ee1533ce13592f53303250d97ef217af0f5b`
+
+Batch 20 reduced the any-link hard pool and established the strongest ECP-7
+validation result, but its remaining error became more population-wide. At the
+selected checkpoint, 1,937 of 2,848 hard meanings failed for all 16 links,
+compared with 1,469 of 3,406 at the selected Batch 15 checkpoint. Batch 21 tests
+whether replay should spend its fixed budget exclusively on those shared
+errors.
+
+ECP7-B21-I inherits the complete Batch 20 implementation, Batch 15 architecture,
+ordinary random task batch, utilization objective, optimizer, data, temperature
+schedule, hard-replay coefficient, batch size, sampler, refresh, warmup,
+30,000-step horizon, selection, translator and thresholds. The sole change is:
+
+- a training meaning enters the replay pool only when all 16 current
+  sender-receiver links reconstruct at least one factor incorrectly, instead of
+  when at least one link fails.
+
+Mining still uses hard predictions over training meanings only. Replay still
+samples 64 pool meanings uniformly with replacement, applies the ordinary
+all-link reconstruction loss, warms from weight zero at step 15,000 to `0.25`
+at step 20,000, and then holds. The complete trajectory through step 15,000
+must match Batch 20 and Batch 15 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B21-I with population-shared hard-meaning replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative failed-link threshold, graded
+score, coefficient, replay batch, refresh, schedule, architecture, base loss,
+optimizer, duration, data, translator or seed may be tried inside Batch 21.
+Failure is recorded without confirmatory test access.

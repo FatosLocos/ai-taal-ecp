@@ -26,7 +26,7 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first twenty sealed batches are valid
+one-factor-per-slot architecture. Its first twenty-one sealed batches are valid
 development results but none passes the full gate. Batch 15 established the
 strong position-aware base: at 30,000 optimization steps it reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
@@ -41,7 +41,10 @@ reached 82.04% validation plus a new-best 80.57% worst-link validation, but
 again failed train exactness and injectivity. The ECP-6 positive controls remain
 perfect. Batch 20 replayed population-hard training meanings and established
 new-best 83.45% mean and 82.13% worst-link validation, but again failed train
-exactness and injectivity. The ECP-7 confirmatory test remains sealed. See
+exactness and injectivity. Batch 21 restricted replay to errors shared by all
+16 links and improved validation again to 83.63% mean and 82.62% worst-link,
+but its target error pool grew and train exactness still failed. The ECP-7
+confirmatory test remains sealed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -102,6 +105,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b18-development.yaml`](config/ecp7-b18-development.yaml) — the Batch 17 replay mechanism with final weight reduced to 0.1.
 - [`config/ecp7-b19-development.yaml`](config/ecp7-b19-development.yaml) — the Batch 18 replay mechanism decayed back to zero after step 20,000.
 - [`config/ecp7-b20-development.yaml`](config/ecp7-b20-development.yaml) — late ordinary task replay on population-hard training meanings.
+- [`config/ecp7-b21-development.yaml`](config/ecp7-b21-development.yaml) — Batch 20 replay restricted to meanings failed by all 16 population links.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
