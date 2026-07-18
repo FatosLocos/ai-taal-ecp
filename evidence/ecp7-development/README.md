@@ -68,6 +68,11 @@ It regressed sharply to 71.53% train exactness, 47.98% validation and 63.04%
 translator validation. Decoder depth is therefore rejected as the B10
 bottleneck. Exact identities and hashes are in `batch12-manifest.json`.
 
+Batch 13 added the symmetric shared sender layer. It collapsed to 1.32% train
+exactness, 0.32% validation, 0.61% translator validation and only 694–831
+messages. Sender depth is therefore also rejected. Exact identities and hashes
+are in `batch13-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

@@ -5,6 +5,7 @@ import torch
 from ai_taal.models import (
     BoundedAutoregressiveSender,
     BoundedParallelSender,
+    DeepBoundedParallelSender,
     DeepPositionAwareMLPReceiver,
     CommunicationSystem,
     FactorizedPermutationSlotReceiver,
@@ -294,6 +295,36 @@ def test_bounded_parallel_sender_checkpoint_round_trip(ecp7_b7_config, tmp_path)
     )
     assert exit_code == 0
     assert output_path.read_text(encoding="utf-8").startswith("[[")
+
+
+def test_deep_bounded_parallel_sender_adds_one_shared_layer(ecp7_b13_config):
+    sender = DeepBoundedParallelSender(ModelSpec.from_config(ecp7_b13_config))
+    meanings = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+
+    message, tokens = sender(meanings, temperature=1.0, sample=False)
+
+    assert message.shape == (2, 4, 16)
+    assert tokens.shape == (2, 4)
+    assert sender.hidden_projection.in_features == sender.spec.hidden_dim
+    assert sender.hidden_projection.out_features == sender.spec.hidden_dim
+    assert not hasattr(sender, "factor_projections")
+    assert not hasattr(sender, "binding_matrix")
+
+
+def test_deep_bounded_parallel_sender_checkpoint_round_trip(
+    ecp7_b13_config, tmp_path
+):
+    sender = DeepBoundedParallelSender(ModelSpec.from_config(ecp7_b13_config))
+    path = tmp_path / "deep-parallel-sender.pt"
+    save_agent_checkpoint(path, sender, kind="sender")
+
+    loaded = load_agent_checkpoint(path, expected_kind="sender")
+
+    assert isinstance(loaded, DeepBoundedParallelSender)
+    meanings = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+    _, expected = sender(meanings, temperature=1.0, sample=False)
+    _, actual = loaded(meanings, temperature=1.0, sample=False)
+    assert torch.equal(actual, expected)
 
 
 def test_position_aware_mlp_receiver_reads_the_complete_message(ecp7_b9_config):

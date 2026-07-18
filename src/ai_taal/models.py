@@ -350,6 +350,18 @@ class BoundedParallelSender(nn.Module):
         return torch.stack(distributions, dim=1)
 
 
+class DeepBoundedParallelSender(BoundedParallelSender):
+    """Add one generic shared hidden layer before all parallel slot heads."""
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__(spec)
+        self.hidden_projection = nn.Linear(spec.hidden_dim, spec.hidden_dim)
+
+    def _context(self, meanings: Tensor) -> Tensor:
+        context = super()._context(meanings)
+        return torch.tanh(self.hidden_projection(context))
+
+
 class LearnedPermutationSlotSender(nn.Module):
     """Compositional slots whose factor-slot binding is selected internally."""
 
@@ -690,6 +702,8 @@ def make_sender(spec: ModelSpec) -> SenderModel:
         return BoundedAutoregressiveSender(spec)
     if spec.sender_family == "bounded_parallel_sender":
         return BoundedParallelSender(spec)
+    if spec.sender_family == "deep_bounded_parallel_sender":
+        return DeepBoundedParallelSender(spec)
     if spec.sender_family == "learned_permutation_slot_sender":
         return LearnedPermutationSlotSender(spec)
     if spec.sender_family == "injective_permutation_slot_sender":

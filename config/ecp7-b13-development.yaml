@@ -1,0 +1,13 @@
+extends: ecp7-b10-development.yaml
+
+experiment:
+  title: ECP-7 extended optimization with a deep bounded-parallel sender
+  arm: extended_optimization_deep_bounded_parallel_sender
+  objective: >-
+    Test whether one additional generic shared sender layer lets the parallel
+    slot heads construct the residual color and size distinctions without
+    introducing factor-specific paths or bindings.
+
+agents:
+  sender:
+    family: deep_bounded_parallel_sender

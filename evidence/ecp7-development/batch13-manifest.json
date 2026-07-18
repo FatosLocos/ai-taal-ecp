@@ -1,0 +1,43 @@
+{
+  "batch": "ECP7-B13",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "86dcb8f3ded9071a561e1f9a8c62d25b5190b9d3c4510afa48fd29a53d3c5279",
+      "seed-11/metrics.json": "2e82b584fa609b65969e65426b5aba410f11a843b3d0dc84500b51893ca53261",
+      "summary.json": "60fdf7a6e7fabacd3f4ccd9b02a4598781536f3f80921e3ab82c279335da7a26"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T131611Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "3bf2e7279356912e65cf63c466e676a98253a262792986740c336c51d389edf3",
+      "posthoc-analysis.json": "e53c93c94573ff87737a8dffde02d0017b60ef215e2117124d40b8a20bcaee19",
+      "seed-11/metrics.json": "9f7e0a3712787ed774a2e5748013d2ac7a7fb0d6c5cf8399995759433f37235d",
+      "summary.json": "ab582b6ab65578d1950532d9ce99c47c8aa774ef5aad7e3ff4d0e3e986c3f4ef"
+    },
+    "best_code_utilization_loss": -0.6994441747665405,
+    "best_step": 600,
+    "collision_meanings_per_sender": [14587, 14529, 14578, 14666],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.19061414930555556,
+    "message_entropy_bits_per_sender": [8.632885744642259, 8.769785435311887, 8.644106953969724, 8.437373215940879],
+    "population_train_mean_exact_match": 0.013218470982142856,
+    "population_train_worst_link_exact_match": 0.010672433035714286,
+    "population_validation_factor_accuracy": [0.0428466796875, 0.185791015625, 0.98492431640625, 0.99835205078125],
+    "population_validation_mean_exact_match": 0.003173828125,
+    "population_validation_worst_link_exact_match": 0.0,
+    "run_id": "20260718T131611Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.006103515625,
+    "unique_messages_per_sender": [773, 831, 782, 694]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}
