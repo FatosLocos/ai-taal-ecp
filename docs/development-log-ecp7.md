@@ -30,6 +30,7 @@ this log.
 | ECP7-B20-I | Intervention | Late global replay of population-hard training meanings | Position-aware MLP | valid negative; new-best validation 83.45%, train and injectivity fail |
 | ECP7-B21-I | Intervention | B20 replay restricted to meanings failed by all 16 links | Position-aware MLP | valid negative; new-best validation 83.63%, shared-error pool grows |
 | ECP7-B22-I | Intervention | B21 replay gradients routed to senders but not receiver parameters | Position-aware MLP | valid negative; shared errors fall but link-specific fragmentation rises |
+| ECP7-B23-I | Intervention | B22 sender-only replay warmup followed by restored joint replay gradients | Position-aware MLP | valid negative; joint phase recreates shared errors without improving accuracy |
 
 ## Batch 1 preregistration
 
@@ -1773,3 +1774,104 @@ gradients for replay after the registered warmup. This tests whether an initial
 code-separation phase followed by joint decoder catch-up can combine B22's
 shared-error reduction with B21's population alignment. No other parameter,
 predicate or mechanism may change.
+
+## Batch 23 preregistration
+
+Preregistered: July 18, 2026 at 16:51:26 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Hard-meaning predicate: all `16` current population links have an incorrect factor<br>
+Replay receiver-parameter gradients: **disabled through step 20,000; enabled from step 20,001**<br>
+Ordinary-task receiver-parameter gradients: **enabled throughout**<br>
+Replay weight: `0` through step `15,000`, linear to `0.25` at step `20,000`, then hold<br>
+Replay batch size: `64` meanings, uniform with replacement<br>
+Training-only pool refresh interval: `200` steps<br>
+Replay sampler seed offset: `+1211`<br>
+Raw configuration SHA-256: `8e0f7ed9b4d9a487bf0700be85e922142aafa3f8ccadf28326227bace6b78015`<br>
+Effective configuration SHA-256: `60f46c913a95077a9f40df695adf6bb9b8788f581c83a12deb35c1f9ca015fb9`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B23-I inherits Batch 22 and changes only the replay receiver-gradient
+routing schedule. Its additional replay branch is sender-only during the
+registered weight warmup and becomes joint after step 20,000. The ordinary
+task remains joint throughout. An invariant test fixes the inclusive boundary:
+receiver parameters are excluded at step 20,000 and included at step 20,001.
+The positive control is rerun, and no alternative switch point, routing,
+predicate or accompanying intervention is admitted into this batch.
+
+## Batch 23 results
+
+Positive-control run: `runs/ecp7-batch23-control-development/20260718T165354Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch23-intervention-development/20260718T165354Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B23-I |
+|---|---:|---:|
+| Population train, mean | 100% | **83.7197%** |
+| Population train, worst link | 100% | 82.7148% |
+| Population validation, mean | 100% | **83.4961%** |
+| Population validation, worst link | 100% | 82.3242% |
+| Universal translator, validation | 100% | **83.6182%** |
+| Exact sender-message agreement | 100% | 92.31% |
+| Unique messages per sender | 15,360 | 12,705–13,199 |
+| Collision meanings per sender | 0 | 2,161–2,655 |
+| Message entropy | 13.91 bits | 13.54–13.61 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B23-I passes validation and
+translator thresholds but fails both train thresholds and sender injectivity.
+It does not improve a primary performance metric over Batch 21. The joint gate
+fails and confirmatory access remains unauthorized.
+
+All 101 optimization records through step 20,000 match Batch 22 exactly. The
+routing invariant is also visible in every history record: replay receiver
+gradients are disabled through step 20,000 and enabled from the next recorded
+boundary at step 20,200. The all-link pool starts at 1,745 meanings, reaches a
+minimum of 1,414 at step 18,200, and contains 1,579 meanings when the sender-only
+phase ends at step 20,000.
+
+Restoring joint replay immediately reverses that separation. The all-link pool
+jumps to 1,984 at step 20,200, reaches 2,085 at the selected step 23,200, and
+ends at 1,979 when patience stops training at step 28,200. The selected
+checkpoint diagnostic confirms 2,085 meanings failed by all 16 links. It has
+2,660 meanings failed by at least one link, lower than Batch 21's 2,755 and
+Batch 22's 3,197, while the mean number of failed links among those meanings is
+14.04. The receiver catch-up phase therefore reduces fragmented errors but
+reconcentrates them into population-shared ambiguity.
+
+Compared with Batch 21, mean validation falls by 0.13 percentage points,
+worst-link validation by 0.29 points, translator validation by 0.02 points and
+sender agreement by 0.66 points. Mean train is effectively unchanged. Batch 21
+retains the strongest validation and agreement results. Compared with Batch 22,
+B23 recovers 0.25 points of sender agreement and 0.02 points of translator
+validation, but mean validation is effectively unchanged and the shared-error
+pool is substantially larger.
+
+Selected sender codebooks contain 12,960, 12,870, 12,705 and 13,199 unique
+messages, with 2,400, 2,490, 2,655 and 2,161 collision meanings. Population
+validation factor accuracies were `[99.87%, 99.91%, 98.44%, 85.25%]`;
+universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 85.18%]`. The persistent size and texture bottlenecks are
+unchanged.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 23 decision
+
+ECP7-B23-I is a valid negative result. A sender-only warmup followed by joint
+replay does not combine the advantages of B21 and B22: joint replay promptly
+recreates shared errors, while accuracy and injectivity remain unchanged. The
+confirmatory split remains sealed.
+
+The routing schedule itself is now sufficiently isolated: permanent joint,
+permanent sender-only and sender-only-to-joint replay all fail differently. A
+future ECP7-B24 may preserve the Batch 23 schedule but make the second replay
+phase receiver-only rather than joint. Detaching replay messages after step
+20,000 would let receivers catch up to the sender-only code movement without
+allowing the replay branch to move those codes again. The ordinary task must
+remain joint throughout, and no other setting may change.

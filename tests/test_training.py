@@ -11,6 +11,7 @@ from ai_taal.models import (
     Sender,
 )
 from ai_taal.training import (
+    _hard_replay_receiver_parameter_gradients,
     _scheduled_code_utilization_weight,
     _scheduled_collision_replay_weight,
     _scheduled_factor_minimax_weight,
@@ -612,6 +613,17 @@ def test_hard_meaning_replay_weight_starts_warms_and_holds(ecp7_b20_config):
     assert _scheduled_hard_meaning_replay_weight(schedule, 17500) == 0.125
     assert _scheduled_hard_meaning_replay_weight(schedule, 20000) == 0.25
     assert _scheduled_hard_meaning_replay_weight(schedule, 30000) == 0.25
+
+
+def test_hard_replay_receiver_gradients_switch_after_registered_step(
+    ecp7_b23_config,
+):
+    schedule = ecp7_b23_config["training"]["global_hard_meaning_replay"]
+
+    assert not _hard_replay_receiver_parameter_gradients(schedule, 15000)
+    assert not _hard_replay_receiver_parameter_gradients(schedule, 20000)
+    assert _hard_replay_receiver_parameter_gradients(schedule, 20001)
+    assert _hard_replay_receiver_parameter_gradients(schedule, 30000)
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

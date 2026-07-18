@@ -455,9 +455,9 @@ def train_population_system(
                 collision_replay_loss = torch.stack(replay_losses).mean()
         hard_meaning_replay_loss = torch.zeros((), device=device)
         hard_meaning_replay_weight = 0.0
-        hard_meaning_replay_receiver_parameter_gradients = bool(
-            hard_meaning_replay_config.get(
-                "receiver_parameter_gradients", True
+        hard_meaning_replay_receiver_parameter_gradients = (
+            _hard_replay_receiver_parameter_gradients(
+                hard_meaning_replay_config, step
             )
         )
         if hard_meaning_replay_enabled:
@@ -1375,3 +1375,18 @@ def _scheduled_hard_meaning_replay_weight(
     warmup_steps = int(hard_replay_config["warmup_steps"])
     progress = min((step - start_step) / warmup_steps, 1.0)
     return float(hard_replay_config["weight"]) * progress
+
+
+def _hard_replay_receiver_parameter_gradients(
+    hard_replay_config: dict[str, Any], step: int
+) -> bool:
+    """Return whether the replay branch updates receiver parameters at this step."""
+    initially_enabled = bool(
+        hard_replay_config.get("receiver_parameter_gradients", True)
+    )
+    switch_step = hard_replay_config.get(
+        "enable_receiver_parameter_gradients_after_step"
+    )
+    return initially_enabled or (
+        switch_step is not None and step > int(switch_step)
+    )
