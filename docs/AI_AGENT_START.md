@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 79 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 82 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 11
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 12
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -95,12 +95,14 @@ schedule and extended population optimization to 15,000 steps. It reached
 12,358–12,906 messages. The translator gate passed, but train, validation and
 injectivity did not. ECP7-B11-I decayed late utilization pressure and regressed
 to 79.09% train, 72.22% validation and 72.41% translator validation. B10 remains
-the strongest base. The confirmatory ECP-7 test is still sealed.
+the strongest base. ECP7-B12-I added one shared decoder layer and regressed
+further to 71.53% train, 47.98% validation and 63.04% translator validation.
+The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B12 intervention and its failure criterion.
+2. Define exactly one ECP7-B13 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -113,23 +115,23 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 10 is the strongest weak-structure result. Batch 11 showed that reducing
-late utilization pressure harms task accuracy, code use and sender agreement.
-B10's one-hidden-layer population decoder and fresh translator both retain a
-size weakness, while color is the other residual population error. The most
-informative next step is one generic decoder-capacity change. A clean ECP7-B12
-progression is:
+Batch 10 is the strongest weak-structure result. Batch 11 ruled out reduced late
+utilization pressure, and Batch 12 ruled out a deeper shared decoder. B10 still
+generates all four message positions from one shallow shared sender context.
+The most informative next step is the symmetric sender-capacity test. A clean
+ECP7-B13 progression is:
 
 - keep the same world and bit budget;
 - return to the complete B10 training and loss schedule;
-- preserve the flattened position-aware input and shared representation;
-- add exactly one second shared hidden layer to both receiver and translator;
+- keep the B10 one-hidden-layer receiver and translator;
+- add exactly one second shared hidden layer to the bounded parallel sender
+  before all four slot heads;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not add a factor-specific input, binding matrix, slot selection or loss
-change. Do not change the sender, hidden width, data, temperature, duration,
-validation cadence or development thresholds, and do not combine decoder depth
+Do not add a factor-specific sender path, binding matrix, slot selection or loss
+change. Do not change the decoder, hidden width, data, temperature, duration,
+validation cadence or development thresholds, and do not combine sender depth
 with variable-length messages or negotiation. That would make its effect
 uninterpretable.
 

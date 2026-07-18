@@ -432,3 +432,26 @@ def test_code_utilization_weight_decay_must_be_bounded(ecp7_b11_config):
     ] = 1.0
     with pytest.raises(ConfigError, match="below its initial weight"):
         validate_config(excessive_final)
+
+
+def test_ecp7_b12_changes_only_the_shared_decoder_depth(
+    ecp7_b10_config, ecp7_b12_config
+):
+    assert ecp7_b12_config["world"] == ecp7_b10_config["world"]
+    assert ecp7_b12_config["dataset"] == ecp7_b10_config["dataset"]
+    assert ecp7_b12_config["channel"] == ecp7_b10_config["channel"]
+    assert ecp7_b12_config["training"] == ecp7_b10_config["training"]
+    assert ecp7_b12_config["agents"]["sender"] == ecp7_b10_config["agents"][
+        "sender"
+    ]
+    assert ecp7_b12_config["agents"]["population"] == ecp7_b10_config["agents"][
+        "population"
+    ]
+    assert ecp7_b12_config["agents"]["receiver"] == {
+        "family": "deep_position_aware_mlp_receiver"
+    }
+    b10_translator = deepcopy(ecp7_b10_config["agents"]["translator"])
+    b12_translator = deepcopy(ecp7_b12_config["agents"]["translator"])
+    assert b10_translator.pop("family") == "position_aware_mlp_receiver"
+    assert b12_translator.pop("family") == "deep_position_aware_mlp_receiver"
+    assert b12_translator == b10_translator

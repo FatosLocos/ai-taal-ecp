@@ -5,6 +5,7 @@ import torch
 from ai_taal.models import (
     BoundedAutoregressiveSender,
     BoundedParallelSender,
+    DeepPositionAwareMLPReceiver,
     CommunicationSystem,
     FactorizedPermutationSlotReceiver,
     InjectivePermutationSlotSender,
@@ -345,3 +346,37 @@ def test_position_aware_mlp_receiver_checkpoint_round_trip(
     )
     assert exit_code == 0
     assert output_path.read_text(encoding="utf-8").startswith("[[")
+
+
+def test_deep_position_aware_receiver_adds_one_shared_layer(ecp7_b12_config):
+    receiver = DeepPositionAwareMLPReceiver(ModelSpec.from_config(ecp7_b12_config))
+    message = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+
+    outputs = receiver(message)
+
+    assert [output.shape for output in outputs] == [
+        (2, 16),
+        (2, 16),
+        (2, 8),
+        (2, 8),
+    ]
+    assert receiver.hidden_projection.in_features == receiver.spec.hidden_dim
+    assert receiver.hidden_projection.out_features == receiver.spec.hidden_dim
+    assert not hasattr(receiver, "binding_matrix")
+    assert not hasattr(receiver, "factor_projections")
+
+
+def test_deep_position_aware_receiver_checkpoint_round_trip(
+    ecp7_b12_config, tmp_path
+):
+    receiver = DeepPositionAwareMLPReceiver(ModelSpec.from_config(ecp7_b12_config))
+    path = tmp_path / "deep-position-aware-receiver.pt"
+    save_agent_checkpoint(path, receiver, kind="receiver")
+
+    loaded = load_agent_checkpoint(path, expected_kind="receiver")
+
+    assert isinstance(loaded, DeepPositionAwareMLPReceiver)
+    message = torch.tensor([[0, 1, 2, 3], [15, 15, 7, 7]])
+    expected = tuple(output.detach() for output in receiver(message))
+    actual = loaded(message)
+    assert all(torch.equal(left, right) for left, right in zip(actual, expected))

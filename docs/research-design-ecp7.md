@@ -519,3 +519,40 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative final weight, decay
 shape, decay boundary, duration, architecture, loss, optimizer or seed may be
 tried inside Batch 11.
+
+## Batch 12 preregistration — Deep position-aware decoder
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b12-development.yaml`<br>
+Raw configuration SHA-256: `4cc37488453b756fb43b4782d0e3e93cf051815a367d1852047fcc34fa29d5ce`<br>
+Effective configuration SHA-256: `798a6380ab144e5db63c8177d3dd70edf76e66b660b3cbb355f5beabe86b27b2`
+
+Batch 11 showed that reducing late utilization pressure worsened task accuracy,
+code use and sender agreement. Batch 10 therefore remains the base. Its shared
+one-hidden-layer decoder and independently trained translator both retained a
+size weakness, while color was the other residual population error. Batch 12
+tests whether the generic decoder is still too shallow for the entangled code.
+
+ECP7-B12-I returns to the complete B10 training and loss schedule. It keeps the
+shared symbol embedding, flattened four-position input and first generic hidden
+projection, then adds exactly one second `hidden_dim × hidden_dim` projection
+with `tanh`. All four factor heads read that same second shared representation.
+The isolated translator uses the identical deeper family.
+
+The decoder still has no factor-specific input path, factor-specific hidden
+projection, binding matrix, slot selector or hard factor-to-slot assignment.
+Hidden width, sender, losses, optimizer, data, 15,000-step duration, original
+5,000-step temperature annealing, selection window and thresholds remain
+unchanged from B10. Smoke runs are mechanical only and may not authorize
+tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B12-I with the deeper shared position-aware receiver and translator.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative depth, activation,
+width, residual connection, sender, loss, duration, optimizer or seed may be
+tried inside Batch 12.

@@ -746,7 +746,7 @@ class PositionAwareMLPReceiver(nn.Module):
             nn.Linear(spec.hidden_dim, size) for size in spec.factor_sizes
         )
 
-    def forward(self, message: Tensor) -> tuple[Tensor, ...]:
+    def _message_representation(self, message: Tensor) -> Tensor:
         if message.ndim == 2:
             embedded = self.symbol_embedding(message)
         elif message.ndim == 3:
@@ -756,7 +756,23 @@ class PositionAwareMLPReceiver(nn.Module):
                 "Message must have shape [batch,length] or [batch,length,vocab]."
             )
         flattened = embedded.reshape(embedded.shape[0], -1)
-        representation = torch.tanh(self.message_projection(flattened))
+        return torch.tanh(self.message_projection(flattened))
+
+    def forward(self, message: Tensor) -> tuple[Tensor, ...]:
+        representation = self._message_representation(message)
+        return tuple(head(representation) for head in self.factor_heads)
+
+
+class DeepPositionAwareMLPReceiver(PositionAwareMLPReceiver):
+    """Add one generic shared hidden layer before all factor heads."""
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__(spec)
+        self.hidden_projection = nn.Linear(spec.hidden_dim, spec.hidden_dim)
+
+    def forward(self, message: Tensor) -> tuple[Tensor, ...]:
+        representation = self._message_representation(message)
+        representation = torch.tanh(self.hidden_projection(representation))
         return tuple(head(representation) for head in self.factor_heads)
 
 
@@ -825,6 +841,8 @@ def make_receiver(spec: ModelSpec) -> ReceiverModel:
         return Receiver(spec)
     if spec.receiver_family == "position_aware_mlp_receiver":
         return PositionAwareMLPReceiver(spec)
+    if spec.receiver_family == "deep_position_aware_mlp_receiver":
+        return DeepPositionAwareMLPReceiver(spec)
     if spec.receiver_family == "factorized_permutation_slot_receiver":
         return FactorizedPermutationSlotReceiver(spec)
     raise ValueError(f"Unknown receiver architecture: {spec.receiver_family}")
