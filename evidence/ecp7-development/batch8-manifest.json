@@ -1,0 +1,41 @@
+{
+  "batch": "ECP7-B8",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "f22ba2bf1042a97deb5274f03fab22d70678d1418986927764ced363634e0846",
+      "seed-11/metrics.json": "e9bde51415a531c0ad32f7caf921048840dff9c1f6d55b1ad4635292ff668b60",
+      "summary.json": "ad2301a93c46c175d2b38687dfe7b66e8b75a14e02b8971fdf18a8a30d3273ae"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T120358Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "15fa04bb33b321b2ca8c29f01da84ff8bbcdd70e85ecbe96c08d6a51cca84cef",
+      "posthoc-analysis.json": "4f1af42cbd75044cd7149a729a4869d81b55a3c3e8b929da0a08570d0e608c60",
+      "seed-11/metrics.json": "945cf063cb1300029175a590452d7e2f39e1ff068b6eb423892357f15581c745",
+      "summary.json": "7fefb6774ba89d3300aaa2138640057484181591940ce918c27349a5e1fa17ff"
+    },
+    "best_algebraic_consistency_loss": 0.05264976993203163,
+    "best_code_utilization_loss": -0.7321186661720276,
+    "best_step": 600,
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.011827256944444446,
+    "message_entropy_bits_per_sender": [8.229443275271354, 8.409431758360435, 8.922917128759757, 8.81365004262187],
+    "population_train_mean_exact_match": 0.005349295479910714,
+    "population_validation_factor_accuracy": [0.0762939453125, 0.065673828125, 0.890380859375, 0.9664306640625],
+    "population_validation_mean_exact_match": 0.00323486328125,
+    "run_id": "20260718T120358Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.0068359375,
+    "unique_messages_per_sender": [857, 895, 1123, 1135]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

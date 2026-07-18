@@ -43,6 +43,10 @@ sender. It reached 3,118–3,415 messages, 9.60% train exactness and 45.64% colo
 accuracy, but shape remained below chance and validation stayed at 0.51%. Exact
 identities and hashes are in `batch7-manifest.json`.
 
+Batch 8 added algebraic context invariance to Batch 7. The relaxed surrogate
+improved, but the discrete protocol regressed to 857–1,135 messages and 0.32%
+validation. Exact identities and hashes are in `batch8-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

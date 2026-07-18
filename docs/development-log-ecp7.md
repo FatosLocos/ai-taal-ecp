@@ -490,3 +490,75 @@ context-invariance objective: the existing algebraic consistency loss for the
 same atomic factor transition in two different training contexts. This directly
 targets composition rather than memorization and assigns no factor to a message
 slot. It must not restore B4–B6 losses or change the receiver simultaneously.
+
+## Batch 8 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B8-I retains the complete Batch 7 architecture and loss set, then activates
+one context-invariance term. It matches two training-only instances of the same
+atomic factor transition and minimizes the squared difference between their
+relaxed message displacements. Its fixed construction and hyperparameters are
+recorded in `docs/research-design-ecp7.md`. No factor is assigned to a channel
+slot. The unchanged positive control is rerun. Smoke is mechanical only and
+cannot authorize tuning.
+
+## Batch 8 results
+
+Positive-control run: `runs/ecp7-batch8-control-development/20260718T120358Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch8-intervention-development/20260718T120358Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B8-I |
+|---|---:|---:|
+| Population train, mean | 100% | 0.5349% |
+| Population train, worst link | 100% | 0.4464% |
+| Population validation, mean | 100% | 0.3235% |
+| Population validation, worst link | 100% | 0.0977% |
+| Universal translator, validation | 100% | 0.6836% |
+| Exact sender-message agreement | 100% | 1.18% |
+| Unique messages per sender | 15,360 | 857–1,135 |
+| Collision meanings per sender | 0 | 14,225–14,503 |
+| Message entropy | 13.91 bits | 8.23–8.92 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B8-I failed the
+population, validation, translator and injectivity gates. It stopped at step
+2,200 under the unchanged early-stopping rule, with step 600 selected.
+
+At that checkpoint, algebraic consistency loss was `0.05265` at its scheduled
+weight of `0.75`, and the hard-utilization loss was `-0.7321`. The surrogate
+could be reduced, but it did not create a useful discrete compositional code.
+Compared with B7, training exactness fell from 9.5965% to 0.5349%, unique
+messages fell from 3,118–3,415 to 857–1,135, population validation fell from
+0.5066% to 0.3235%, and translator validation fell from 2.7588% to 0.6836%.
+
+Population validation factor accuracies were approximately
+`[7.63%, 6.57%, 89.04%, 96.64%]`. The context objective therefore suppressed
+the strong B7 color signal and left shape near chance. Universal-translator
+factor accuracies of `[14.60%, 10.30%, 98.12%, 99.02%]` again show that a fresh
+decoder extracts more color and shape information than the jointly trained
+population receivers, but far below the registered gate.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 8 decision
+
+ECP7-B8-I is recorded as a negative development result and is not retained.
+Relaxed transition invariance competed with the discrete task and utilization
+objectives instead of converting B7's distinctions into composition. The
+confirmatory split remains sealed.
+
+B7 remains the strongest optimization base. Its shape minimal pairs change
+approximately 1.11–1.13 message positions and concentrate about 64% of that
+change in one position, while its post-hoc universal translator decodes shape
+better than the jointly trained receivers. A future ECP7-B9 may keep the B7
+sender and losses but replace the recurrent final-state receiver with one
+generic position-aware MLP over all four embedded slots. This tests decoder
+access without factor-to-slot binding and must not add another loss.

@@ -19,7 +19,7 @@ from ai_taal.models import (
     PopulationSystem,
     Receiver,
     ReceiverModel,
-    Sender,
+    SenderModel,
     make_receiver,
     make_sender,
 )
@@ -756,7 +756,7 @@ def build_algebraic_quadruples(
 
 
 def algebraic_consistency_loss(
-    sender: Sender, quadruples: Tensor, *, temperature: float
+    sender: SenderModel, quadruples: Tensor, *, temperature: float
 ) -> Tensor:
     """Make the same factor change context-invariant in message distribution."""
     if quadruples.ndim != 3 or quadruples.shape[1:] != (4, 4):
