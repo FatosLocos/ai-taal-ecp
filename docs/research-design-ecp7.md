@@ -1013,3 +1013,43 @@ sealed-test requirement fails. No alternative switch step, gradient route,
 predicate, coefficient, replay batch, refresh, architecture, base loss,
 optimizer, duration, data, translator or seed may be tried inside Batch 23.
 Failure is recorded without confirmatory test access.
+
+## Batch 24 preregistration — Receiver-only replay catch-up
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 17:09:59 UTC<br>
+Configuration: `config/ecp7-b24-development.yaml`<br>
+Raw configuration SHA-256: `27e737c1eaa3c191253469fb863171c9875e1e9433c2b00b7a578e15609155dc`<br>
+Effective configuration SHA-256: `a01f184249b32859074909039ba86d495854a3c5f063c19f5519e2739135cb9e`
+
+Batch 22's sender-only replay separated population-shared failures but created
+link-specific fragmentation. Batch 23 restored joint replay after warmup and
+immediately recreated shared failures. Batch 24 isolates the remaining routing
+hypothesis: let receivers catch up to the separated codes without allowing the
+additional replay loss to move sender codes again.
+
+ECP7-B24-I inherits the complete Batch 23 implementation, Batch 21 predicate,
+Batch 20 replay mechanism, Batch 15 architecture, ordinary task batch,
+utilization objective, optimizer, data, temperature schedule, coefficient,
+replay batch, sampler, refresh, warmup, 30,000-step horizon, selection,
+translator and thresholds. The sole change is:
+
+- after step 20,000, the additional hard-replay branch detaches sender messages,
+  making that branch receiver-only instead of joint.
+
+Replay remains sender-only through step 20,000. The ordinary base task updates
+both senders and receivers at every step. Mining still uses hard training
+predictions only. The complete optimization trajectory through step 20,000
+must match Batch 23 and Batch 22 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B24-I with sender-only then receiver-only hard replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative switch step, gradient route,
+predicate, coefficient, replay batch, refresh, architecture, base loss,
+optimizer, duration, data, translator or seed may be tried inside Batch 24.
+Failure is recorded without confirmatory test access.

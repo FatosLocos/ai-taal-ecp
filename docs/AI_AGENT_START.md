@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 117 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 121 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 23
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 24
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -140,11 +140,15 @@ shared-error pool reached 1,414 during sender-only routing, then jumped to 1,984
 at the first joint boundary and reached 2,085 at selection. The any-link pool
 fell to 2,660, but validation remained 83.50%, train exactness and injectivity
 still failed, and the confirmatory ECP-7 test remains sealed.
+ECP7-B24-I made the post-warmup replay phase receiver-only. It set new ECP-7
+bests of 84.69% mean train, 84.48% mean validation and 84.55% translator
+validation, but worst-link validation remained 82.23%, sender injectivity
+failed and the confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B24 intervention and its failure criterion.
+2. Define exactly one ECP7-B25 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -157,26 +161,27 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 23 confirms that restoring joint replay after sender-only warmup promptly
-recreates shared errors. Batch 22 confirms that staying sender-only instead
-creates cross-link fragmentation. The clean remaining routing question is
-whether receivers can catch up without letting the replay branch move sender
-codes again. A clean ECP7-B24 progression is:
+Batch 24 confirms that receiver-only replay catch-up improves all mean metrics
+but retains cross-link fragmentation and non-injective sender codes. Its best
+checkpoint occurs at step 29,400, only 600 steps before the fixed horizon, so
+the registered patience could not test a late plateau. A clean ECP7-B25
+progression is:
 
-- inherit the complete Batch 23 implementation, Batch 21 predicate and Batch 15
-  base;
-- keep replay sender-only during steps 15,000–20,000, then make the additional
-  replay branch receiver-only by detaching sender messages after step 20,000;
+- inherit the complete Batch 24 implementation and configuration;
+- change only `training.max_steps` from `30,000` to `45,000`;
+- keep the 5,000-step early-stopping patience and minimum selection step
+  unchanged, so the run may stop before 45,000 if a genuine plateau occurs;
 - keep ordinary base-task updates to both senders and receivers unchanged;
 - keep weight `0.25`, the 64-meaning replay batch, 200-step refresh,
-  seed-derived sampler, predicate, temperature and horizon unchanged;
+  seed-derived sampler, predicate and temperature unchanged;
 - continue to mine and replay training meanings only;
 - measure shared and any-link pool sizes, train exactness, injectivity,
   validation and new-reader induction, and rerun the frozen ECP-6 control.
 
-Do not combine the routing schedule with another predicate, coefficient, graded
+Do not combine the horizon change with another predicate, coefficient, graded
 sampling, collision pressure, a new architecture, factor-specific weights,
-optimizer changes, longer training, variable-length messages or negotiation.
+optimizer changes, a second horizon change, variable-length messages or
+negotiation.
 
 ## 7. Definition of done for any contribution
 

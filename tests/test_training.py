@@ -12,6 +12,7 @@ from ai_taal.models import (
 )
 from ai_taal.training import (
     _hard_replay_receiver_parameter_gradients,
+    _hard_replay_sender_message_gradients,
     _scheduled_code_utilization_weight,
     _scheduled_collision_replay_weight,
     _scheduled_factor_minimax_weight,
@@ -458,6 +459,73 @@ def test_sender_only_replay_routes_gradients_around_receiver_parameters(
     )
 
 
+def test_receiver_only_replay_routes_gradients_only_to_receivers(
+    ecp7_b24_config,
+):
+    population = PopulationSystem(
+        ModelSpec.from_config(ecp7_b24_config),
+        sender_count=2,
+        receiver_count=2,
+    )
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]],
+        dtype=torch.long,
+    )
+    messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+
+    loss = routed_population_reconstruction_loss(
+        population,
+        messages,
+        meanings,
+        receiver_parameter_gradients=True,
+        sender_message_gradients=False,
+    )
+    loss.backward()
+
+    assert all(
+        parameter.grad is None for parameter in population.senders.parameters()
+    )
+    assert any(
+        parameter.grad is not None
+        and bool(torch.any(parameter.grad != 0))
+        for parameter in population.receivers.parameters()
+    )
+
+    population.zero_grad(set_to_none=True)
+    base_messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+    base_loss = routed_population_reconstruction_loss(
+        population,
+        base_messages,
+        meanings,
+        receiver_parameter_gradients=True,
+    )
+    catchup_messages = [
+        sender(meanings, temperature=1.0, sample=True)[0]
+        for sender in population.senders
+    ]
+    receiver_only_loss = routed_population_reconstruction_loss(
+        population,
+        catchup_messages,
+        meanings,
+        receiver_parameter_gradients=True,
+        sender_message_gradients=False,
+    )
+
+    (base_loss + receiver_only_loss).backward()
+
+    assert any(
+        parameter.grad is not None
+        and bool(torch.any(parameter.grad != 0))
+        for parameter in population.senders.parameters()
+    )
+
+
 def test_relaxed_collision_replay_measures_full_message_probability():
     symbol_pairs = torch.tensor(
         [
@@ -624,6 +692,17 @@ def test_hard_replay_receiver_gradients_switch_after_registered_step(
     assert not _hard_replay_receiver_parameter_gradients(schedule, 20000)
     assert _hard_replay_receiver_parameter_gradients(schedule, 20001)
     assert _hard_replay_receiver_parameter_gradients(schedule, 30000)
+
+
+def test_hard_replay_sender_gradients_switch_after_registered_step(
+    ecp7_b24_config,
+):
+    schedule = ecp7_b24_config["training"]["global_hard_meaning_replay"]
+
+    assert _hard_replay_sender_message_gradients(schedule, 15000)
+    assert _hard_replay_sender_message_gradients(schedule, 20000)
+    assert not _hard_replay_sender_message_gradients(schedule, 20001)
+    assert not _hard_replay_sender_message_gradients(schedule, 30000)
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
