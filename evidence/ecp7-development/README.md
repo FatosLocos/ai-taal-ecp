@@ -58,6 +58,11 @@ population optimization to 15,000 steps. It reached 82.08% train exactness,
 but train, validation and injectivity still failed. Exact identities and hashes
 are in `batch10-manifest.json`.
 
+Batch 11 decayed code-utilization weight after step 5,000. It regressed to
+79.09% train exactness, 72.22% validation, 72.41% translator validation and
+11,893–12,323 messages. Batch 10 therefore remains the strongest base. Exact
+identities and hashes are in `batch11-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

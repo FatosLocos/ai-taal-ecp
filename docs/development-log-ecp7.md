@@ -714,3 +714,76 @@ hold weight `1.0` through step 5,000, then decay linearly to `0.1` at step
 15,000. This keeps anti-collapse pressure while bringing the surrogate's final
 weighted magnitude close to the remaining task loss. No other loss,
 architecture, duration, annealing, data, translator or threshold may change.
+
+## Batch 11 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `15,000`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Code-utilization weight: `1.0` through step `5,000`, then linear to `0.1` at step `15,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B11-I keeps every Batch 10 setting except the coefficient schedule on the
+existing code-utilization term. The coefficient remains identical to B10
+through the original 5,000-step horizon, then decays to a nonzero anti-collapse
+weight. The unchanged positive control is rerun. No alternative weight or
+accompanying intervention is admitted into this batch.
+
+## Batch 11 results
+
+Positive-control run: `runs/ecp7-batch11-control-development/20260718T124421Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch11-intervention-development/20260718T124421Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B11-I |
+|---|---:|---:|
+| Population train, mean | 100% | 79.0911% |
+| Population train, worst link | 100% | 77.8530% |
+| Population validation, mean | 100% | 72.2229% |
+| Population validation, worst link | 100% | 70.8008% |
+| Universal translator, validation | 100% | 72.4121% |
+| Exact sender-message agreement | 100% | 89.14% |
+| Unique messages per sender | 15,360 | 11,893–12,323 |
+| Collision meanings per sender | 0 | 3,037–3,467 |
+| Message entropy | 13.91 bits | 13.41–13.48 bits |
+| Development gate | pass | **fail** |
+
+The positive control again passed every gate at 100%. ECP7-B11-I retained a
+passing translator score, but missed train, validation and injectivity. It does
+not authorize confirmatory access.
+
+Relative to B10, decaying utilization pressure reduced train exactness from
+82.0836% to 79.0911%, validation from 72.9797% to 72.2229%, translator validation
+from 75.1465% to 72.4121%, and sender agreement from 92.31% to 89.14%. It also
+lost roughly 300–1,000 unique messages per sender and introduced more collision
+meanings. The isolated change therefore moved every principal code and task
+measure in the wrong direction.
+
+Population validation factor accuracies were
+`[87.21%, 99.96%, 98.54%, 85.45%]`; universal-translator factor accuracies were
+`[87.50%, 100%, 98.54%, 85.28%]`. Color and size remain the residual errors.
+
+The selected checkpoint was step 14,800. Its task loss was `0.0805`, utilization
+loss was `-0.7275`, and scheduled utilization weight was `0.118`. Every setting
+and recorded metric through step 5,000 matched the B10 trajectory before the
+registered coefficient schedules diverged.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 11 decision
+
+ECP7-B11-I is rejected. The result falsifies the proposed explanation that
+full late utilization pressure was the primary B10 bottleneck. B10 remains the
+strongest weak-structure base, and the confirmatory split remains sealed.
+
+The residual error now appears decoder-limited rather than loss-weight-limited:
+B10's shared one-hidden-layer decoder plateaued on color and size, and its fresh
+translator showed the same size weakness. A future ECP7-B12 may return to the
+complete B10 schedule and add exactly one second generic shared hidden layer to
+both the position-aware receiver and isolated translator. It must preserve the
+same flattened positional input and must not add factor-specific paths, binding,
+loss, duration, data or threshold changes.

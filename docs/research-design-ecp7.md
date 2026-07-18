@@ -476,3 +476,46 @@ All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative horizon, patience,
 annealing schedule, architecture, loss, optimizer or seed may be tried inside
 Batch 10.
+
+## Batch 11 preregistration — Code-utilization weight decay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b11-development.yaml`<br>
+Raw configuration SHA-256: `6316b7361a7c4947089b7e33d189a80c4e37739650c75e961fcec7628b812c70`<br>
+Effective configuration SHA-256: `db05737365381f73afada0462de1f6ae111b92b96589364e29f05befac701519`
+
+Batch 10 passed the translator threshold and reached 72.98% validation, but
+validation plateaued after approximately step 12,000. At the selected final
+checkpoint, the unweighted utilization term had magnitude `0.7548` while task
+loss was `0.0765`. The code nevertheless retained 12,358–12,906 unique messages,
+13.48–13.57 bits of entropy, sender agreement above 92%, and collision buckets
+of at most four meanings.
+
+Batch 11 tests one explanation: after the high-entropy code is established,
+full utilization pressure dominates the remaining task objective and prevents
+the last color and size distinctions from resolving.
+
+ECP7-B11-I keeps the complete B10 model, data, optimizer, duration, checkpoint
+selection, temperature schedule, translator, task loss and utilization formula.
+It changes only the coefficient applied to that existing utilization term:
+
+- the original warmup and weight `1.0` are unchanged through step 5,000;
+- the coefficient then decays linearly from `1.0` at step 5,000 to `0.1` at
+  step 15,000;
+- the final nonzero coefficient preserves an anti-collapse signal while making
+  its expected weighted magnitude comparable to B10's remaining task loss.
+
+This schedule reproduces every B10 optimization setting and weight through the
+original B9 horizon. Smoke runs are mechanical only and may not authorize
+tuning.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B11-I with utilization-weight decay on the B10 base.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative final weight, decay
+shape, decay boundary, duration, architecture, loss, optimizer or seed may be
+tried inside Batch 11.
