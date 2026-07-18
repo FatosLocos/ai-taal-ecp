@@ -136,6 +136,13 @@ validation. The selected error pool contains 1,690 shared failures and 3,142
 any-link failures, so worst-link accuracy and injectivity still fail. Exact
 identities and hashes are in `batch24-manifest.json`.
 
+Batch 25 extended only the receiver-only catch-up ceiling to 45,000 steps. It
+set new-best means of 85.26% train, 85.24% validation and 85.13% translator
+validation, but the observed worst train link exactly reached its sender's
+82.81% unique-code ceiling. The remaining failure is sender injectivity, not
+receiver training time. Exact identities and hashes are in
+`batch25-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

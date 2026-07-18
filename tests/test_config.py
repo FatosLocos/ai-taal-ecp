@@ -861,3 +861,17 @@ def test_hard_replay_sender_gradient_switch_is_bounded_and_synchronized(
     ] = 20200
     with pytest.raises(ConfigError, match="gradient switches must match"):
         validate_config(invalid_mismatch)
+
+
+def test_ecp7_b25_changes_only_the_training_horizon(
+    ecp7_b24_config, ecp7_b25_config
+):
+    assert ecp7_b25_config["world"] == ecp7_b24_config["world"]
+    assert ecp7_b25_config["dataset"] == ecp7_b24_config["dataset"]
+    assert ecp7_b25_config["channel"] == ecp7_b24_config["channel"]
+    assert ecp7_b25_config["agents"] == ecp7_b24_config["agents"]
+    b24_training = deepcopy(ecp7_b24_config["training"])
+    b25_training = deepcopy(ecp7_b25_config["training"])
+    assert b24_training.pop("max_steps") == 30000
+    assert b25_training.pop("max_steps") == 45000
+    assert b25_training == b24_training
