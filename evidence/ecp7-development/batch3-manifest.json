@@ -1,0 +1,39 @@
+{
+  "batch": "ECP7-B3",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "46821ce61e70185998c44eae8a6c8cbd8c76c3ced8f3a3e3324918e788f52197",
+      "seed-11/metrics.json": "77977edf6b6b5f458e1b9971e194eacd8c2440795e265a3d541e4fa4a6df3289",
+      "summary.json": "7408ece692259aa5ec5c75f727cdaafb83ecbe992cbe68a8c64491fcbb75d2fc"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T104735Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "88f4d9e361db2d93493789b5ff62edc8f7989362fdb3dcb16478b83c07843517",
+      "posthoc-analysis.json": "20e8cf7fd5cc1a21cb39ca4251f84acb4588eb1d074240c8744643a21601f956",
+      "seed-11/metrics.json": "c6eccbc6e51069bb13facf420aefeafd9916e2446310c96685ec9e89fdf13d76",
+      "summary.json": "8c1886abce7e71cf1fb2ba4866a55a69ff11aaccf3a1344c7eec6c84e3af156a"
+    },
+    "best_code_utilization_loss": -0.7075217366218567,
+    "best_step": 3400,
+    "development_gate_passed": false,
+    "message_entropy_bits_per_sender": [8.195636672378424, 8.657120011042089, 8.727224396659697, 8.43725699944013],
+    "population_train_mean_exact_match": 0.011910574776785714,
+    "population_validation_factor_accuracy": [0.17669677734375, 0.06170654296875, 0.99932861328125, 0.998779296875],
+    "population_validation_mean_exact_match": 0.01922607421875,
+    "run_id": "20260718T105006Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.022705078125,
+    "unique_messages_per_sender": [585, 972, 939, 740]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

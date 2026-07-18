@@ -164,3 +164,38 @@ accessible meanings for every sender, respect every local slot boundary, and
 write no confirmatory test metric or episode. Failure is recorded without
 opening the test split. No weight, warmup, temperature or independence variant
 may be tried inside Batch 2.
+
+## Batch 3 preregistration — Straight-through hard utilization
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b3-development.yaml`<br>
+Raw configuration SHA-256: `8a1fb70caeb16ee2e9f912fe37508d02c25d2b00e4ec887546d143fdc099ad39`<br>
+Effective configuration SHA-256: `62cb6965f619a72905af2ba652e1feea3e718cad1201cdd4066063de4aef7756`
+
+Batch 2 improved its loss on relaxed distributions while the evaluated hard
+code collapsed further. Batch 3 tests whether that relaxation gap closes when
+the unchanged utilization formula receives the same straight-through one-hot
+messages already consumed by the receivers during task training.
+
+This is the only Batch 3 change. The forward values used to calculate entropy
+and pairwise mutual information are discrete one-hot symbols. Gradients still
+flow through the straight-through Gumbel estimator. The architecture, factor
+inputs, loss weight `1.0`, 400-step warmup, temperature `1.0`, independence
+weight `1.0`, task loss, population, split, capacity, training duration, early
+stopping and translator remain unchanged from Batch 2.
+
+The utilization loss still receives no factor labels, factor identities or
+desired slot mapping. It does add an explicit pressure on the empirical hard
+symbol marginals and pairwise slot dependence of each training batch.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B3-I with straight-through hard code utilization.
+
+The positive-control validity gate and intervention development gate remain
+unchanged. B3 must pass population, validation, translator, injectivity, channel
+and sealed-test checks together. A failure remains a development result and
+does not authorize confirmatory test access. No alternative estimator, weight
+or training schedule may be tried inside Batch 3.

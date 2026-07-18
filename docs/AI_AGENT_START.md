@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 51 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 54 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,16 +71,17 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 and Batch 2
-configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I added a
-factor-agnostic utilization loss that improved its soft objective but collapsed
-further to 85–104 hard messages. Both paired ECP-6 positive controls stayed
-perfect. The confirmatory ECP-7 test is still sealed.
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 3
+configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
+soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
+that loss to straight-through hard messages and improved to 585–972 messages,
+but still reached only 1.92% validation. All paired ECP-6 positive controls
+stayed perfect. The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B3 intervention and its failure criterion.
+2. Define exactly one ECP7-B4 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -93,20 +94,21 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-The first two attempts showed both severe code collapse and a soft-to-hard
-relaxation gap. The most informative next step is one utilization objective
-calculated from straight-through hard messages. A clean ECP7-B3 progression is:
+Batch 3 partly closed the soft-to-hard gap, but marginal balance and pairwise
+independence still allowed many complete-message collisions. The most
+informative next step is one direct joint-collision penalty. A clean ECP7-B4
+progression is:
 
 - keep the same world and bit budget;
 - keep the joint autoregressive sender and generic isolated receiver;
-- retain the Batch 2 formula and replace only its soft message input with the
-  straight-through hard message used by the task;
+- retain the full Batch 3 objective and add one loss equal to the average
+  number of other distinct inputs with the same straight-through full message;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not combine this with architectural resizing, a new loss weight, longer
-training, variable-length messages or negotiation. That would make any change
-from Batch 2 uninterpretable.
+Do not combine this with architectural resizing, changes to the existing loss
+weight, longer training, variable-length messages or negotiation. That would
+make any change from Batch 3 uninterpretable.
 
 ## 7. Definition of done for any contribution
 

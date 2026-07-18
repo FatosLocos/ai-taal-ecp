@@ -1,0 +1,13 @@
+extends: ecp7-b2-development.yaml
+
+experiment:
+  title: ECP-7 straight-through hard code-utilization development
+  arm: straight_through_hard_code_utilization
+  objective: >-
+    Test whether applying the unchanged Batch 2 utilization formula directly
+    to the straight-through hard messages closes the observed soft-to-hard
+    relaxation gap without restoring a factor-to-slot binding.
+
+training:
+  code_utilization:
+    message_source: straight_through

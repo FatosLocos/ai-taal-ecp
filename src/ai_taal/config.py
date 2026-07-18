@@ -136,6 +136,13 @@ def validate_config(config: dict[str, Any]) -> None:
             raise ConfigError("Code-utilization warmup must be positive.")
         if utilization.get("relaxed_temperature", 0) <= 0:
             raise ConfigError("Code-utilization temperature must be positive.")
+        if utilization.get("message_source", "relaxed") not in {
+            "relaxed",
+            "straight_through",
+        }:
+            raise ConfigError(
+                "Code-utilization message_source must be relaxed or straight_through."
+            )
 
 
 def file_sha256(path: str | Path) -> str:

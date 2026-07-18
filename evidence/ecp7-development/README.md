@@ -19,6 +19,11 @@ failed the same registered gate. Its improved soft utilization objective did
 not transfer to the discrete protocol. Exact Batch 2 identities and hashes are
 in `batch2-manifest.json`.
 
+Batch 3 applied the unchanged objective to straight-through one-hot messages.
+It remained below the gate but improved to 585–972 hard messages, 8.20–8.73
+bits of entropy and 1.92% validation. Exact identities and hashes are in
+`batch3-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

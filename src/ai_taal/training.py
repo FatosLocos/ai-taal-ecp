@@ -189,6 +189,9 @@ def train_population_system(
     atom_consensus_enabled = bool(atom_consensus_config.get("enabled", False))
     utilization_config = training.get("code_utilization", {})
     utilization_enabled = bool(utilization_config.get("enabled", False))
+    utilization_message_source = utilization_config.get(
+        "message_source", "relaxed"
+    )
     if utilization_enabled:
         if float(utilization_config.get("weight", 0.0)) < 0:
             raise ValueError("Code-utilization weight cannot be negative.")
@@ -196,6 +199,10 @@ def train_population_system(
             raise ValueError("Slot-independence weight cannot be negative.")
         if float(utilization_config.get("relaxed_temperature", 0.0)) <= 0:
             raise ValueError("Code-utilization temperature must be positive.")
+        if utilization_message_source not in {"relaxed", "straight_through"}:
+            raise ValueError(
+                "Code-utilization message source must be relaxed or straight_through."
+            )
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
             "Population training supports all_senders_all_receivers only."
@@ -317,8 +324,15 @@ def train_population_system(
                         independence_weight=float(
                             utilization_config["independence_weight"]
                         ),
+                        message_distributions=(
+                            message
+                            if utilization_message_source == "straight_through"
+                            else None
+                        ),
                     )
-                    for sender in population.senders
+                    for sender, message in zip(
+                        population.senders, messages, strict=True
+                    )
                 ]
             ).mean()
             utilization_warmup = max(
@@ -503,6 +517,7 @@ def factor_agnostic_code_utilization_loss(
     *,
     temperature: float,
     independence_weight: float,
+    message_distributions: Tensor | None = None,
 ) -> Tensor:
     """Use the available code space without assigning factors to slots.
 
@@ -514,10 +529,20 @@ def factor_agnostic_code_utilization_loss(
         raise ValueError("Code-utilization temperature must be positive.")
     if independence_weight < 0:
         raise ValueError("Slot-independence weight cannot be negative.")
-    relaxed_message = getattr(sender, "relaxed_message", None)
-    if relaxed_message is None:
-        raise ValueError("Code utilization requires a relaxed sender message.")
-    distributions = relaxed_message(meanings, temperature=temperature)
+    if message_distributions is None:
+        relaxed_message = getattr(sender, "relaxed_message", None)
+        if relaxed_message is None:
+            raise ValueError("Code utilization requires a relaxed sender message.")
+        distributions = relaxed_message(meanings, temperature=temperature)
+    else:
+        distributions = message_distributions
+        if distributions.shape[:2] != (
+            meanings.shape[0],
+            sender.spec.message_length,
+        ):
+            raise ValueError(
+                "Code-utilization messages do not match the input batch and slots."
+            )
     alphabet_sizes = sender.spec.slot_alphabet_sizes
     if len(alphabet_sizes) != sender.spec.message_length:
         raise ValueError("Code utilization requires one alphabet size per slot.")

@@ -133,6 +133,29 @@ def test_factor_agnostic_code_utilization_backpropagates(ecp7_b2_config):
     assert any(parameter.grad is not None for parameter in sender.parameters())
 
 
+def test_straight_through_code_utilization_is_discrete_and_backpropagates(
+    ecp7_b3_config,
+):
+    sender = BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_b3_config))
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]], dtype=torch.long
+    )
+    messages, _ = sender(meanings, temperature=1.0, sample=True)
+
+    assert torch.all((messages == 0) | (messages == 1))
+    loss = factor_agnostic_code_utilization_loss(
+        sender,
+        meanings,
+        temperature=1.0,
+        independence_weight=1.0,
+        message_distributions=messages,
+    )
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert any(parameter.grad is not None for parameter in sender.parameters())
+
+
 def test_code_utilization_prefers_independent_balanced_slots():
     class FixedSender:
         class Spec:
