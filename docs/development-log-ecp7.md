@@ -10,6 +10,7 @@ this log.
 | ECP7-B1-C | Positive control | ECP-6 factor-local permutation slots | Factor-local classifier | completed; gate passed |
 | ECP7-B1-I | Intervention | Joint-context bounded autoregressive | Generic sequence encoder | completed; gate failed |
 | ECP7-B2-I | Intervention | B1 sender plus factor-agnostic code utilization | Generic sequence encoder | completed; gate failed |
+| ECP7-B3-I | Intervention | B2 loss on straight-through hard messages | Generic sequence encoder | completed; gate failed |
 
 No other ECP-7 variant has been trained.
 
@@ -145,3 +146,64 @@ remains sealed and no frozen ECP-7 configuration is created. A future ECP7-B3
 may test one preregistered utilization signal calculated from straight-through
 hard messages, directly addressing the observed relaxation gap. It must not
 simultaneously change architecture, training duration or loss weight.
+
+## Batch 3 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B3-I changes only the Batch 2 utilization-loss input from relaxed messages
+to the straight-through one-hot messages already used for receiver training.
+The exact identity and unchanged hyperparameters are recorded in
+`docs/research-design-ecp7.md`. The ECP-6 positive control is rerun on the same
+seed and split. Smoke is mechanical only and cannot authorize tuning.
+
+## Batch 3 results
+
+Positive-control run: `runs/ecp7-batch3-control-development/20260718T104735Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch3-intervention-development/20260718T105006Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B3-I |
+|---|---:|---:|
+| Population train, mean | 100% | 1.1911% |
+| Population train, worst link | 100% | 1.0184% |
+| Population validation, mean | 100% | 1.9226% |
+| Population validation, worst link | 100% | 1.2695% |
+| Universal translator, validation | 100% | 2.2705% |
+| Unique messages per sender | 15,360 | 585–972 |
+| Collision meanings per sender | 0 | 14,388–14,775 |
+| Message entropy | 13.91 bits | 8.20–8.73 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B3-I failed the
+population, validation, translator and injectivity gates, but it materially
+improved every hard-utilization measure relative to Batch 2.
+
+At the selected step 3,400 checkpoint, the straight-through utilization loss
+was `-0.7075`. Unique hard messages increased from Batch 2's 85–104 to 585–972,
+entropy increased from 6.13–6.31 to 8.20–8.73 bits, population validation rose
+from 0.6165% to 1.9226%, and translator validation rose from 0.6592% to 2.2705%.
+The run reached the fixed 5,000-step limit; later checkpoints improved training
+accuracy but generalized worse, so the preregistered selector retained step
+3,400.
+
+Population validation factor accuracies were approximately
+`[17.67%, 6.17%, 99.93%, 99.88%]`. Hard utilization therefore helped color but
+shape remained at its 6.25% chance level. Marginal balance and pairwise slot
+independence still allowed extensive higher-order full-message collisions.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 3 decision
+
+ECP7-B3-I is a negative development result with a clear directional gain. The
+confirmatory split remains sealed and no frozen ECP-7 configuration is created.
+A future ECP7-B4 may add one direct straight-through full-message collision
+penalty while retaining all Batch 3 settings. This targets joint collisions
+without assigning semantic factors to slots.

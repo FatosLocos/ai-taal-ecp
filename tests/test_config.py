@@ -148,3 +148,32 @@ def test_ecp7_b2_rejects_negative_code_utilization_weight(ecp7_b2_config):
     invalid["training"]["code_utilization"]["weight"] = -0.1
     with pytest.raises(ConfigError, match="Code-utilization weight"):
         validate_config(invalid)
+
+
+def test_ecp7_b3_changes_only_the_utilization_message_source(
+    ecp7_b2_config, ecp7_b3_config
+):
+    assert ecp7_b3_config["world"] == ecp7_b2_config["world"]
+    assert ecp7_b3_config["dataset"] == ecp7_b2_config["dataset"]
+    assert ecp7_b3_config["channel"] == ecp7_b2_config["channel"]
+    assert ecp7_b3_config["agents"] == ecp7_b2_config["agents"]
+    b2_utilization = ecp7_b2_config["training"]["code_utilization"]
+    b3_utilization = ecp7_b3_config["training"]["code_utilization"]
+    assert b2_utilization == {
+        "enabled": True,
+        "weight": 1.0,
+        "warmup_steps": 400,
+        "relaxed_temperature": 1.0,
+        "independence_weight": 1.0,
+    }
+    assert b3_utilization == {
+        **b2_utilization,
+        "message_source": "straight_through",
+    }
+
+
+def test_ecp7_b3_rejects_an_unknown_message_source(ecp7_b3_config):
+    invalid = deepcopy(ecp7_b3_config)
+    invalid["training"]["code_utilization"]["message_source"] = "hard_argmax"
+    with pytest.raises(ConfigError, match="message_source"):
+        validate_config(invalid)
