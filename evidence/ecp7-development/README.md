@@ -123,6 +123,13 @@ any-link pool grew to 3,197 and validation regressed to 83.51%. Sender-only
 routing therefore trades shared ambiguity for cross-link fragmentation. Exact
 identities and hashes are in `batch22-manifest.json`.
 
+Batch 23 kept the Batch 22 sender-only warmup through step 20,000 and then
+restored joint replay gradients. The shared-error pool fell to 1,414 during the
+sender-only phase but jumped to 1,984 at the first joint phase boundary and
+reached 2,085 at selection. The any-link pool improved to 2,660, but validation
+remained 83.50% and injectivity still failed. Exact identities and hashes are in
+`batch23-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

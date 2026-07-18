@@ -972,3 +972,44 @@ sealed-test requirement fails. No alternative gradient route, predicate,
 coefficient, replay batch, refresh, schedule, architecture, base loss,
 optimizer, duration, data, translator or seed may be tried inside Batch 22.
 Failure is recorded without confirmatory test access.
+
+## Batch 23 preregistration — Phased shared-error replay routing
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 16:51:26 UTC<br>
+Configuration: `config/ecp7-b23-development.yaml`<br>
+Raw configuration SHA-256: `8e0f7ed9b4d9a487bf0700be85e922142aafa3f8ccadf28326227bace6b78015`<br>
+Effective configuration SHA-256: `60f46c913a95077a9f40df695adf6bb9b8788f581c83a12deb35c1f9ca015fb9`
+
+Batch 21's joint replay preserved population alignment but grew the shared-error
+pool. Batch 22's sender-only replay reduced that pool but increased fragmented
+any-link errors and reduced sender agreement. Batch 23 isolates whether the two
+routing modes are useful in sequence: first move ambiguous sender codes against
+fixed receivers, then allow receivers to catch up.
+
+ECP7-B23-I inherits the complete Batch 22 implementation, Batch 21 predicate,
+Batch 20 replay mechanism, Batch 15 architecture, ordinary task batch,
+utilization objective, optimizer, data, temperature schedule, coefficient,
+replay batch, sampler, refresh, warmup, 30,000-step horizon, selection,
+translator and thresholds. The sole change is:
+
+- the additional hard-replay branch keeps receiver parameters fixed through
+  step 20,000 and restores receiver-parameter gradients from step 20,001.
+
+The replay loss remains zero through step 15,000 and warms linearly through
+step 20,000. The ordinary base task updates both senders and receivers at every
+step. Mining still uses hard training predictions only. The complete
+optimization trajectory through step 15,000 must match B22, B21, B20 and B15
+exactly; through step 20,000 it must match B22.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B23-I with phased population-shared hard replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative switch step, gradient route,
+predicate, coefficient, replay batch, refresh, architecture, base loss,
+optimizer, duration, data, translator or seed may be tried inside Batch 23.
+Failure is recorded without confirmatory test access.

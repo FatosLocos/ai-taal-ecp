@@ -765,3 +765,50 @@ def test_hard_replay_receiver_gradient_routing_must_be_boolean(
     ] = 0
     with pytest.raises(ConfigError, match="gradients must be boolean"):
         validate_config(invalid)
+
+
+def test_ecp7_b23_changes_only_hard_replay_gradient_schedule(
+    ecp7_b22_config, ecp7_b23_config
+):
+    assert ecp7_b23_config["world"] == ecp7_b22_config["world"]
+    assert ecp7_b23_config["dataset"] == ecp7_b22_config["dataset"]
+    assert ecp7_b23_config["channel"] == ecp7_b22_config["channel"]
+    assert ecp7_b23_config["agents"] == ecp7_b22_config["agents"]
+    b22_training = deepcopy(ecp7_b22_config["training"])
+    b23_training = deepcopy(ecp7_b23_config["training"])
+    assert b23_training["global_hard_meaning_replay"].pop(
+        "enable_receiver_parameter_gradients_after_step"
+    ) == 20000
+    assert b23_training == b22_training
+
+
+def test_hard_replay_receiver_gradient_switch_must_follow_warmup(
+    ecp7_b23_config,
+):
+    invalid = deepcopy(ecp7_b23_config)
+    invalid["training"]["global_hard_meaning_replay"][
+        "enable_receiver_parameter_gradients_after_step"
+    ] = 19999
+    with pytest.raises(ConfigError, match="must follow warmup"):
+        validate_config(invalid)
+
+    invalid_type = deepcopy(ecp7_b23_config)
+    invalid_type["training"]["global_hard_meaning_replay"][
+        "enable_receiver_parameter_gradients_after_step"
+    ] = True
+    with pytest.raises(ConfigError, match="switch must be an integer"):
+        validate_config(invalid_type)
+
+    invalid_initial_route = deepcopy(ecp7_b23_config)
+    invalid_initial_route["training"]["global_hard_meaning_replay"][
+        "receiver_parameter_gradients"
+    ] = True
+    with pytest.raises(ConfigError, match="requires gradients to start disabled"):
+        validate_config(invalid_initial_route)
+
+    invalid_end = deepcopy(ecp7_b23_config)
+    invalid_end["training"]["global_hard_meaning_replay"][
+        "enable_receiver_parameter_gradients_after_step"
+    ] = 30000
+    with pytest.raises(ConfigError, match="must follow warmup"):
+        validate_config(invalid_end)

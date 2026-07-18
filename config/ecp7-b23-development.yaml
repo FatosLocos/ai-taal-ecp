@@ -1,0 +1,13 @@
+extends: ecp7-b22-development.yaml
+
+experiment:
+  title: ECP-7 phased population-shared hard replay
+  arm: phased_population_shared_hard_replay
+  objective: >-
+    Test whether a sender-only replay warmup followed by restored joint replay
+    gradients can preserve early shared-error separation while allowing
+    receivers to realign with the moved sender codes.
+
+training:
+  global_hard_meaning_replay:
+    enable_receiver_parameter_gradients_after_step: 20000

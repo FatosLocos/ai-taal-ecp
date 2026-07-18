@@ -294,9 +294,19 @@ def validate_config(config: dict[str, Any]) -> None:
         receiver_parameter_gradients = hard_replay.get(
             "receiver_parameter_gradients", True
         )
+        receiver_gradient_switch_step = hard_replay.get(
+            "enable_receiver_parameter_gradients_after_step"
+        )
         if not isinstance(receiver_parameter_gradients, bool):
             raise ConfigError(
                 "Global hard-meaning replay receiver parameter gradients must be boolean."
+            )
+        if receiver_gradient_switch_step is not None and (
+            isinstance(receiver_gradient_switch_step, bool)
+            or not isinstance(receiver_gradient_switch_step, int)
+        ):
+            raise ConfigError(
+                "Global hard-meaning replay receiver gradient switch must be an integer."
             )
         for value, label in (
             (start_step, "start"),
@@ -321,6 +331,19 @@ def validate_config(config: dict[str, Any]) -> None:
             raise ConfigError(
                 "Global hard-meaning replay warmup must complete within max_steps."
             )
+        if receiver_gradient_switch_step is not None:
+            if receiver_parameter_gradients:
+                raise ConfigError(
+                    "Global hard-meaning replay receiver gradient switch requires gradients to start disabled."
+                )
+            if not (
+                start_step + warmup_steps
+                <= receiver_gradient_switch_step
+                < training["max_steps"]
+            ):
+                raise ConfigError(
+                    "Global hard-meaning replay receiver gradient switch must follow warmup and precede max_steps."
+                )
         if batch_size < 1:
             raise ConfigError(
                 "Global hard-meaning replay batch size must be positive."
