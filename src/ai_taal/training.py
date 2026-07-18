@@ -177,6 +177,9 @@ def train_population_system(
     collision_replay_generator = torch.Generator(device="cpu").manual_seed(
         seed + 919
     )
+    hard_meaning_replay_generator = torch.Generator(device="cpu").manual_seed(
+        seed + 1211
+    )
     consistency_config = training.get("algebraic_consistency", {})
     consistency_enabled = bool(consistency_config.get("enabled", False))
     consistency_quadruples = None
@@ -221,6 +224,18 @@ def train_population_system(
         collision_replay_config.get("weight", 0.0)
     ) < 0:
         raise ValueError("Global collision-replay weight cannot be negative.")
+    hard_meaning_replay_config = training.get(
+        "global_hard_meaning_replay", {}
+    )
+    hard_meaning_replay_enabled = bool(
+        hard_meaning_replay_config.get("enabled", False)
+    )
+    if hard_meaning_replay_enabled and float(
+        hard_meaning_replay_config.get("weight", 0.0)
+    ) < 0:
+        raise ValueError(
+            "Global hard-meaning replay weight cannot be negative."
+        )
     sender_consensus_config = training.get("sender_message_consensus", {})
     sender_consensus_enabled = bool(sender_consensus_config.get("enabled", False))
     if sender_consensus_enabled and float(
@@ -261,6 +276,9 @@ def train_population_system(
         torch.empty((0, 2), dtype=torch.long, device=device)
         for _ in population.senders
     ]
+    hard_meaning_replay_indices = torch.empty(
+        0, dtype=torch.long, device=device
+    )
     started = time.perf_counter()
 
     for step in range(1, max_steps + 1):
@@ -435,6 +453,47 @@ def train_population_system(
                         relaxed_collision_pair_probability(replay_messages)
                     )
                 collision_replay_loss = torch.stack(replay_losses).mean()
+        hard_meaning_replay_loss = torch.zeros((), device=device)
+        hard_meaning_replay_weight = 0.0
+        if hard_meaning_replay_enabled:
+            hard_meaning_replay_weight = (
+                _scheduled_hard_meaning_replay_weight(
+                    hard_meaning_replay_config, step
+                )
+            )
+            if (
+                hard_meaning_replay_weight > 0
+                and len(hard_meaning_replay_indices) > 0
+            ):
+                replay_batch_size = int(
+                    hard_meaning_replay_config["batch_size"]
+                )
+                replay_positions = torch.randint(
+                    len(hard_meaning_replay_indices),
+                    (replay_batch_size,),
+                    generator=hard_meaning_replay_generator,
+                    device="cpu",
+                ).to(device)
+                hard_batch = train_values[
+                    hard_meaning_replay_indices[replay_positions]
+                ]
+                hard_messages = [
+                    sender(
+                        hard_batch, temperature=temperature, sample=True
+                    )[0]
+                    for sender in population.senders
+                ]
+                hard_receiver_logits = [
+                    receiver(message)
+                    for message in hard_messages
+                    for receiver in population.receivers
+                ]
+                hard_meaning_replay_loss = torch.stack(
+                    [
+                        _factor_loss(logits, hard_batch)
+                        for logits in hard_receiver_logits
+                    ]
+                ).mean()
         sender_consensus_loss = torch.zeros((), device=device)
         sender_consensus_weight = 0.0
         if sender_consensus_enabled:
@@ -454,6 +513,7 @@ def train_population_system(
             + utilization_weight * utilization_loss
             + joint_collision_weight * joint_collision_loss
             + collision_replay_weight * collision_replay_loss
+            + hard_meaning_replay_weight * hard_meaning_replay_loss
             + sender_consensus_weight * sender_consensus_loss
         )
         optimizer.zero_grad(set_to_none=True)
@@ -477,6 +537,18 @@ def train_population_system(
                 mine_sender_collision_pairs(sender, train_values)
                 for sender in population.senders
             ]
+        if (
+            hard_meaning_replay_enabled
+            and step >= int(hard_meaning_replay_config["start_step"])
+            and step
+            % int(hard_meaning_replay_config["refresh_interval"])
+            == 0
+        ):
+            hard_meaning_replay_indices = (
+                mine_population_hard_meaning_indices(
+                    population, train_values
+                )
+            )
         history.append(
             {
                 "step": step,
@@ -511,6 +583,15 @@ def train_population_system(
                 "global_collision_replay_pair_counts": [
                     len(pairs) for pairs in collision_replay_pairs
                 ],
+                "global_hard_meaning_replay_loss": float(
+                    hard_meaning_replay_loss.detach().cpu()
+                ),
+                "global_hard_meaning_replay_weight": float(
+                    hard_meaning_replay_weight
+                ),
+                "global_hard_meaning_replay_pool_size": len(
+                    hard_meaning_replay_indices
+                ),
                 "sender_message_consensus_loss": float(
                     sender_consensus_loss.detach().cpu()
                 ),
@@ -772,6 +853,25 @@ def collision_pairs_from_messages(messages: Tensor) -> Tensor:
 def mine_sender_collision_pairs(sender: SenderModel, meanings: Tensor) -> Tensor:
     """Mine sender collisions from hard messages over training meanings only."""
     return collision_pairs_from_messages(encode_meanings(sender, meanings))
+
+
+@torch.no_grad()
+def mine_population_hard_meaning_indices(
+    population: PopulationSystem, meanings: Tensor
+) -> Tensor:
+    """Return inputs that any current sender-receiver link gets wrong."""
+    population.eval()
+    hard = torch.zeros(
+        len(meanings), dtype=torch.bool, device=meanings.device
+    )
+    for sender in population.senders:
+        messages = encode_meanings(sender, meanings)
+        for receiver in population.receivers:
+            predictions = torch.stack(
+                [head.argmax(dim=-1) for head in receiver(messages)], dim=1
+            )
+            hard |= ~predictions.eq(meanings).all(dim=1)
+    return hard.nonzero(as_tuple=False).flatten()
 
 
 def relaxed_collision_pair_probability(message_pairs: Tensor) -> Tensor:
@@ -1208,3 +1308,14 @@ def _scheduled_collision_replay_weight(
         return final_weight
     decay_progress = (step - decay_start) / (decay_end - decay_start)
     return initial_weight + (final_weight - initial_weight) * decay_progress
+
+
+def _scheduled_hard_meaning_replay_weight(
+    hard_replay_config: dict[str, Any], step: int
+) -> float:
+    start_step = int(hard_replay_config["start_step"])
+    if step <= start_step:
+        return 0.0
+    warmup_steps = int(hard_replay_config["warmup_steps"])
+    progress = min((step - start_step) / warmup_steps, 1.0)
+    return float(hard_replay_config["weight"]) * progress

@@ -1,0 +1,19 @@
+extends: ecp7-b15-development.yaml
+
+experiment:
+  title: ECP-7 late global hard-meaning task replay
+  arm: late_global_hard_meaning_task_replay
+  objective: >-
+    Test whether ordinary reconstruction updates concentrated on training
+    meanings failed by any current population link can repair the residual
+    known-meaning bottleneck without a meaning-to-slot binding, factor weight,
+    code-distance surrogate, or validation-driven sampling.
+
+training:
+  global_hard_meaning_replay:
+    enabled: true
+    weight: 0.25
+    start_step: 15000
+    warmup_steps: 5000
+    batch_size: 64
+    refresh_interval: 200

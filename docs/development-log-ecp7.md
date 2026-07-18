@@ -27,6 +27,7 @@ this log.
 | ECP7-B17-I | Intervention | B15 with late global collision-pair replay | Position-aware MLP | completed; gate failed |
 | ECP7-B18-I | Intervention | B17 replay with final weight 0.1 | Position-aware MLP | completed; gate failed |
 | ECP7-B19-I | Intervention | B18 with replay decayed to zero after step 20,000 | Position-aware MLP | valid negative; validation 82.04%, train and injectivity fail |
+| ECP7-B20-I | Intervention | Late global replay of population-hard training meanings | Position-aware MLP | valid negative; new-best validation 83.45%, train and injectivity fail |
 
 ## Batch 1 preregistration
 
@@ -1454,3 +1455,114 @@ remaining train error is a sparse hard-example problem without adding a
 meaning-to-slot binding or a code-distance surrogate. Collision replay, factor
 reweighting, architecture, optimizer, horizon, data, translator and thresholds
 must remain unchanged or absent as appropriate.
+
+## Batch 20 preregistration
+
+Preregistered: July 18, 2026 at 15:42:06 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Hard-meaning predicate: any incorrect factor from any of 16 current population links<br>
+Replay weight: `0` through step `15,000`, linear to `0.25` at step `20,000`, then hold<br>
+Replay batch size: `64` meanings, uniform with replacement<br>
+Training-only pool refresh interval: `200` steps<br>
+Replay sampler seed offset: `+1211`<br>
+Raw configuration SHA-256: `01afcad913222db6a6ef858919664cc50bfac9269f8405eb8cae0dd9832c7319`<br>
+Effective configuration SHA-256: `44b1dbd8b767e4b3e58e88e7f1645e6dc1578b04fd30fa174777dffaf96c3b75`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+A selected-checkpoint diagnostic on completed Batch 15 found 3,406 training
+meanings with at least one population-link error. They fail for 11.14 of 16
+links on average. Their ordinary reconstruction loss is `0.20870`, compared
+with `0.06442` on the full training set, so the registered coefficient gives an
+estimated task-scale contribution of `0.0522`.
+
+ECP7-B20-I is identical to Batch 15 through step 15,000. The first pool is then
+mined from hard training predictions only. Each subsequent replay update uses
+the same all-senders/all-receivers factor reconstruction loss and current
+straight-through temperature as the ordinary task batch. The independent
+sampler prevents replay-index draws from changing the base batch sequence. No
+validation meaning participates in mining or replay. The positive control is
+rerun, and no alternative hard predicate, coefficient, sampler or accompanying
+intervention is admitted into this batch.
+
+## Batch 20 results
+
+Positive-control run: `runs/ecp7-batch20-control-development/20260718T154331Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch20-intervention-development/20260718T154331Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B20-I |
+|---|---:|---:|
+| Population train, mean | 100% | **83.7721%** |
+| Population train, worst link | 100% | 82.7148% |
+| Population validation, mean | 100% | **83.4473%** |
+| Population validation, worst link | 100% | **82.1289%** |
+| Universal translator, validation | 100% | **83.9600%** |
+| Exact sender-message agreement | 100% | **92.40%** |
+| Unique messages per sender | 15,360 | 12,795–13,304 |
+| Collision meanings per sender | 0 | 2,056–2,565 |
+| Message entropy | 13.91 bits | 13.56–13.62 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B20-I establishes the
+strongest ECP-7 mean validation, worst-link validation and sender agreement so
+far. It passes the validation and universal-translator thresholds, but still
+fails both known-meaning train thresholds and sender injectivity. The joint gate
+therefore fails and confirmatory access remains unauthorized.
+
+All 76 logged records through step 15,000 match Batch 15 exactly on every 25
+shared trajectory field. The first registered mining pass found 3,452 hard
+training meanings. Replay weight rose from zero to `0.25` by step 20,000, where
+the pool had fallen to 2,862. Its minimum was 2,705 at step 27,400; it then
+continued to fluctuate rather than converging to zero.
+
+The selected checkpoint was step 29,800 with a 2,848-meaning pool. Task loss was
+`0.06719`, hard-meaning replay loss `0.14823`, replay weight `0.25`, and
+utilization loss `-0.73711`. The weighted replay contribution was approximately
+`0.0371`, below the ordinary task loss. The run reached the registered 30,000
+step horizon. Its final checkpoint had 3,084 hard meanings and 82.84%
+validation, so selection correctly retained step 29,800 using validation only.
+
+Compared with Batch 15, train exactness improved by 0.31 percentage points,
+mean validation by 0.86 points, worst-link validation by 2.34 points, translator
+validation by 0.59 points and sender agreement by 0.07 points. Batch 20 now
+holds the strongest ECP-7 validation result; Batch 18 retains the strongest
+train and translator results.
+
+The hard pool did shrink, but its remaining errors became more population-wide.
+At the selected Batch 15 checkpoint, 3,406 meanings fail for at least one link,
+1,469 fail for all 16 links, and a hard meaning fails for 11.14 links on
+average. At the selected Batch 20 checkpoint, those values are 2,848, 1,937 and
+13.07. Uniform any-link replay therefore repairs many link-specific errors while
+leaving a smaller set of more consistently wrong meanings. Its hard-pool loss
+rose from the diagnostic `0.20870` to `0.25880` despite the smaller pool.
+
+Selected sender codebooks contain 12,795, 12,960, 12,898 and 13,304 unique
+messages, with 2,565, 2,400, 2,462 and 2,056 collision meanings. Population
+validation factor accuracies were `[99.58%, 99.96%, 98.44%, 85.35%]`;
+universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 85.52%]`. The generalization gain comes primarily from
+near-complete population color and shape recovery, while size and especially
+texture remain fixed bottlenecks.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 20 decision
+
+ECP7-B20-I is a valid and informative negative result. Ordinary task replay on
+any-link failures improves cross-link consistency and establishes the strongest
+weak-structure validation result, but it does not materially lift train
+exactness or reach injectivity. The confirmatory split remains sealed.
+
+A future ECP7-B21 may keep the complete Batch 20 mechanism and parameters while
+changing only the mining predicate from “at least one of 16 links fails” to
+“all 16 links fail.” This tests the observed concentration directly by spending
+the same registered replay budget exclusively on population-shared errors. No
+coefficient, replay batch, refresh, schedule, architecture, base loss,
+optimizer, horizon, data, translator or threshold change may accompany that
+predicate test.
