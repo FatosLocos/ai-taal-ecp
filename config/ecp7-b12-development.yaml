@@ -1,0 +1,15 @@
+extends: ecp7-b10-development.yaml
+
+experiment:
+  title: ECP-7 extended optimization with a deep position-aware decoder
+  arm: extended_optimization_deep_position_aware_decoder
+  objective: >-
+    Test whether one additional generic shared hidden layer lets receivers and
+    the isolated translator resolve the residual color and size distinctions
+    without introducing factor-specific paths or bindings.
+
+agents:
+  receiver:
+    family: deep_position_aware_mlp_receiver
+  translator:
+    family: deep_position_aware_mlp_receiver

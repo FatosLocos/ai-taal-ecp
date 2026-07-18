@@ -787,3 +787,72 @@ complete B10 schedule and add exactly one second generic shared hidden layer to
 both the position-aware receiver and isolated translator. It must preserve the
 same flattened positional input and must not add factor-specific paths, binding,
 loss, duration, data or threshold changes.
+
+## Batch 12 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `15,000`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Decoder change: one additional shared `hidden_dim × hidden_dim` layer<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B12-I returns to every Batch 10 training and loss setting, then changes
+only the receiver and translator depth. The four factor heads still consume one
+shared representation of all four embedded positions. There is no binding or
+factor-specific input path. The unchanged positive control is rerun, and no
+alternative decoder variant is admitted into this batch.
+
+## Batch 12 results
+
+Positive-control run: `runs/ecp7-batch12-control-development/20260718T130109Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch12-intervention-development/20260718T130109Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B12-I |
+|---|---:|---:|
+| Population train, mean | 100% | 71.5297% |
+| Population train, worst link | 100% | 66.6016% |
+| Population validation, mean | 100% | 47.9797% |
+| Population validation, worst link | 100% | 39.7461% |
+| Universal translator, validation | 100% | 63.0371% |
+| Exact sender-message agreement | 100% | 88.64% |
+| Unique messages per sender | 15,360 | 10,119–11,404 |
+| Collision meanings per sender | 0 | 3,956–5,241 |
+| Message entropy | 13.91 bits | 13.11–13.33 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B12-I failed train,
+validation, translator and injectivity. It does not authorize confirmatory
+access.
+
+Relative to B10, the second decoder layer reduced train exactness from 82.0836%
+to 71.5297%, validation from 72.9797% to 47.9797%, and translator validation from
+75.1465% to 63.0371%. Code use and sender agreement also fell. The added generic
+decoder depth therefore made the emergent protocol harder, not easier, to learn.
+
+Population validation factor accuracies were
+`[77.07%, 86.05%, 100%, 77.05%]`; universal-translator factor accuracies were
+`[97.17%, 87.50%, 100%, 75.90%]`. The deeper shared representation did not
+resolve the residual factors consistently across receivers and a new reader.
+
+The selected checkpoint was step 10,000 with task loss `0.1539` and utilization
+loss `-0.7153`. Validation subsequently regressed, so the registered patience
+rule stopped population training at step 13,000.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 12 decision
+
+ECP7-B12-I is rejected. Decoder depth is not the B10 bottleneck. Batch 10 remains
+the strongest weak-structure base, and the confirmatory split remains sealed.
+
+The remaining capacity hypothesis is sender-side: B10 generates all four slots
+from one shallow shared context, and receiver depth has now been ruled out. A
+future ECP7-B13 may return to the complete B10 model and add exactly one second
+generic shared hidden layer to the bounded parallel sender before all four slot
+heads. It must retain the B10 one-layer receiver and translator and must not add
+factor-specific sender paths, loss, width, duration, data or threshold changes.

@@ -63,6 +63,11 @@ Batch 11 decayed code-utilization weight after step 5,000. It regressed to
 11,893–12,323 messages. Batch 10 therefore remains the strongest base. Exact
 identities and hashes are in `batch11-manifest.json`.
 
+Batch 12 added one generic shared hidden layer to the receiver and translator.
+It regressed sharply to 71.53% train exactness, 47.98% validation and 63.04%
+translator validation. Decoder depth is therefore rejected as the B10
+bottleneck. Exact identities and hashes are in `batch12-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
