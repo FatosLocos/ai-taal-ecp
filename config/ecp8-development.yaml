@@ -1,0 +1,21 @@
+extends: ecp8-control-development.yaml
+
+experiment:
+  title: ECP-8 global-capacity intervention development
+  arm: global_capacity_16_bit_intervention
+  objective: >-
+    Test whether four unrestricted 16-symbol positions eliminate hard-code
+    collisions in the unchanged weak-structure architecture and training setup.
+
+channel:
+  type: discrete_fixed_length
+  vocabulary_size: 16
+  symbol_min: 0
+  symbol_max: 15
+  message_length: 4
+  bits_per_symbol: 4
+  bits_per_message: 16
+  factor_alphabet_sizes: null
+  bits_per_symbol_by_factor: null
+  slot_alphabet_sizes: null
+  bits_per_symbol_by_slot: null

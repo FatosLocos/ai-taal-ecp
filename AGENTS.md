@@ -41,6 +41,6 @@ python3.12 -m venv .venv
 - Keep existing ECP-0 through ECP-6 configurations reproducible.
 - Document new experiments in three stages: preregistration, sealed development log, confirmatory results.
 - Write new configurations, documentation, reports and user-facing output in English.
-- When proposing ECP-7, prefer a single falsifiable intervention over several simultaneous architecture changes.
+- Preserve the completed ECP-8 Batch 1 capacity isolation and its sealed confirmatory split. Any Batch 2 must keep the 16-bit arm fixed and preregister exactly one structure-induction mechanism.
 
-The recommended next research question is whether compositional structure still emerges when the explicit one-factor-per-slot architectural bias is weakened.
+ECP-8 Batch 1 found that surplus capacity nearly removes collisions but does not reach injectivity or compositional validation. Do not continue a channel-size search.

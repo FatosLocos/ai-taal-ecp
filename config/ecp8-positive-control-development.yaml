@@ -1,0 +1,8 @@
+extends: ecp8-base-development.yaml
+
+experiment:
+  title: ECP-8 factorized positive-control development
+  arm: ecp6_factorized_positive_control
+  objective: >-
+    Verify that the frozen ECP-6 architecture solves the fresh ECP-8
+    validation matching at the information-theoretic 14-bit lower bound.
