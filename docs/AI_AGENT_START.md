@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 88 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 89 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 14
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 15
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -98,15 +98,17 @@ to 79.09% train, 72.22% validation and 72.41% translator validation. B10 remains
 the strongest base. ECP7-B12-I added one shared decoder layer and regressed
 further to 71.53% train, 47.98% validation and 63.04% translator validation.
 ECP7-B13-I added the symmetric sender layer and collapsed to 1.32% train, 0.32%
-validation and 0.61% translator validation. The confirmatory ECP-7 test is still
-sealed. ECP7-B14-I decayed late learning rate and regressed to 79.13% train,
-65.49% validation and 71.02% translator validation. B10 remains the strongest
-base.
+validation and 0.61% translator validation. ECP7-B14-I decayed late learning
+rate and regressed to 79.13% train, 65.49% validation and 71.02% translator
+validation. ECP7-B15-I extended constant-rate training to 30,000 steps and is
+now strongest at 83.46% train, 82.59% validation and 83.37% translator
+validation. Its validation and translator gates pass, but train and injectivity
+do not. The confirmatory ECP-7 test is still sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B15 intervention and its failure criterion.
+2. Define exactly one ECP7-B16 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -119,25 +121,23 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 10 is the strongest weak-structure result. Batch 11 ruled out reduced late
-utilization pressure, while Batches 12 and 13 ruled out extra generic decoder
-and sender depth. Batch 14 showed that reducing late learning rate is also
-harmful, while B10 selected its final 15,000-step checkpoint. The most
-informative next step is one final duration-only extension. A clean ECP7-B15
-progression is:
+Batch 15 is the strongest weak-structure result. It passes validation and
+translator gates, with residual known-meaning error concentrated in size after
+the high-entropy code is established. Earlier Batch 6 minimax pressure started
+from step zero on a much weaker protocol. The most informative next step is one
+late worst-factor schedule. A clean ECP7-B16 progression is:
 
 - keep the same world and bit budget;
-- return to the complete B10 training and loss schedule;
-- keep constant learning rate `0.001` and the temperature endpoint `0.8`;
-- extend only maximum population steps to 30,000, minimum selection to 15,000
-  and patience to 5,000;
+- keep the complete B15 architecture, horizon and base losses;
+- keep normalized factor-minimax weight `0` through step 15,000;
+- warm only that weight linearly to `1.0` over steps 15,000–20,000, then hold;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not change architecture, loss weights, optimizer, data, temperature,
-validation cadence or development thresholds, and do not combine the longer
-horizon with variable-length messages or negotiation. That would make its
-effect uninterpretable.
+Do not change architecture, utilization, optimizer, data, temperature, duration,
+validation cadence or development thresholds, and do not combine the late
+minimax schedule with variable-length messages or negotiation. That would make
+its effect uninterpretable.
 
 ## 7. Definition of done for any contribution
 

@@ -992,3 +992,79 @@ updates is harmful. A future ECP7-B15 may therefore keep the exact B10
 architecture, losses, constant learning rate and temperature endpoint, then
 extend only the maximum population horizon to 30,000 steps with minimum
 selection step 15,000 and patience 5,000. No other setting may change.
+
+## Batch 15 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `30,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Learning rate: constant `0.001`<br>
+Temperature schedule steps: `5,000`, then hold at `0.8`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B15-I keeps every Batch 10 architecture, loss, optimizer, data and
+translator setting. It extends only population optimization and its selection
+window. The unchanged positive control is rerun, and no alternative horizon or
+accompanying intervention is admitted into this batch.
+
+## Batch 15 results
+
+Positive-control run: `runs/ecp7-batch15-control-development/20260718T134437Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch15-intervention-development/20260718T134437Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B15-I |
+|---|---:|---:|
+| Population train, mean | 100% | 83.4612% |
+| Population train, worst link | 100% | 81.9336% |
+| Population validation, mean | 100% | **82.5867%** |
+| Population validation, worst link | 100% | 79.7852% |
+| Universal translator, validation | 100% | **83.3740%** |
+| Exact sender-message agreement | 100% | 92.33% |
+| Unique messages per sender | 15,360 | 12,585–13,200 |
+| Collision meanings per sender | 0 | 2,160–2,775 |
+| Message entropy | 13.91 bits | 13.52–13.61 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B15-I passed the registered
+mean validation and universal-translator thresholds for the first time in one
+batch. It still failed known-meaning train exactness and sender injectivity, so
+the joint gate fails and confirmatory access remains unauthorized.
+
+Relative to B10, the longer constant-rate horizon raised validation from
+72.9797% to 82.5867% and translator validation from 75.1465% to 83.3740%.
+Population train exactness increased only from 82.0836% to 83.4612%, indicating
+that residual hard-message collisions, not held-out composition, are now the
+principal gate failure.
+
+Population validation factor accuracies were
+`[98.86%, 99.75%, 98.44%, 85.05%]`; universal-translator factor accuracies were
+`[100%, 100%, 98.44%, 84.94%]`. Color and shape became essentially perfect.
+Size is now the dominant residual factor, with the fixed texture error also
+preventing exact reconstruction.
+
+The selected checkpoint was step 28,800 with task loss `0.0675` and utilization
+loss `-0.7399`. Validation first crossed 80% between steps 24,000 and 26,000 and
+remained above it through the final step. Every sender used at least 12,585
+messages, and no collision bucket contained more than three meanings.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 15 decision
+
+ECP7-B15-I is a negative result under the joint gate but becomes the new
+strongest weak-structure base. It passes composition and new-reader induction;
+only known-meaning exactness and injectivity remain below their registered
+thresholds. The confirmatory split remains sealed.
+
+The residual error is concentrated in size after the shared code is already
+established. A future ECP7-B16 may keep the complete B15 design and introduce
+only late normalized worst-factor emphasis: factor-minimax weight `0` through
+step 15,000, linearly warm to `1.0` over 5,000 steps, then hold. This revisits the
+Batch 6 objective only after the high-entropy B15 protocol exists and must not
+change architecture, utilization, duration, data, translator or thresholds.
