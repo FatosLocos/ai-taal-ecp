@@ -672,3 +672,44 @@ def test_collision_replay_decay_must_follow_warmup_and_fit_horizon(
     ] = 0.1
     with pytest.raises(ConfigError, match="below its initial weight"):
         validate_config(invalid_final)
+
+
+def test_ecp7_b20_adds_only_global_hard_meaning_replay(
+    ecp7_b15_config, ecp7_b20_config
+):
+    assert ecp7_b20_config["world"] == ecp7_b15_config["world"]
+    assert ecp7_b20_config["dataset"] == ecp7_b15_config["dataset"]
+    assert ecp7_b20_config["channel"] == ecp7_b15_config["channel"]
+    assert ecp7_b20_config["agents"] == ecp7_b15_config["agents"]
+    b15_training = deepcopy(ecp7_b15_config["training"])
+    b20_training = deepcopy(ecp7_b20_config["training"])
+    assert b20_training.pop("global_hard_meaning_replay") == {
+        "enabled": True,
+        "weight": 0.25,
+        "start_step": 15000,
+        "warmup_steps": 5000,
+        "batch_size": 64,
+        "refresh_interval": 200,
+    }
+    assert b20_training == b15_training
+
+
+def test_global_hard_meaning_replay_parameters_are_bounded(ecp7_b20_config):
+    invalid_batch = deepcopy(ecp7_b20_config)
+    invalid_batch["training"]["global_hard_meaning_replay"]["batch_size"] = 0
+    with pytest.raises(ConfigError, match="batch size must be positive"):
+        validate_config(invalid_batch)
+
+    invalid_warmup = deepcopy(ecp7_b20_config)
+    invalid_warmup["training"]["global_hard_meaning_replay"][
+        "warmup_steps"
+    ] = 15001
+    with pytest.raises(ConfigError, match="complete within max_steps"):
+        validate_config(invalid_warmup)
+
+    invalid_refresh = deepcopy(ecp7_b20_config)
+    invalid_refresh["training"]["global_hard_meaning_replay"][
+        "refresh_interval"
+    ] = 300
+    with pytest.raises(ConfigError, match="evaluation boundaries"):
+        validate_config(invalid_refresh)

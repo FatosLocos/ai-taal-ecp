@@ -838,3 +838,53 @@ sealed-test requirement fails. No alternative decay, endpoint, mining, pair
 sampler, architecture, base loss, optimizer, duration, data, translator or seed
 may be tried inside Batch 19. Failure is recorded without confirmatory test
 access.
+
+## Batch 20 preregistration — Global hard-meaning task replay
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 15:42:06 UTC<br>
+Configuration: `config/ecp7-b20-development.yaml`<br>
+Raw configuration SHA-256: `01afcad913222db6a6ef858919664cc50bfac9269f8405eb8cae0dd9832c7319`<br>
+Effective configuration SHA-256: `44b1dbd8b767e4b3e58e88e7f1645e6dc1578b04fd30fa174777dffaf96c3b75`
+
+Batches 17–19 show that direct collision replay changes code use but does not
+stably repair the known-meaning error. A training-only diagnostic on the
+selected Batch 15 checkpoint found that 3,406 of 14,336 training meanings fail
+for at least one of the 16 sender-receiver links. Those meanings fail for 11.14
+links on average and have mean ordinary reconstruction loss `0.20870`, versus
+`0.06442` over the complete training set. Batch 20 tests whether this
+concentrated residual error is a hard-example sampling problem.
+
+ECP7-B20-I inherits the complete Batch 15 architecture, random task batch,
+utilization objective, optimizer, data, temperature schedule, 30,000-step
+horizon, selection rule, translator and thresholds. It adds one mechanism:
+
+- after the normal step-15,000 evaluation, and every 200 steps thereafter,
+  evaluate hard predictions over training meanings only;
+- include a meaning in the replay pool when any current sender-receiver link
+  reconstructs at least one factor incorrectly;
+- sample 64 pool meanings uniformly with replacement using a separate
+  seed-derived generator;
+- compute the ordinary all-senders/all-receivers reconstruction loss on that
+  batch with the unchanged straight-through sender and current temperature;
+- keep replay weight `0` through step 15,000, warm it linearly to `0.25` at
+  step 20,000, and hold it through step 30,000.
+
+At the Batch 15 diagnostic scale, weight `0.25` contributes approximately
+`0.0522` for the hard-example loss, comparable to rather than larger than the
+remaining ordinary task loss. The base random batch remains unchanged. Mining
+uses no validation meaning, factor-specific weight, slot assignment,
+code-distance target or collision pair. The complete trajectory through step
+15,000 must match Batch 15 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B20-I with late global hard-meaning task replay.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative predicate, score, replay weight,
+batch size, refresh, schedule, architecture, base loss, optimizer, duration,
+data, translator or seed may be tried inside Batch 20. Failure is recorded
+without confirmatory test access.

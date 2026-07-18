@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 105 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 109 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 19
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 20
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -112,18 +112,25 @@ validation and 83.01% translator validation without becoming injective. The
 confirmatory ECP-7 test is still sealed.
 ECP7-B18-I reduced replay weight to `0.1` and recovered 84.08% train, 80.71%
 validation and a new-best 84.06% translator validation. Validation and
-translator gates pass, but train and injectivity do not. Batch 15 retains the
-best validation result, and the confirmatory ECP-7 test remains sealed.
+translator gates pass, but train and injectivity do not. Batch 15 retained the
+best validation result at that stage, and the confirmatory ECP-7 test remains
+sealed.
 ECP7-B19-I decayed replay back to zero from steps 20,000–25,000. It reached
 83.74% train, 82.04% validation, a new-best 80.57% worst-link validation and
 83.50% translator validation. The bounded pulse improved cross-link balance but
-still failed train thresholds and injectivity. Batch 15 retains the best mean
-validation result, and the confirmatory ECP-7 test remains sealed.
+still failed train thresholds and injectivity. Batch 15 retained the best mean
+validation result at that stage, and the confirmatory ECP-7 test remains
+sealed.
+ECP7-B20-I replayed ordinary task updates on training meanings failed by any
+population link. It reached 83.77% train, a new-best 83.45% mean and 82.13%
+worst-link validation, and 83.96% translator validation. The pool shrank but its
+remaining errors became more population-wide, so train thresholds and
+injectivity still failed. The confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B20 intervention and its failure criterion.
+2. Define exactly one ECP7-B21 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -136,27 +143,25 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batches 17–19 show that collision-pair replay changes code use but does not
-stably separate the remaining collisions. Batch 19 improves validation only
-after replay is removed, while known-meaning train exactness remains near 84%.
-The clean next question is whether the residual error is concentrated in a
-sparse set of hard training meanings that uniform task batches do not repair.
-A clean ECP7-B20 progression is:
+Batch 20 shows that ordinary task replay on any-link errors improves
+generalization and cross-link balance, but mostly removes link-specific errors.
+At its selected checkpoint, 1,937 of 2,848 hard meanings fail for all 16 links,
+up from 1,469 of 3,406 at the Batch 15 checkpoint. The clean next question is
+whether the fixed replay budget should target only those population-shared
+errors. A clean ECP7-B21 progression is:
 
-- keep the same world, bit budget, Batch 15 architecture and 30,000-step horizon;
-- do not enable collision replay or factor reweighting;
-- periodically evaluate only the training codebook and deterministically mine
-  meanings reconstructed incorrectly by the current population;
-- add ordinary reconstruction updates on one fixed, registered number of mined
-  meanings after step 15,000, using a separate seed-derived sampler;
-- keep the ordinary random task batch and all base objectives unchanged;
+- inherit the complete Batch 20 implementation and Batch 15 base;
+- change only the mining predicate from at least one failed link to all 16
+  failed links;
+- keep weight `0.25`, the 64-meaning uniform replay batch, 200-step refresh,
+  seed-derived sampler, warmup and horizon unchanged;
+- continue to mine and replay training meanings only;
 - measure train exactness, injectivity, validation composition and new-reader
   induction, and rerun the frozen ECP-6 positive control.
 
-Preregister the mining score, refresh interval, replay batch size, coefficient
-and schedule before training. Do not combine hard-meaning replay with collision
-pressure, a new architecture, factor-specific weights, optimizer changes,
-longer training, variable-length messages or negotiation.
+Do not combine the predicate change with another coefficient, graded sampling,
+collision pressure, a new architecture, factor-specific weights, optimizer
+changes, longer training, variable-length messages or negotiation.
 
 ## 7. Definition of done for any contribution
 

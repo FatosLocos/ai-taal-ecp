@@ -280,6 +280,55 @@ def validate_config(config: dict[str, Any]) -> None:
                     "Global collision-replay final weight must be non-negative and below its initial weight."
                 )
 
+    hard_replay = training.get("global_hard_meaning_replay", {})
+    if hard_replay.get("enabled", False):
+        if hard_replay.get("weight", -1) < 0:
+            raise ConfigError(
+                "Global hard-meaning replay weight cannot be negative."
+            )
+        start_step = hard_replay.get("start_step", -1)
+        warmup_steps = hard_replay.get("warmup_steps", 0)
+        batch_size = hard_replay.get("batch_size", 0)
+        refresh_interval = hard_replay.get("refresh_interval", 0)
+        for value, label in (
+            (start_step, "start"),
+            (warmup_steps, "warmup"),
+            (batch_size, "batch size"),
+            (refresh_interval, "refresh interval"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ConfigError(
+                    f"Global hard-meaning replay {label} must be an integer."
+                )
+        if start_step < 0:
+            raise ConfigError(
+                "Global hard-meaning replay start cannot be negative."
+            )
+        if warmup_steps < 1:
+            raise ConfigError(
+                "Global hard-meaning replay warmup must be positive."
+            )
+        if start_step + warmup_steps > training["max_steps"]:
+            raise ConfigError(
+                "Global hard-meaning replay warmup must complete within max_steps."
+            )
+        if batch_size < 1:
+            raise ConfigError(
+                "Global hard-meaning replay batch size must be positive."
+            )
+        if refresh_interval < 1:
+            raise ConfigError(
+                "Global hard-meaning replay refresh interval must be positive."
+            )
+        evaluation_interval = training["evaluation_interval"]
+        if (
+            start_step % evaluation_interval != 0
+            or refresh_interval % evaluation_interval != 0
+        ):
+            raise ConfigError(
+                "Global hard-meaning replay must start and refresh on evaluation boundaries."
+            )
+
     sender_consensus = training.get("sender_message_consensus", {})
     if sender_consensus.get("enabled", False):
         if sender_consensus.get("weight", -1) < 0:

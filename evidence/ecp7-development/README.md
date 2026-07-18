@@ -104,6 +104,13 @@ validation and 83.50% translator validation. The bounded pulse improved
 cross-link balance but still failed train thresholds and injectivity. Exact
 identities and hashes are in `batch19-manifest.json`.
 
+Batch 20 replayed ordinary task updates on training meanings failed by any
+population link. It reached 83.77% train exactness, a new-best 83.45% mean and
+82.13% worst-link validation, and 83.96% translator validation. The hard pool
+shrunk but concentrated into population-wide failures, so train thresholds and
+injectivity still failed. Exact identities and hashes are in
+`batch20-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

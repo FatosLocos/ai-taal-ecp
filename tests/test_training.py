@@ -14,6 +14,7 @@ from ai_taal.training import (
     _scheduled_code_utilization_weight,
     _scheduled_collision_replay_weight,
     _scheduled_factor_minimax_weight,
+    _scheduled_hard_meaning_replay_weight,
     _scheduled_learning_rate,
     _scheduled_temperature,
     algebraic_consistency_loss,
@@ -22,6 +23,7 @@ from ai_taal.training import (
     calibrate_receiver_binding,
     collision_pairs_from_messages,
     factor_agnostic_code_utilization_loss,
+    mine_population_hard_meaning_indices,
     mine_sender_collision_pairs,
     normalized_factor_minimax_loss,
     relaxed_collision_pair_probability,
@@ -323,6 +325,58 @@ def test_collision_pair_mining_uses_a_senders_hard_training_code(
     assert len(pairs) == 6
 
 
+def test_hard_meaning_mining_returns_union_of_population_link_errors():
+    class IdentitySender(torch.nn.Module):
+        def forward(self, meanings, **_kwargs):
+            return None, meanings.clone()
+
+    class ConditionalReceiver(torch.nn.Module):
+        def __init__(self, *, condition_factor=None, flipped_factor=None):
+            super().__init__()
+            self.condition_factor = condition_factor
+            self.flipped_factor = flipped_factor
+
+        def forward(self, messages):
+            predictions = messages.clone()
+            if self.condition_factor is not None:
+                mask = messages[:, self.condition_factor] == 1
+                predictions[mask, self.flipped_factor] = (
+                    1 - predictions[mask, self.flipped_factor]
+                )
+            return tuple(
+                torch.nn.functional.one_hot(
+                    predictions[:, factor_index], num_classes=2
+                ).to(torch.float32)
+                for factor_index in range(predictions.shape[1])
+            )
+
+    class StubPopulation(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.senders = torch.nn.ModuleList([IdentitySender()])
+            self.receivers = torch.nn.ModuleList(
+                [
+                    ConditionalReceiver(),
+                    ConditionalReceiver(
+                        condition_factor=0, flipped_factor=3
+                    ),
+                    ConditionalReceiver(
+                        condition_factor=1, flipped_factor=2
+                    ),
+                ]
+            )
+
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 0, 1, 0], [0, 1, 0, 1]], dtype=torch.long
+    )
+
+    hard_indices = mine_population_hard_meaning_indices(
+        StubPopulation(), meanings
+    )
+
+    assert hard_indices.tolist() == [1, 2]
+
+
 def test_relaxed_collision_replay_measures_full_message_probability():
     symbol_pairs = torch.tensor(
         [
@@ -469,6 +523,15 @@ def test_collision_replay_pulse_warms_decays_and_stops(ecp7_b19_config):
     assert _scheduled_collision_replay_weight(schedule, 22500) == 0.05
     assert _scheduled_collision_replay_weight(schedule, 25000) == 0.0
     assert _scheduled_collision_replay_weight(schedule, 30000) == 0.0
+
+
+def test_hard_meaning_replay_weight_starts_warms_and_holds(ecp7_b20_config):
+    schedule = ecp7_b20_config["training"]["global_hard_meaning_replay"]
+
+    assert _scheduled_hard_meaning_replay_weight(schedule, 15000) == 0.0
+    assert _scheduled_hard_meaning_replay_weight(schedule, 17500) == 0.125
+    assert _scheduled_hard_meaning_replay_weight(schedule, 20000) == 0.25
+    assert _scheduled_hard_meaning_replay_weight(schedule, 30000) == 0.25
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
