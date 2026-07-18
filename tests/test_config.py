@@ -328,3 +328,28 @@ def test_ecp7_b8_adds_only_algebraic_context_invariance(
     assert "joint_message_collision" not in b8_training
     assert "sender_message_consensus" not in b8_training
     assert "factor_minimax" not in b8_training
+
+
+def test_ecp7_b9_changes_only_the_shared_decoder_family(
+    ecp7_b7_config, ecp7_b9_config
+):
+    assert ecp7_b9_config["world"] == ecp7_b7_config["world"]
+    assert ecp7_b9_config["dataset"] == ecp7_b7_config["dataset"]
+    assert ecp7_b9_config["channel"] == ecp7_b7_config["channel"]
+    assert ecp7_b9_config["training"] == ecp7_b7_config["training"]
+    assert (
+        ecp7_b9_config["agents"]["sender"]
+        == ecp7_b7_config["agents"]["sender"]
+    )
+    assert (
+        ecp7_b9_config["agents"]["population"]
+        == ecp7_b7_config["agents"]["population"]
+    )
+    assert ecp7_b9_config["agents"]["receiver"] == {
+        "family": "position_aware_mlp_receiver"
+    }
+    b7_translator = deepcopy(ecp7_b7_config["agents"]["translator"])
+    b9_translator = deepcopy(ecp7_b9_config["agents"]["translator"])
+    assert b7_translator.pop("family") == "sequence_encoder_multihead_classifier"
+    assert b9_translator.pop("family") == "position_aware_mlp_receiver"
+    assert b9_translator == b7_translator

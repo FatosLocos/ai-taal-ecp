@@ -397,3 +397,43 @@ The batch contains exactly two seed-11 runs:
 All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative quadruple sampling,
 weight, warmup, receiver, architecture or duration may be tried inside Batch 8.
+
+## Batch 9 preregistration — Position-aware MLP decoder
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b9-development.yaml`<br>
+Raw configuration SHA-256: `1ceeb80a3657078167d6d2ebacc1d57546d41ce53860148b9dfe7941b855c3fc`<br>
+Effective configuration SHA-256: `d76fd03cfdffc97cdc4ded755868db93c6d77df62c14fb9fda3627fc2a3ad591`
+
+Batch 7 messages changed when shape changed, and a fresh translator extracted
+more shape information than the jointly trained receiver population. Batch 8's
+sender-side context loss suppressed the stronger Batch 7 code. Batch 9 returns
+to the complete B7 sender and loss set, then changes one shared decoder-family
+assumption: messages are no longer compressed into a GRU final state.
+
+The position-aware MLP decoder embeds each of the four received symbols with
+one shared symbol embedding, concatenates the four embeddings in channel order,
+projects that complete vector into one hidden representation, and applies four
+factor-classification heads. Every factor head reads the same representation of
+all message positions.
+
+The decoder preserves positional information but has no recurrent order bias,
+factor-specific input path, binding matrix, hard slot selection or
+factor-to-slot assignment. The post-freeze universal translator uses the same
+decoder family so transfer is evaluated without giving it a different
+architectural advantage. Its isolation metadata is unchanged.
+
+This decoder-family replacement is the only Batch 9 change. The B7 parallel
+sender, Batch 3 hard-utilization loss, task loss, population, channel, split,
+duration, selection and transfer training remain unchanged. The rejected Batch
+8 algebraic objective is disabled as in B7.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B9-I with the shared position-aware MLP decoder on the B7 sender.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No sender, loss, hidden-size,
+duration or alternative decoder variant may be tried inside Batch 9.

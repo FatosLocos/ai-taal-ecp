@@ -1,0 +1,15 @@
+extends: ecp7-b7-development.yaml
+
+experiment:
+  title: ECP-7 parallel sender with position-aware MLP decoding
+  arm: parallel_sender_position_aware_mlp_decoder
+  objective: >-
+    Test whether a generic decoder that reads all four embedded positions
+    directly can recover the parallel sender's shape signal without a
+    factor-to-slot binding or recurrent final-state bottleneck.
+
+agents:
+  receiver:
+    family: position_aware_mlp_receiver
+  translator:
+    family: position_aware_mlp_receiver

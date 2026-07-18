@@ -47,6 +47,11 @@ Batch 8 added algebraic context invariance to Batch 7. The relaxed surrogate
 improved, but the discrete protocol regressed to 857–1,135 messages and 0.32%
 validation. Exact identities and hashes are in `batch8-manifest.json`.
 
+Batch 9 replaced the recurrent decoder with a generic position-aware MLP. It
+reached 71.27% train exactness, 52.39% validation, 54.81% translator validation
+and 10,834–11,017 messages, but still missed every registered performance and
+injectivity gate. Exact identities and hashes are in `batch9-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

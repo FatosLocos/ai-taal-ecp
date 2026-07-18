@@ -562,3 +562,78 @@ better than the jointly trained receivers. A future ECP7-B9 may keep the B7
 sender and losses but replace the recurrent final-state receiver with one
 generic position-aware MLP over all four embedded slots. This tests decoder
 access without factor-to-slot binding and must not add another loss.
+
+## Batch 9 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B9-I returns to the Batch 7 parallel sender and loss set, then changes one
+shared decoder family. The receiver and post-freeze translator concatenate all
+four embedded message positions and decode every factor from one generic MLP
+representation instead of a recurrent final state. They have no binding matrix
+or factor-specific slot input. The exact architecture and exclusions are
+recorded in `docs/research-design-ecp7.md`. The unchanged positive control is
+rerun. Smoke is mechanical only and cannot authorize tuning.
+
+## Batch 9 results
+
+Positive-control run: `runs/ecp7-batch9-control-development/20260718T121559Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch9-intervention-development/20260718T121559Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B9-I |
+|---|---:|---:|
+| Population train, mean | 100% | 71.2734% |
+| Population train, worst link | 100% | 70.1521% |
+| Population validation, mean | 100% | 52.3865% |
+| Population validation, worst link | 100% | 50.8789% |
+| Universal translator, validation | 100% | 54.8096% |
+| Exact sender-message agreement | 100% | 89.51% |
+| Unique messages per sender | 15,360 | 10,834–11,017 |
+| Collision meanings per sender | 0 | 4,343–4,526 |
+| Message entropy | 13.91 bits | 13.25–13.28 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B9-I still failed
+the population, validation, translator and injectivity gates, so it does not
+authorize confirmatory access. It nevertheless produced the first large
+weak-structure result in ECP-7.
+
+The position-aware decoder raised mean population train exactness from B7's
+9.5965% to 71.2734%, validation from 0.5066% to 52.3865%, worst-link validation
+from 0% to 50.8789%, and universal-translator validation from 2.7588% to
+54.8096%. Sender exact-message agreement rose from 27.90% to 89.51%, even
+without an explicit sender-consensus loss.
+
+Population validation factor accuracies were approximately
+`[84.17%, 76.09%, 98.45%, 86.10%]`; the decoder therefore recovered the shape
+signal that the recurrent population ignored. Universal-translator factor
+accuracies were `[86.08%, 83.50%, 97.85%, 81.98%]`. No factor remains near
+chance.
+
+The selected checkpoint was the final registered step 5,000. Its task loss was
+`0.1724`, hard-utilization loss was `-0.7357`, and exactness was still improving.
+Each sender used 10,834–11,017 messages with 13.25–13.28 bits of entropy; the
+largest collision bucket contained only 8–9 meanings. These observations
+indicate unfinished optimization rather than the previous semantic collapse.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 9 decision
+
+ECP7-B9-I is a negative development result because every registered threshold
+must pass together. It is also the new strongest weak-structure design and the
+first result that justifies an isolated optimization-budget test. The
+confirmatory split remains sealed.
+
+A future ECP7-B10 may keep the complete B9 architecture and loss set, preserve
+its original 5,000-step temperature annealing, and extend only the population
+optimization horizon to 15,000 steps with a preregistered longer selection
+window. No architecture, decoder, loss, data, translator or threshold may
+change in that batch.
