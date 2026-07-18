@@ -987,3 +987,38 @@ def test_ecp7_b28_changes_only_the_sender_representation(
         == "residual_bounded_parallel_sender"
     )
     assert b28_agents == b25_agents
+
+
+def test_ecp7_b29_changes_only_late_residual_activation(
+    ecp7_b28_config, ecp7_b29_config
+):
+    assert ecp7_b29_config["world"] == ecp7_b28_config["world"]
+    assert ecp7_b29_config["dataset"] == ecp7_b28_config["dataset"]
+    assert ecp7_b29_config["channel"] == ecp7_b28_config["channel"]
+    assert ecp7_b29_config["agents"] == ecp7_b28_config["agents"]
+    b28_training = deepcopy(ecp7_b28_config["training"])
+    b29_training = deepcopy(ecp7_b29_config["training"])
+    assert b29_training.pop("sender_residual_activation") == {
+        "enabled": True,
+        "start_step": 30000,
+    }
+    assert b29_training == b28_training
+
+
+def test_sender_residual_activation_is_late_bounded_and_architecture_specific(
+    ecp7_b29_config,
+):
+    invalid_early = deepcopy(ecp7_b29_config)
+    invalid_early["training"]["sender_residual_activation"]["start_step"] = 10000
+    with pytest.raises(ConfigError, match="cannot precede minimum"):
+        validate_config(invalid_early)
+
+    invalid_boundary = deepcopy(ecp7_b29_config)
+    invalid_boundary["training"]["sender_residual_activation"]["start_step"] = 30100
+    with pytest.raises(ConfigError, match="evaluation boundaries"):
+        validate_config(invalid_boundary)
+
+    invalid_sender = deepcopy(ecp7_b29_config)
+    invalid_sender["agents"]["sender"]["family"] = "bounded_parallel_sender"
+    with pytest.raises(ConfigError, match="requires the residual parallel sender"):
+        validate_config(invalid_sender)

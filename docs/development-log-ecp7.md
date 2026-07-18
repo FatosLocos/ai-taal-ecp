@@ -36,6 +36,7 @@ this log.
 | ECP7-B26-I | Intervention | B25 with a second sender-only pulse and final receiver-only catch-up | Position-aware MLP | valid negative; route cycle changes error sharing but not code capacity |
 | ECP7-B27-I | Intervention | B25 plus one late bounded direct sender-collision pulse | Position-aware MLP | valid negative; collision multiplicity falls but unique-code capacity is unchanged |
 | ECP7-B28-I | Intervention | B25 with one zero-initialized shared sender residual interaction | Position-aware MLP | valid negative; generic residual depth drives memorization and code collapse |
+| ECP7-B29-I | Intervention | B28 residual branch frozen at exact zero through step 30,000 | Position-aware MLP | valid negative; late activation immediately reduces capacity and worst-link validation |
 
 ## Batch 1 preregistration
 
@@ -2393,3 +2394,107 @@ start of training is closed. If one final residual test is attempted, it must
 freeze the exact-zero branch through the already successful B25 trajectory and
 activate only that representation afterward; no architectural, objective or
 route change may accompany it.
+
+## Batch 29 preregistration
+
+Preregistered: July 18, 2026 at 18:47:04 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `45,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Residual weight and bias through step 30,000: **exact zero and frozen**<br>
+Residual parameter gradients from step 30,001: **enabled**<br>
+Pre-existing sender and receiver gradients: **unchanged throughout**<br>
+Additional collision loss: **none**<br>
+Hard-meaning replay route: unchanged B25 sender-only warmup, then receiver-only catch-up<br>
+Raw configuration SHA-256: `4c4e32dc054eb4af400e04fccc5c312edea0e5cbfa9c39fbee6e2615d56258b9`<br>
+Effective configuration SHA-256: `6483d2cf84f2e7e1d0365e90aeefc99641fb9255c3617d8d3928623af5db3947`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B29-I inherits Batch 28's zero-RNG residual sender and every Batch 25
+training setting. It changes only when the two residual parameters may receive
+gradients. They remain non-trainable and exactly zero through step 30,000;
+because the branch consumes no RNG and contributes zero, all shared history
+fields through that boundary must match Batch 25 exactly. The residual weight
+and bias become trainable on step 30,001. All original sender parameters remain
+trainable throughout, and the established receiver-only hard-replay route is
+unchanged.
+
+The positive control is rerun. All existing validity and development gates
+remain unchanged. The late-capacity hypothesis also requires a selected
+minimum sender codebook larger than Batch 25's 12,720-message minimum without a
+lower worst-link validation score. No gradual activation, alternative boundary,
+residual change, collision replay, new loss, route change, receiver change,
+optimizer, horizon, data, translator or seed may be tried inside Batch 29.
+If this final residual test fails, ECP-7 development closes without confirmatory
+test access.
+
+## Batch 29 results
+
+Positive-control run: `runs/ecp7-batch29-control-development/20260718T184951Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch29-intervention-development/20260718T185111Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B29-I |
+|---|---:|---:|
+| Population train, mean | 100% | 84.8868% |
+| Population train, worst link | 100% | 82.2824% |
+| Population validation, mean | 100% | 84.7412% |
+| Population validation, worst link | 100% | 81.7383% |
+| Universal translator, validation | 100% | 85.0098% |
+| Exact sender-message agreement | 100% | 91.96% |
+| Unique messages per sender | 15,360 | 12,720–13,439 |
+| Collision meanings per sender | 0 | 1,921–2,640 |
+| Message entropy | 13.91 bits | 13.54–13.64 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B29-I passes the mean
+validation and translator thresholds but fails both train thresholds, sender
+injectivity and the added late-capacity/worst-link criterion. Its selected
+checkpoint occurs at step 31,000, only 1,000 steps after activation; patience
+stops the run at step 36,000. The joint gate fails and confirmatory access
+remains unauthorized.
+
+All 151 shared history records through step 30,000 match Batch 25 exactly.
+Every recorded residual-gradient flag is false through that boundary and true
+afterward. This validates the intended isolation: the branch is identically
+zero during the complete established shallow trajectory and genuinely trains
+only in the late phase.
+
+The intervention still regresses immediately. Relative to Batch 25, the step
+31,000 checkpoint loses 0.38 percentage points of mean train, 0.53 points of
+worst-link train, 0.50 points of mean validation, 0.98 points of worst-link
+validation and 0.12 points of translator validation. Validation falls further
+to 84.30% at the final step.
+
+Selected sender codebooks contain 13,163, 12,960, 12,720 and 13,439 unique
+messages, compared with Batch 25's 13,440, 12,960, 12,720 and 13,440. The late
+branch therefore removes 278 net occupied codes rather than adding capacity;
+the minimum remains 12,720. Selected residual weight norms of 2.36–3.33 and
+bias norms of 0.15–0.23 confirm that the branch moved materially from zero.
+
+The selected diagnostic finds 1,679 meanings failed by all links and 3,152
+failed by at least one link, with 11.00 mean failed links per erroneous
+meaning. Shared errors are essentially unchanged from Batch 25's 1,677, while
+any-link failures increase by 185. Population validation factor accuracies
+were `[99.88%, 99.89%, 98.41%, 86.56%]`; universal-translator factor
+accuracies were `[100%, 100%, 98.41%, 86.60%]`.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384
+validation-only episodes, no confirmatory-test keys, valid local alphabets,
+and exactly 14 declared bits for every logged message.
+
+## Batch 29 decision and ECP-7 development closure
+
+ECP7-B29-I is a valid negative result. Late activation avoids Batch 28's
+catastrophic relearning failure, but even a residual branch introduced only
+after the shallow protocol is established immediately reduces code capacity
+and worst-link generalization. The representation hypothesis and its permitted
+schedule are rejected.
+
+No ECP-7 development variant passes the complete gate, so no `config/ecp7.yaml`
+is frozen and the ECP-7 confirmatory test remains sealed. Development closes
+after 29 transparently recorded batches. ECP-6 remains the latest confirmed
+result; future research must define a new ECP-8 question and fresh
+preregistration rather than continue tuning ECP-7.

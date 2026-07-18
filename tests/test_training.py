@@ -19,6 +19,7 @@ from ai_taal.training import (
     _scheduled_hard_meaning_replay_weight,
     _scheduled_learning_rate,
     _scheduled_temperature,
+    _sender_residual_parameter_gradients,
     algebraic_consistency_loss,
     atom_code_consensus_loss,
     build_algebraic_quadruples,
@@ -742,6 +743,17 @@ def test_late_sender_collision_pulse_preserves_the_first_30000_steps(
     assert _scheduled_collision_replay_weight(schedule, 37500) == 0.05
     assert _scheduled_collision_replay_weight(schedule, 40000) == 0.0
     assert _scheduled_collision_replay_weight(schedule, 45000) == 0.0
+
+
+def test_sender_residual_parameters_activate_after_registered_boundary(
+    ecp7_b29_config,
+):
+    schedule = ecp7_b29_config["training"]["sender_residual_activation"]
+
+    assert not _sender_residual_parameter_gradients(schedule, 1)
+    assert not _sender_residual_parameter_gradients(schedule, 30000)
+    assert _sender_residual_parameter_gradients(schedule, 30001)
+    assert _sender_residual_parameter_gradients(schedule, 45000)
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

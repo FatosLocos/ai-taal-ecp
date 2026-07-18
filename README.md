@@ -25,9 +25,9 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
-ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first twenty-six sealed batches are valid
-development results but none passes the full gate. Batch 15 established the
+ECP-7 development tested how much of that result depends on the explicit
+one-factor-per-slot architecture. All 29 sealed batches are valid development
+results, but none passes the full gate. Batch 15 established the
 strong position-aware base: at 30,000 optimization steps it reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
 12,585–13,200 hard messages per sender. Validation and translator thresholds pass
@@ -65,8 +65,13 @@ code counts again remained unchanged and worst-link validation regressed to
 closed. Batch 28 added an identity-initialized generic residual sender block,
 but it collapsed to 9.65% validation and roughly 8,000 unique messages. Generic
 depth active from the start promotes memorization rather than compositional
-generalization. See
+generalization. Batch 29 activated that branch only after the exact B25
+trajectory; it still reduced validation to 84.74% and removed occupied codes.
+ECP-7 development is therefore closed after 29 variants. No confirmatory ECP-7
+configuration was frozen and its confirmatory split was never opened. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
+The compact synthesis is in
+[`docs/ecp7-development-conclusion.md`](docs/ecp7-development-conclusion.md).
 
 ## Build on this work
 
@@ -106,6 +111,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) — machine code, 14-bit wire format and induction procedure.
 - [`docs/research-design-ecp7.md`](docs/research-design-ecp7.md) — preregistered weak-structure question, paired control and sealed split.
 - [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md) — the first negative weak-structure batch and integrity checks.
+- [`docs/ecp7-development-conclusion.md`](docs/ecp7-development-conclusion.md) — sealed development synthesis and closure after 29 variants.
 - [`config/ecp7-development.yaml`](config/ecp7-development.yaml) — sealed weak-structure intervention configuration.
 - [`config/ecp7-b2-development.yaml`](config/ecp7-b2-development.yaml) — factor-agnostic soft code-utilization intervention.
 - [`config/ecp7-b3-development.yaml`](config/ecp7-b3-development.yaml) — the same utilization formula on straight-through hard messages.
@@ -134,6 +140,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b26-development.yaml`](config/ecp7-b26-development.yaml) — Batch 25 with one preregistered sender/receiver replay-route cycle.
 - [`config/ecp7-b27-development.yaml`](config/ecp7-b27-development.yaml) — Batch 25 plus one late bounded direct sender-collision pulse.
 - [`config/ecp7-b28-development.yaml`](config/ecp7-b28-development.yaml) — Batch 25 with one zero-initialized shared residual sender interaction.
+- [`config/ecp7-b29-development.yaml`](config/ecp7-b29-development.yaml) — Batch 28 with residual parameters frozen through step 30,000.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

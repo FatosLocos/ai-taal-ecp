@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 130 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 133 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 28
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 29
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -166,39 +166,38 @@ prove an identical initial function and unchanged RNG state, but the trainable
 branch still collapsed to 53.91% train, 9.65% validation, 11.62% translator
 validation and only 7,928–8,333 messages. Generic sender depth active from the
 first update is therefore rejected. The confirmatory test remains sealed.
+ECP7-B29-I froze that residual branch at exact zero through step 30,000. All
+151 shared history records matched Batch 25, but late activation reduced the
+selected codebooks to 13,163, 12,960, 12,720 and 13,439 messages and worst-link
+validation to 81.74%. This final permitted residual test failed. ECP-7
+development is closed; no confirmatory configuration was frozen and the test
+split was never opened.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define at most one ECP7-B29 late-activation residual intervention and its
-   failure criterion.
-3. Register the variant and immutable configuration hashes before training.
-4. Add tests for every new invariant.
-5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
-6. Append every attempted variant and negative result to the development log.
-7. Select at most one final design using train and validation only.
-8. Create `config/ecp7.yaml` only after a design passes its development gate.
-9. Freeze its UTC time, config hash, split hash, seeds and thresholds.
-10. Only then run those seeds once with `experiment --unseal-test`.
-11. Run integrity analysis and publish successes and failures.
+2. Read `docs/ecp7-development-conclusion.md`; do not create ECP7-B30.
+3. Preserve every ECP-7 configuration and the still-sealed confirmatory split.
+4. Define a new ECP-8 question before implementing another architecture or loss.
+5. Create a fresh deterministic split and preregister its development gate.
+6. Add tests for every new invariant.
+7. Use only `smoke` and `develop` until one ECP-8 design passes development.
+8. Freeze at most one design, its UTC time, hashes, seeds and thresholds.
+9. Only then permit one confirmatory `experiment --unseal-test` execution.
+10. Run integrity analysis and publish successes and failures.
 
-## 6. Recommended next experiment
+## 6. Recommended next research phase
 
-Batch 28 shows that identity initialization alone does not protect the shallow
-compositional trajectory: a residual branch trainable from step 1 rapidly
-becomes dominant and memorizes the training relation. Do not try another
-always-active generic layer, width or activation.
+ECP-7 development is closed after 29 sealed variants. Do not continue a
+residual schedule, collision coefficient, replay route or horizon search, and
+do not open the unused ECP-7 confirmatory split.
 
-At most one ECP7-B29 residual follow-up is justified: inherit B28's exact
-zero-RNG representation and B25's complete training setup, freeze the residual
-weight and bias at zero through step 30,000, then activate only those parameters
-for the remaining registered horizon. The purpose is to isolate whether late
-representation capacity can split an already established code without
-relearning the compositional protocol. Predefine one activation boundary and
-do not combine it with collision replay, gradient-route changes, a new loss,
-factor-slot bindings, optimizer changes, variable-length messages or
-negotiation. If this also fails, close ECP-7 development rather than continue a
-residual schedule search.
+Start ECP-8 with a separate preregistration that chooses exactly one new
+question. Plausible directions include learned compositional structure without
+fixed slots, variable-length coding efficiency, interactive negotiation, or
+transfer across altered synthetic worlds. These are different hypotheses:
+select one, define its channel and baselines, generate a fresh deterministic
+split, and register the development and confirmatory gates before training.
 
 ## 7. Definition of done for any contribution
 

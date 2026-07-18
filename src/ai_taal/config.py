@@ -162,6 +162,31 @@ def validate_config(config: dict[str, Any]) -> None:
                 "Final learning rate must be positive and below its initial value."
             )
 
+    residual_activation = training.get("sender_residual_activation", {})
+    if residual_activation.get("enabled", False):
+        start_step = residual_activation.get("start_step")
+        if isinstance(start_step, bool) or not isinstance(start_step, int):
+            raise ConfigError("Sender-residual activation start must be an integer.")
+        if start_step < training["minimum_steps"]:
+            raise ConfigError(
+                "Sender-residual activation cannot precede minimum selection steps."
+            )
+        if start_step >= training["max_steps"]:
+            raise ConfigError(
+                "Sender-residual activation must precede max_steps."
+            )
+        if start_step % training["evaluation_interval"] != 0:
+            raise ConfigError(
+                "Sender-residual activation must align with evaluation boundaries."
+            )
+        if (
+            config["agents"]["sender"].get("family")
+            != "residual_bounded_parallel_sender"
+        ):
+            raise ConfigError(
+                "Sender-residual activation requires the residual parallel sender."
+            )
+
     utilization = training.get("code_utilization", {})
     if utilization.get("enabled", False):
         if utilization.get("weight", -1) < 0:
