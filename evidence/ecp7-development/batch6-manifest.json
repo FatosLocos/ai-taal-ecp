@@ -1,0 +1,41 @@
+{
+  "batch": "ECP7-B6",
+  "confirmatory_test_unsealed": false,
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "2c256277a48a94a531c9731e4b2d039e93126d23941678e308ee6720f8da5992",
+      "seed-11/metrics.json": "fec252aaaac449a7c0ef04fcffdef5923abfa65eab86f1671fe40c032981e21f",
+      "summary.json": "39350aec656518602a5ef48425b70c2fc901fc56cf34c725d7f8c1298cb419e2"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T113533Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "b89d0552cfd2825fb510248f22b453eb3e8096f78631de689dc467d32856c395",
+      "posthoc-analysis.json": "33019e8f58685ee458ba6ce8ec8ff07efaf044efaec50332ca9af4e3286e049b",
+      "seed-11/metrics.json": "1dcdf8eaf81dcce5b97bdaa80515151b16e6fccef98d495c6f284a5a1a15e42d",
+      "summary.json": "c0c334b74b407abac9c1cb507fd7f7e4de7c5107c316fbab53592a8a18fa7843"
+    },
+    "best_code_utilization_loss": -0.7024012804031372,
+    "best_factor_minimax_loss": 1.0013574361801147,
+    "best_step": 1400,
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.02749565972222222,
+    "message_entropy_bits_per_sender": [7.483011690476116, 7.495614063496931, 7.4939026502487724, 7.140418003892749],
+    "population_train_mean_exact_match": 0.004486083984375,
+    "population_validation_factor_accuracy": [0.0665283203125, 0.06494140625, 0.9947509765625, 0.9962158203125],
+    "population_validation_mean_exact_match": 0.004638671875,
+    "run_id": "20260718T113533Z-ecp7-development",
+    "universal_translator_validation_exact_match": 0.005859375,
+    "unique_messages_per_sender": [452, 542, 489, 313]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

@@ -339,3 +339,76 @@ one minimax factor-reconstruction objective that emphasizes the currently
 worst decoded factor without assigning any factor to a channel slot. It must
 not retain the rejected B4 or B5 losses or change the architecture at the same
 time.
+
+## Batch 6 preregistration
+
+Date: July 18, 2026<br>
+Seed: `11`<br>
+Maximum population steps: `5,000`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B6-I returns to Batch 3 and adds exactly one normalized minimax
+factor-reconstruction term. For each sender-receiver pair it selects the
+largest factor cross-entropy after division by that factor's uniform-guess
+entropy. Its fixed formula, weight and warmup are recorded in
+`docs/research-design-ecp7.md`. The rejected Batch 4 and Batch 5 losses are
+absent. The unchanged positive control is rerun. Smoke is mechanical only and
+cannot authorize tuning.
+
+## Batch 6 results
+
+Positive-control run: `runs/ecp7-batch6-control-development/20260718T113533Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch6-intervention-development/20260718T113533Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B6-I |
+|---|---:|---:|
+| Population train, mean | 100% | 0.4486% |
+| Population train, worst link | 100% | 0.3836% |
+| Population validation, mean | 100% | 0.4639% |
+| Population validation, worst link | 100% | 0.1953% |
+| Universal translator, validation | 100% | 0.5859% |
+| Exact sender-message agreement | 100% | 2.75% |
+| Unique messages per sender | 15,360 | 313–542 |
+| Collision meanings per sender | 0 | 14,818–15,047 |
+| Message entropy | 13.91 bits | 7.14–7.50 bits |
+| Development gate | pass | **fail** |
+
+The positive control again validated the batch at 100%. ECP7-B6-I failed the
+population, validation, translator and injectivity gates. It stopped at step
+3,000 under the unchanged early-stopping rule, with step 1,400 selected.
+
+At that checkpoint, the normalized minimax loss was `1.0014`: the worst factor
+remained essentially at uniform-guess cross-entropy despite receiving the full
+additional weight. The hard-utilization loss was `-0.7024`. Population
+validation factor accuracies were approximately
+`[6.65%, 6.49%, 99.48%, 99.62%]`. The intervention therefore did not redistribute
+semantic learning toward color or shape; it preserved the same easy-factor
+solution.
+
+Compared with Batch 3, unique messages fell from 585–972 to 313–542, entropy
+fell from 8.20–8.73 to 7.14–7.50 bits, population validation fell from 1.9226%
+to 0.4639%, and translator validation fell from 2.2705% to 0.5859%. The mean
+training exactness was higher than Batch 5, but it did not generalize to the
+held-out color-shape combinations.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384 validation-only
+episodes, no confirmatory-test keys, valid local alphabets, and exactly 14
+declared bits for every logged message.
+
+## Batch 6 decision
+
+ECP7-B6-I is recorded as a negative development result and is not retained. It
+shows that emphasizing the worst decoded factor is insufficient when the
+generic sender still converges to a code dominated by the easier factors. The
+confirmatory split remains sealed and ECP7-B3-I remains the strongest
+weak-structure variant.
+
+B4–B6 added three distinct training pressures to the same autoregressive base;
+all reduced its strongest result. A future ECP7-B7 may instead change exactly
+one architectural assumption: replace autoregressive symbol generation with a
+generic parallel sender whose every slot reads the same joint meaning context.
+This removes sequential optimization while still providing no factor-specific
+input path, factor-to-slot assignment or semantic codebook. It must return to
+the Batch 3 loss set and leave the generic receiver unchanged.

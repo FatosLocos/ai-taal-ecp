@@ -279,3 +279,44 @@ The batch contains exactly two seed-11 runs:
 All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative consensus weight,
 warmup, reduction, architecture or duration may be tried inside Batch 5.
+
+## Batch 6 preregistration — Normalized factor minimax
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b6-development.yaml`<br>
+Raw configuration SHA-256: `29fffcbfbc81c96e5765594ba67eea8143ff6d45f77defc8ce3acaf1a628b6f9`<br>
+Effective configuration SHA-256: `3e54202ce906426a2a576c54ba9a8a4d7d65711dd8bc9376c2d6551244db046a`
+
+Batch 5 increased sender agreement by creating a shared collapse, so Batch 6
+returns to ECP7-B3-I and retains neither the Batch 4 collision loss nor the
+Batch 5 sender-consensus loss. Across B3–B5, color and especially shape remain
+the weak factors while size and texture are much easier. Batch 6 asks whether
+the mean task objective lets the system neglect its hardest semantic dimension.
+
+For every sender-receiver pair and training minibatch, let `CE_f` be the
+cross-entropy for output factor `f` and `K_f` its number of values. The new
+objective is:
+
+`L_minimax = max_f [CE_f / log(K_f)]`
+
+Dividing by the uniform-guess cross-entropy makes difficulty comparable across
+16-way and 8-way factors. The original mean factor-reconstruction loss remains
+active; the minimax term adds gradient pressure from the currently worst
+relative factor. It uses the same supervised output factors already present in
+the task, but receives no channel-slot identity, factor-to-slot assignment,
+desired symbol or privileged codebook.
+
+The minimax weight is fixed at `1.0` with a 400-step linear warmup. This is the
+only Batch 6 addition. The Batch 3 straight-through utilization objective,
+architecture, population, split, 14-bit channel, 5,000-step limit, early
+stopping and translator remain unchanged.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B6-I with normalized factor minimax on the Batch 3 base.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative minimax weight,
+normalization, reduction, architecture or duration may be tried inside Batch 6.

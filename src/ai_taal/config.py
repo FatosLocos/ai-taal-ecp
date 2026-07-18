@@ -158,6 +158,13 @@ def validate_config(config: dict[str, Any]) -> None:
         if sender_consensus.get("warmup_steps", 0) < 1:
             raise ConfigError("Sender-message consensus warmup must be positive.")
 
+    factor_minimax = training.get("factor_minimax", {})
+    if factor_minimax.get("enabled", False):
+        if factor_minimax.get("weight", -1) < 0:
+            raise ConfigError("Factor-minimax weight cannot be negative.")
+        if factor_minimax.get("warmup_steps", 0) < 1:
+            raise ConfigError("Factor-minimax warmup must be positive.")
+
 
 def file_sha256(path: str | Path) -> str:
     digest = hashlib.sha256()

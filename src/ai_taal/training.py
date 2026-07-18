@@ -215,6 +215,12 @@ def train_population_system(
         sender_consensus_config.get("weight", 0.0)
     ) < 0:
         raise ValueError("Sender-message consensus weight cannot be negative.")
+    factor_minimax_config = training.get("factor_minimax", {})
+    factor_minimax_enabled = bool(factor_minimax_config.get("enabled", False))
+    if factor_minimax_enabled and float(
+        factor_minimax_config.get("weight", 0.0)
+    ) < 0:
+        raise ValueError("Factor-minimax weight cannot be negative.")
     if population_config["pairing"] != "all_senders_all_receivers":
         raise ValueError(
             "Population training supports all_senders_all_receivers only."
@@ -266,6 +272,21 @@ def train_population_system(
         task_loss = torch.stack(
             [_factor_loss(logits, batch) for logits in receiver_logits]
         ).mean()
+        factor_minimax_loss = torch.zeros((), device=device)
+        factor_minimax_weight = 0.0
+        if factor_minimax_enabled:
+            factor_minimax_loss = torch.stack(
+                [
+                    normalized_factor_minimax_loss(logits, batch)
+                    for logits in receiver_logits
+                ]
+            ).mean()
+            factor_minimax_warmup = max(
+                int(factor_minimax_config.get("warmup_steps", 1)), 1
+            )
+            factor_minimax_weight = float(factor_minimax_config["weight"]) * min(
+                step / factor_minimax_warmup, 1.0
+            )
         consistency_loss = torch.zeros((), device=device)
         consistency_weight = 0.0
         if consistency_quadruples is not None:
@@ -380,6 +401,7 @@ def train_population_system(
             ) * min(step / sender_consensus_warmup, 1.0)
         loss = (
             task_loss
+            + factor_minimax_weight * factor_minimax_loss
             + consistency_weight * consistency_loss
             + slot_consensus_weight * slot_consensus_loss
             + atom_consensus_weight * atom_consensus_loss
@@ -404,6 +426,8 @@ def train_population_system(
                 "step": step,
                 "loss": float(loss.detach().cpu()),
                 "task_loss": float(task_loss.detach().cpu()),
+                "factor_minimax_loss": float(factor_minimax_loss.detach().cpu()),
+                "factor_minimax_weight": float(factor_minimax_weight),
                 "algebraic_consistency_loss": float(
                     consistency_loss.detach().cpu()
                 ),
@@ -974,6 +998,22 @@ def _factor_loss(logits: tuple[Tensor, ...], targets: Tensor) -> Tensor:
         for index, factor_logits in enumerate(logits)
     ]
     return torch.stack(losses).mean()
+
+
+def normalized_factor_minimax_loss(
+    logits: tuple[Tensor, ...], targets: Tensor
+) -> Tensor:
+    """Emphasize the worst relative factor error without binding it to a slot."""
+    if len(logits) != targets.shape[1]:
+        raise ValueError("Factor-minimax logits must match the target factors.")
+    normalized_losses = []
+    for index, factor_logits in enumerate(logits):
+        class_count = factor_logits.shape[-1]
+        if class_count < 2:
+            raise ValueError("Factor-minimax factors require at least two classes.")
+        factor_loss = nn.functional.cross_entropy(factor_logits, targets[:, index])
+        normalized_losses.append(factor_loss / math.log(class_count))
+    return torch.stack(normalized_losses).max()
 
 
 def _geometric_schedule(start: float, end: float, progress: float) -> float:
