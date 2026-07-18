@@ -10,6 +10,7 @@ import torch
 
 from ai_taal.models import (
     BoundedAutoregressiveSender,
+    BoundedParallelSender,
     FactorizedPermutationSlotReceiver,
     InjectivePermutationSlotSender,
     LearnedPermutationSlotSender,
@@ -54,6 +55,7 @@ def main(argv: list[str] | None = None) -> int:
                 InjectivePermutationSlotSender,
                 MinimalPermutationSlotSender,
                 BoundedAutoregressiveSender,
+                BoundedParallelSender,
             ),
         ):
             raise TypeError("Sender checkpoint did not load a sender.")

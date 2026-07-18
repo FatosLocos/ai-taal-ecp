@@ -256,6 +256,100 @@ class BoundedAutoregressiveSender(nn.Module):
         return torch.stack(distributions, dim=1)
 
 
+class BoundedParallelSender(nn.Module):
+    """Generate bounded slots in parallel from one shared joint context.
+
+    Every slot reads the same representation of every meaning factor. Separate
+    heads only enforce the local channel capacities; they do not receive a
+    factor identity, factor-local embedding, binding matrix, or semantic code.
+    """
+
+    def __init__(self, spec: ModelSpec) -> None:
+        super().__init__()
+        if len(spec.slot_alphabet_sizes) != spec.message_length:
+            raise ValueError(
+                "A bounded parallel sender requires one alphabet size per slot."
+            )
+        if any(
+            size < 2 or size > spec.vocabulary_size
+            for size in spec.slot_alphabet_sizes
+        ):
+            raise ValueError(
+                "Every slot alphabet must fit within the global token space."
+            )
+        self.spec = spec
+        self.factor_embeddings = nn.ModuleList(
+            nn.Embedding(size, spec.factor_embedding_dim)
+            for size in spec.factor_sizes
+        )
+        combined_dim = len(spec.factor_sizes) * spec.factor_embedding_dim
+        self.context_projection = nn.Linear(combined_dim, spec.hidden_dim)
+        self.slot_heads = nn.ModuleList(
+            nn.Linear(spec.hidden_dim, alphabet_size)
+            for alphabet_size in spec.slot_alphabet_sizes
+        )
+
+    def _context(self, meanings: Tensor) -> Tensor:
+        embedded_factors = [
+            embedding(meanings[:, index])
+            for index, embedding in enumerate(self.factor_embeddings)
+        ]
+        return torch.tanh(
+            self.context_projection(torch.cat(embedded_factors, dim=-1))
+        )
+
+    def _local_logits(self, meanings: Tensor) -> list[Tensor]:
+        context = self._context(meanings)
+        return [head(context) for head in self.slot_heads]
+
+    def forward(
+        self,
+        meanings: Tensor,
+        *,
+        temperature: float = 1.0,
+        sample: bool = True,
+    ) -> tuple[Tensor, Tensor]:
+        if temperature <= 0:
+            raise ValueError("Temperature must be positive.")
+        padded_symbols: list[Tensor] = []
+        tokens: list[Tensor] = []
+        for logits, alphabet_size in zip(
+            self._local_logits(meanings),
+            self.spec.slot_alphabet_sizes,
+            strict=True,
+        ):
+            if sample:
+                local_symbol = F.gumbel_softmax(
+                    logits, tau=temperature, hard=True, dim=-1
+                )
+            else:
+                token = logits.argmax(dim=-1)
+                local_symbol = F.one_hot(token, alphabet_size).to(logits.dtype)
+            tokens.append(local_symbol.argmax(dim=-1))
+            padded_symbols.append(
+                F.pad(local_symbol, (0, self.spec.vocabulary_size - alphabet_size))
+            )
+        return torch.stack(padded_symbols, dim=1), torch.stack(tokens, dim=1)
+
+    def relaxed_message(self, meanings: Tensor, *, temperature: float = 1.0) -> Tensor:
+        if temperature <= 0:
+            raise ValueError("Temperature must be positive.")
+        distributions = []
+        for logits, alphabet_size in zip(
+            self._local_logits(meanings),
+            self.spec.slot_alphabet_sizes,
+            strict=True,
+        ):
+            local_distribution = torch.softmax(logits / temperature, dim=-1)
+            distributions.append(
+                F.pad(
+                    local_distribution,
+                    (0, self.spec.vocabulary_size - alphabet_size),
+                )
+            )
+        return torch.stack(distributions, dim=1)
+
+
 class LearnedPermutationSlotSender(nn.Module):
     """Compositional slots whose factor-slot binding is selected internally."""
 
@@ -582,6 +676,7 @@ class MinimalPermutationSlotSender(InjectivePermutationSlotSender):
 SenderModel = (
     Sender
     | BoundedAutoregressiveSender
+    | BoundedParallelSender
     | LearnedPermutationSlotSender
     | InjectivePermutationSlotSender
     | MinimalPermutationSlotSender
@@ -593,6 +688,8 @@ def make_sender(spec: ModelSpec) -> SenderModel:
         return Sender(spec)
     if spec.sender_family == "bounded_autoregressive_sender":
         return BoundedAutoregressiveSender(spec)
+    if spec.sender_family == "bounded_parallel_sender":
+        return BoundedParallelSender(spec)
     if spec.sender_family == "learned_permutation_slot_sender":
         return LearnedPermutationSlotSender(spec)
     if spec.sender_family == "injective_permutation_slot_sender":

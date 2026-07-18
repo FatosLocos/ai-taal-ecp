@@ -320,3 +320,39 @@ The batch contains exactly two seed-11 runs:
 All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative minimax weight,
 normalization, reduction, architecture or duration may be tried inside Batch 6.
+
+## Batch 7 preregistration — Bounded parallel sender
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b7-development.yaml`<br>
+Raw configuration SHA-256: `e885c6892b9da0b4af89dce96c00037a3813881499f20dd1b21e7a06ca4cf41d`<br>
+Effective configuration SHA-256: `1ca8b5c618bc9193b60745040fa7f8a91e31a92e5786d2eab0597874938dee9e`
+
+Batches 4–6 added three different training pressures to the autoregressive
+Batch 3 sender, and every addition reduced its strongest result. Batch 7
+therefore returns to the exact Batch 3 loss set and changes one architectural
+assumption: symbols no longer depend sequentially on earlier symbols.
+
+The bounded parallel sender embeds all four meaning factors, concatenates them,
+and projects them into one shared joint context. Four independent output heads
+read that same context simultaneously and are limited only by the registered
+slot alphabet sizes `[16,16,8,8]`. Straight-through Gumbel sampling and the
+Batch 3 hard-utilization loss remain unchanged.
+
+The heads identify channel positions, not semantic factors. There is no
+factor-specific projection, factor-local message head, recurrent state,
+factor-to-slot binding, binding matrix, desired symbol or semantic codebook.
+The generic sequence receiver and universal translator are unchanged. This
+tests whether sequential generation itself was an optimization bottleneck;
+it does not remove the fixed four-position channel frame.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B7-I with bounded parallel generation and the Batch 3 loss set.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No receiver change, hidden-size
+change, extra loss, longer duration or alternative parallel architecture may be
+tried inside Batch 7.

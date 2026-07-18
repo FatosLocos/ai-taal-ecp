@@ -1,0 +1,16 @@
+extends: ecp7-b3-development.yaml
+
+experiment:
+  title: ECP-7 bounded parallel-sender development
+  arm: bounded_parallel_sender
+  objective: >-
+    Test whether parallel symbol generation from one shared joint meaning
+    context avoids the optimization failure of the autoregressive sender
+    without introducing factor-specific paths or factor-to-slot assignments.
+
+agents:
+  sender:
+    family: bounded_parallel_sender
+
+training:
+  discrete_estimator: straight_through_bounded_parallel

@@ -26,13 +26,13 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first six sealed batches are valid
+one-factor-per-slot architecture. Its first seven sealed batches are valid
 negative results. Straight-through hard utilization remains the best weakly
-structured variant at 585–972 messages and 1.92% validation. Direct collision
-pressure regressed, while sender consensus raised exact agreement to 44.02% but
-collapsed the code to 169–231 messages. Normalized minimax factor training also
-failed to recover color or shape. The ECP-6 positive controls remained perfect.
-The ECP-7 confirmatory test remains sealed. See
+structured population-validation result at 1.92%. A parallel joint-context
+sender increased code use to 3,118–3,415 messages and train exactness to 9.60%,
+but shape remained below chance and validation stayed at 0.51%. The ECP-6
+positive controls remained perfect. The ECP-7 confirmatory test remains sealed.
+See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -79,6 +79,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b4-development.yaml`](config/ecp7-b4-development.yaml) — direct joint-message collision pressure on top of Batch 3.
 - [`config/ecp7-b5-development.yaml`](config/ecp7-b5-development.yaml) — straight-through sender consensus on the Batch 3 base.
 - [`config/ecp7-b6-development.yaml`](config/ecp7-b6-development.yaml) — normalized minimax factor reconstruction on the Batch 3 base.
+- [`config/ecp7-b7-development.yaml`](config/ecp7-b7-development.yaml) — bounded parallel generation from one shared joint context.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
