@@ -1,0 +1,25 @@
+extends: ecp7-b25-development.yaml
+
+experiment:
+  title: ECP-7 coordinate-descent hard-replay cycle
+  arm: coordinate_descent_hard_replay_cycle
+  objective: >-
+    Test whether a second sender-only separation pulse against saturated
+    receivers can break remaining code collisions before a final receiver-only
+    catch-up phase.
+
+training:
+  global_hard_meaning_replay:
+    gradient_route_phases:
+      - end_step: 20000
+        sender_message_gradients: true
+        receiver_parameter_gradients: false
+      - end_step: 30000
+        sender_message_gradients: false
+        receiver_parameter_gradients: true
+      - end_step: 35000
+        sender_message_gradients: true
+        receiver_parameter_gradients: false
+      - end_step: 45000
+        sender_message_gradients: false
+        receiver_parameter_gradients: true

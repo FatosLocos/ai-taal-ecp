@@ -300,6 +300,7 @@ def validate_config(config: dict[str, Any]) -> None:
         sender_gradient_switch_step = hard_replay.get(
             "disable_sender_message_gradients_after_step"
         )
+        gradient_route_phases = hard_replay.get("gradient_route_phases")
         if not isinstance(receiver_parameter_gradients, bool):
             raise ConfigError(
                 "Global hard-meaning replay receiver parameter gradients must be boolean."
@@ -366,6 +367,54 @@ def validate_config(config: dict[str, Any]) -> None:
             if sender_gradient_switch_step != receiver_gradient_switch_step:
                 raise ConfigError(
                     "Global hard-meaning replay sender and receiver gradient switches must match."
+                )
+        if gradient_route_phases is not None:
+            if (
+                not isinstance(gradient_route_phases, list)
+                or not gradient_route_phases
+            ):
+                raise ConfigError(
+                    "Global hard-meaning replay gradient-route phases must be a non-empty list."
+                )
+            previous_end = -1
+            for phase in gradient_route_phases:
+                if not isinstance(phase, dict):
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route phases must be objects."
+                    )
+                phase_end = phase.get("end_step")
+                sender_gradients = phase.get("sender_message_gradients")
+                receiver_gradients = phase.get("receiver_parameter_gradients")
+                if isinstance(phase_end, bool) or not isinstance(phase_end, int):
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route phase ends must be integers."
+                    )
+                if not isinstance(sender_gradients, bool) or not isinstance(
+                    receiver_gradients, bool
+                ):
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route flags must be boolean."
+                    )
+                if sender_gradients == receiver_gradients:
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route phases must enable exactly one side."
+                    )
+                if phase_end <= previous_end:
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route phase ends must increase."
+                    )
+                if phase_end % training["evaluation_interval"] != 0:
+                    raise ConfigError(
+                        "Global hard-meaning replay gradient-route phase ends must align with evaluation boundaries."
+                    )
+                previous_end = phase_end
+            if gradient_route_phases[0]["end_step"] != start_step + warmup_steps:
+                raise ConfigError(
+                    "Global hard-meaning replay gradient-route phases must start with the registered warmup boundary."
+                )
+            if gradient_route_phases[-1]["end_step"] != training["max_steps"]:
+                raise ConfigError(
+                    "Global hard-meaning replay gradient-route phases must cover max_steps."
                 )
         if batch_size < 1:
             raise ConfigError(

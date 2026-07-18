@@ -875,3 +875,71 @@ def test_ecp7_b25_changes_only_the_training_horizon(
     assert b24_training.pop("max_steps") == 30000
     assert b25_training.pop("max_steps") == 45000
     assert b25_training == b24_training
+
+
+def test_ecp7_b26_changes_only_the_replay_gradient_route_phases(
+    ecp7_b25_config, ecp7_b26_config
+):
+    assert ecp7_b26_config["world"] == ecp7_b25_config["world"]
+    assert ecp7_b26_config["dataset"] == ecp7_b25_config["dataset"]
+    assert ecp7_b26_config["channel"] == ecp7_b25_config["channel"]
+    assert ecp7_b26_config["agents"] == ecp7_b25_config["agents"]
+    b25_training = deepcopy(ecp7_b25_config["training"])
+    b26_training = deepcopy(ecp7_b26_config["training"])
+    assert b26_training["global_hard_meaning_replay"].pop(
+        "gradient_route_phases"
+    ) == [
+        {
+            "end_step": 20000,
+            "sender_message_gradients": True,
+            "receiver_parameter_gradients": False,
+        },
+        {
+            "end_step": 30000,
+            "sender_message_gradients": False,
+            "receiver_parameter_gradients": True,
+        },
+        {
+            "end_step": 35000,
+            "sender_message_gradients": True,
+            "receiver_parameter_gradients": False,
+        },
+        {
+            "end_step": 45000,
+            "sender_message_gradients": False,
+            "receiver_parameter_gradients": True,
+        },
+    ]
+    assert b26_training == b25_training
+
+
+def test_hard_replay_gradient_route_phases_are_bounded_and_one_sided(
+    ecp7_b26_config,
+):
+    invalid_order = deepcopy(ecp7_b26_config)
+    invalid_order["training"]["global_hard_meaning_replay"][
+        "gradient_route_phases"
+    ][2]["end_step"] = 30000
+    with pytest.raises(ConfigError, match="phase ends must increase"):
+        validate_config(invalid_order)
+
+    invalid_route = deepcopy(ecp7_b26_config)
+    invalid_route["training"]["global_hard_meaning_replay"][
+        "gradient_route_phases"
+    ][2]["receiver_parameter_gradients"] = True
+    with pytest.raises(ConfigError, match="must enable exactly one side"):
+        validate_config(invalid_route)
+
+    invalid_boundary = deepcopy(ecp7_b26_config)
+    invalid_boundary["training"]["global_hard_meaning_replay"][
+        "gradient_route_phases"
+    ][2]["end_step"] = 35100
+    with pytest.raises(ConfigError, match="evaluation boundaries"):
+        validate_config(invalid_boundary)
+
+    invalid_final = deepcopy(ecp7_b26_config)
+    invalid_final["training"]["global_hard_meaning_replay"][
+        "gradient_route_phases"
+    ][-1]["end_step"] = 44800
+    with pytest.raises(ConfigError, match="must cover max_steps"):
+        validate_config(invalid_final)

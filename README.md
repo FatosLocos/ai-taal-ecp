@@ -26,7 +26,7 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first twenty-five sealed batches are valid
+one-factor-per-slot architecture. Its first twenty-six sealed batches are valid
 development results but none passes the full gate. Batch 15 established the
 strong position-aware base: at 30,000 optimization steps it reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
@@ -55,7 +55,11 @@ worst-link and injectivity gates still failed.
 Batch 25 extended that catch-up to 45,000 steps and improved again to 85.26%
 train, 85.24% validation and 85.13% translator validation. Receiver performance
 now nearly reaches the mathematical ceiling of the non-injective sender
-codebooks, so another horizon-only extension is not justified. See
+codebooks, so another horizon-only extension is not justified. Batch 26 added
+one sender/receiver route cycle and reached 85.38% validation, but did not add
+a single net unique code: shared errors became link-specific errors instead.
+The replay-routing family is therefore closed; future work must target sender
+capacity directly. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -121,6 +125,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b23-development.yaml`](config/ecp7-b23-development.yaml) — Batch 22 sender-only replay through step 20,000 followed by restored joint replay gradients.
 - [`config/ecp7-b24-development.yaml`](config/ecp7-b24-development.yaml) — Batch 23 routing with sender messages detached for receiver-only replay after step 20,000.
 - [`config/ecp7-b25-development.yaml`](config/ecp7-b25-development.yaml) — Batch 24 receiver-only catch-up with an isolated 45,000-step maximum horizon.
+- [`config/ecp7-b26-development.yaml`](config/ecp7-b26-development.yaml) — Batch 25 with one preregistered sender/receiver replay-route cycle.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 122 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 125 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 25
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 26
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -149,11 +149,18 @@ ECP7-B25-I extended only that catch-up horizon to 45,000 steps. It improved to
 85.13% translator validation. The worst train link exactly matches its 82.81%
 unique-code ceiling, so sender injectivity remains the structural blocker and
 the confirmatory ECP-7 test remains sealed.
+ECP7-B26-I inserted a second sender-only pulse followed by receiver-only
+catch-up. It reached small new bests of 85.37% mean train and 85.38% validation
+and translator validation, but its unique-message counts were effectively
+unchanged. Shared failures fell while any-link failures rose, closing the
+replay-routing family as an error-redistribution mechanism rather than an
+injectivity solution. The confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B26 intervention and its failure criterion.
+2. Define exactly one ECP7-B27 direct sender-capacity intervention and its
+   failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -166,29 +173,20 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 25 confirms that extra receiver-only catch-up time improves decoder fit
-but leaves the sender collision structure almost unchanged. The observed worst
-train link exactly reaches its sender's unique-code ceiling, so another horizon
-extension cannot solve the gate. A clean ECP7-B26 coordinate-descent progression
-is:
+Batch 26 shows that another one-sided replay cycle cannot increase sender code
+capacity. Receiver-only phases fit the existing codebook ceiling; sender-only
+ordinary-task replay converts shared errors into link-specific errors. Do not
+try another route boundary, route cycle or horizon extension.
 
-- inherit the complete Batch 25 implementation and 45,000-step ceiling;
-- keep sender-only replay through step 20,000 and receiver-only replay through
-  step 30,000 exactly as in Batch 25;
-- route the additional replay branch sender-only again for steps 30,001–35,000,
-  then restore receiver-only replay from step 35,001;
-- reuse the registered 5,000-step sender-separation duration;
-- keep ordinary base-task updates to both senders and receivers unchanged;
-- keep weight `0.25`, the 64-meaning replay batch, 200-step refresh,
-  seed-derived sampler, predicate and temperature unchanged;
-- continue to mine and replay training meanings only;
-- measure shared and any-link pool sizes, train exactness, injectivity,
-  validation and new-reader induction, and rerun the frozen ECP-6 control.
-
-Do not combine the routing cycle with another predicate, coefficient, graded
-sampling, collision pressure, a new architecture, factor-specific weights,
-optimizer changes, a horizon change, variable-length messages or
-negotiation.
+For ECP7-B27, preregister exactly one direct sender-capacity intervention on the
+strongest stable base. A defensible candidate is a late, bounded pulse that
+explicitly separates globally mined hard-message collisions while preserving
+the ordinary reconstruction task. Reuse an already tested loss and coefficient
+where possible, activate it only after a shared unchanged trajectory, and
+define success primarily as a reproducible increase in unique messages without
+loss of worst-link validation. Do not combine this with a new architecture,
+new predicate, optimizer change, factor-specific supervision, variable-length
+messages or negotiation in the same batch.
 
 ## 7. Definition of done for any contribution
 
