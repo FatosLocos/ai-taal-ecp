@@ -1,0 +1,13 @@
+extends: ecp7-b20-development.yaml
+
+experiment:
+  title: ECP-7 population-shared hard-meaning task replay
+  arm: population_shared_hard_meaning_task_replay
+  objective: >-
+    Test whether keeping the complete Batch 20 replay mechanism but mining only
+    training meanings failed by all 16 current sender-receiver links can repair
+    the population-shared error concentration without changing replay scale.
+
+training:
+  global_hard_meaning_replay:
+    minimum_failed_links: 16

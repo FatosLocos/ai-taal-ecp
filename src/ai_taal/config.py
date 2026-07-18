@@ -290,11 +290,13 @@ def validate_config(config: dict[str, Any]) -> None:
         warmup_steps = hard_replay.get("warmup_steps", 0)
         batch_size = hard_replay.get("batch_size", 0)
         refresh_interval = hard_replay.get("refresh_interval", 0)
+        minimum_failed_links = hard_replay.get("minimum_failed_links", 1)
         for value, label in (
             (start_step, "start"),
             (warmup_steps, "warmup"),
             (batch_size, "batch size"),
             (refresh_interval, "refresh interval"),
+            (minimum_failed_links, "minimum failed links"),
         ):
             if isinstance(value, bool) or not isinstance(value, int):
                 raise ConfigError(
@@ -319,6 +321,14 @@ def validate_config(config: dict[str, Any]) -> None:
         if refresh_interval < 1:
             raise ConfigError(
                 "Global hard-meaning replay refresh interval must be positive."
+            )
+        population = config["agents"]["population"]
+        population_link_count = (
+            population["sender_count"] * population["receiver_count"]
+        )
+        if not 1 <= minimum_failed_links <= population_link_count:
+            raise ConfigError(
+                "Global hard-meaning replay minimum failed links must fit the population."
             )
         evaluation_interval = training["evaluation_interval"]
         if (

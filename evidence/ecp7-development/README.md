@@ -111,6 +111,12 @@ shrunk but concentrated into population-wide failures, so train thresholds and
 injectivity still failed. Exact identities and hashes are in
 `batch20-manifest.json`.
 
+Batch 21 restricted the unchanged replay budget to meanings failed by all 16
+population links. It reached a new-best 83.63% mean and 82.62% worst-link
+validation plus 92.96% sender agreement, but mean train remained 83.71% and the
+target shared-error pool grew. Exact identities and hashes are in
+`batch21-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

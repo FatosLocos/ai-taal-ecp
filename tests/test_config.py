@@ -713,3 +713,29 @@ def test_global_hard_meaning_replay_parameters_are_bounded(ecp7_b20_config):
     ] = 300
     with pytest.raises(ConfigError, match="evaluation boundaries"):
         validate_config(invalid_refresh)
+
+
+def test_ecp7_b21_changes_only_the_hard_meaning_predicate(
+    ecp7_b20_config, ecp7_b21_config
+):
+    assert ecp7_b21_config["world"] == ecp7_b20_config["world"]
+    assert ecp7_b21_config["dataset"] == ecp7_b20_config["dataset"]
+    assert ecp7_b21_config["channel"] == ecp7_b20_config["channel"]
+    assert ecp7_b21_config["agents"] == ecp7_b20_config["agents"]
+    b20_training = deepcopy(ecp7_b20_config["training"])
+    b21_training = deepcopy(ecp7_b21_config["training"])
+    assert b21_training["global_hard_meaning_replay"].pop(
+        "minimum_failed_links"
+    ) == 16
+    assert b21_training == b20_training
+
+
+def test_hard_meaning_failed_link_threshold_must_fit_population(
+    ecp7_b21_config,
+):
+    invalid = deepcopy(ecp7_b21_config)
+    invalid["training"]["global_hard_meaning_replay"][
+        "minimum_failed_links"
+    ] = 17
+    with pytest.raises(ConfigError, match="must fit the population"):
+        validate_config(invalid)

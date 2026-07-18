@@ -361,6 +361,9 @@ def test_hard_meaning_mining_returns_union_of_population_link_errors():
                         condition_factor=0, flipped_factor=3
                     ),
                     ConditionalReceiver(
+                        condition_factor=0, flipped_factor=3
+                    ),
+                    ConditionalReceiver(
                         condition_factor=1, flipped_factor=2
                     ),
                 ]
@@ -375,6 +378,12 @@ def test_hard_meaning_mining_returns_union_of_population_link_errors():
     )
 
     assert hard_indices.tolist() == [1, 2]
+
+    shared_hard_indices = mine_population_hard_meaning_indices(
+        StubPopulation(), meanings, minimum_failed_links=2
+    )
+
+    assert shared_hard_indices.tolist() == [1]
 
 
 def test_relaxed_collision_replay_measures_full_message_probability():

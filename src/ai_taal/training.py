@@ -546,7 +546,13 @@ def train_population_system(
         ):
             hard_meaning_replay_indices = (
                 mine_population_hard_meaning_indices(
-                    population, train_values
+                    population,
+                    train_values,
+                    minimum_failed_links=int(
+                        hard_meaning_replay_config.get(
+                            "minimum_failed_links", 1
+                        )
+                    ),
                 )
             )
         history.append(
@@ -857,12 +863,18 @@ def mine_sender_collision_pairs(sender: SenderModel, meanings: Tensor) -> Tensor
 
 @torch.no_grad()
 def mine_population_hard_meaning_indices(
-    population: PopulationSystem, meanings: Tensor
+    population: PopulationSystem,
+    meanings: Tensor,
+    *,
+    minimum_failed_links: int = 1,
 ) -> Tensor:
-    """Return inputs that any current sender-receiver link gets wrong."""
+    """Return inputs meeting a population-link reconstruction-error threshold."""
     population.eval()
-    hard = torch.zeros(
-        len(meanings), dtype=torch.bool, device=meanings.device
+    link_count = len(population.senders) * len(population.receivers)
+    if not 1 <= minimum_failed_links <= link_count:
+        raise ValueError("Minimum failed links must fit the population.")
+    failed_links = torch.zeros(
+        len(meanings), dtype=torch.long, device=meanings.device
     )
     for sender in population.senders:
         messages = encode_meanings(sender, meanings)
@@ -870,8 +882,12 @@ def mine_population_hard_meaning_indices(
             predictions = torch.stack(
                 [head.argmax(dim=-1) for head in receiver(messages)], dim=1
             )
-            hard |= ~predictions.eq(meanings).all(dim=1)
-    return hard.nonzero(as_tuple=False).flatten()
+            failed_links += (~predictions.eq(meanings).all(dim=1)).to(
+                failed_links.dtype
+            )
+    return (failed_links >= minimum_failed_links).nonzero(
+        as_tuple=False
+    ).flatten()
 
 
 def relaxed_collision_pair_probability(message_pairs: Tensor) -> Tensor:
