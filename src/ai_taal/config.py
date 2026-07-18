@@ -74,15 +74,36 @@ def validate_config(config: dict[str, Any]) -> None:
     if split_total != meaning_count:
         raise ConfigError(f"Data splits total {split_total}, not {meaning_count}.")
 
-    if channel["type"] == "factor_local_discrete_fixed_length":
-        alphabet_sizes = channel["factor_alphabet_sizes"]
-        if alphabet_sizes != factor_sizes:
-            raise ConfigError("Factor-local alphabets do not match the world.")
+    if channel["type"] in {
+        "factor_local_discrete_fixed_length",
+        "slot_local_discrete_fixed_length",
+    }:
+        if channel["type"] == "factor_local_discrete_fixed_length":
+            alphabet_sizes = channel["factor_alphabet_sizes"]
+            width_key = "bits_per_symbol_by_factor"
+            if alphabet_sizes != factor_sizes:
+                raise ConfigError("Factor-local alphabets do not match the world.")
+        else:
+            alphabet_sizes = channel["slot_alphabet_sizes"]
+            width_key = "bits_per_symbol_by_slot"
+            if len(alphabet_sizes) != channel["message_length"]:
+                raise ConfigError(
+                    "Slot-local alphabets must match the message length."
+                )
+        if any(size < 2 for size in alphabet_sizes):
+            raise ConfigError("Local alphabets must contain at least two symbols.")
         expected_message_bits = sum(
             math.ceil(math.log2(size)) for size in alphabet_sizes
         )
+        expected_widths = [math.ceil(math.log2(size)) for size in alphabet_sizes]
+        if channel.get(width_key) != expected_widths:
+            raise ConfigError(f"{width_key} does not match the local alphabets.")
         if channel["vocabulary_size"] != max(alphabet_sizes):
             raise ConfigError("Global token space does not match the local alphabets.")
+        if math.prod(alphabet_sizes) < meaning_count:
+            raise ConfigError(
+                "Local channel code space cannot represent every world meaning."
+            )
     else:
         expected_bits_per_symbol = math.ceil(math.log2(channel["vocabulary_size"]))
         if expected_bits_per_symbol != channel["bits_per_symbol"]:

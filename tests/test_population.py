@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from ai_taal.models import ModelSpec, PopulationSystem
 from ai_taal.training import evaluate_population, meanings_tensor, train_population_system
 from ai_taal.world import build_splits
@@ -98,4 +100,23 @@ def test_cultural_transmission_requires_a_full_turnover_before_selection(ecp2_co
     assert result.best_step == 5
     assert result.history[-1]["replacement_count"] == 2
     assert result.history[-1]["full_population_turnovers"] == 1.0
-from copy import deepcopy
+
+
+def test_ecp7_uses_new_matching_for_intervention_and_positive_control(
+    ecp6_config, ecp7_config, ecp7_positive_control_config
+):
+    ecp6_split = build_splits(ecp6_config)
+    intervention_split = build_splits(ecp7_config)
+    control_split = build_splits(ecp7_positive_control_config)
+
+    previous_pairs = set(ecp6_split.held_out_validation_color_shape_pairs) | set(
+        ecp6_split.held_out_color_shape_pairs
+    )
+    new_pairs = set(intervention_split.held_out_validation_color_shape_pairs) | set(
+        intervention_split.held_out_color_shape_pairs
+    )
+    assert previous_pairs.isdisjoint(new_pairs)
+    assert intervention_split.manifest() == control_split.manifest()
+    assert len(intervention_split.train) == 14_336
+    assert len(intervention_split.validation) == 1_024
+    assert len(intervention_split.compositional_test) == 1_024

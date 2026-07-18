@@ -9,6 +9,7 @@ from pathlib import Path
 import torch
 
 from ai_taal.models import (
+    BoundedAutoregressiveSender,
     FactorizedPermutationSlotReceiver,
     InjectivePermutationSlotSender,
     LearnedPermutationSlotSender,
@@ -52,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
                 LearnedPermutationSlotSender,
                 InjectivePermutationSlotSender,
                 MinimalPermutationSlotSender,
+                BoundedAutoregressiveSender,
             ),
         ):
             raise TypeError("Sender checkpoint did not load a sender.")

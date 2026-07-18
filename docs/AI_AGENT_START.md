@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 39 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 47 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -69,33 +69,43 @@ Then verify hashes, channel constraints and topographic null models:
 
 This reruns a known experiment. It must not be presented as a new independent confirmatory test.
 
-## 5. Start a scientifically valid ECP-7
+## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-6. Use this sequence:
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 configs.
+ECP7-B1-I is a recorded negative development result: its generic
+autoregressive protocol collapsed to 130–139 messages, while the paired ECP-6
+positive control stayed perfect. The confirmatory ECP-7 test is still sealed.
 
-1. Write one falsifiable research question and a failure criterion.
-2. Create `config/ecp7-development.yaml`, normally extending `ecp6.yaml`.
-3. Create a genuinely new deterministic holdout or world seed.
-4. Add tests for every new invariant before training.
+Continue with this sequence:
+
+1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
+2. Define exactly one ECP7-B2 intervention and its failure criterion.
+3. Register the variant and immutable configuration hashes before training.
+4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
-6. Record all tried variants in `docs/development-log-ecp7.md`.
-7. Select one final design using train and validation only.
-8. Create `config/ecp7.yaml` with status `frozen_for_confirmatory` and a UTC freeze time.
-9. Record config and split SHA-256 values in `docs/research-design-ecp7.md`.
-10. Only then run the predefined seeds once with `experiment --unseal-test`.
-11. Run posthoc integrity analysis and publish both successes and failures.
+6. Append every attempted variant and negative result to the development log.
+7. Select at most one final design using train and validation only.
+8. Create `config/ecp7.yaml` only after a design passes its development gate.
+9. Freeze its UTC time, config hash, split hash, seeds and thresholds.
+10. Only then run those seeds once with `experiment --unseal-test`.
+11. Run integrity analysis and publish successes and failures.
 
 ## 6. Recommended next experiment
 
-The most informative next step is to weaken the one-factor-per-slot bias. A clean progression is:
+The first attempt showed that removing the factor-slot bias entirely can cause
+severe code collapse. The most informative next step is a single,
+factor-agnostic code-utilization intervention. A clean ECP7-B2 progression is:
 
 - keep the same world and bit budget;
-- replace the hard factor-local sender with a less structured discrete sender;
-- retain an isolated generic receiver;
-- measure whether compositionality, injectivity and new-reader induction survive;
-- include the ECP-6 architecture as a frozen positive control.
+- keep the joint autoregressive sender and generic isolated receiver;
+- add one preregistered pressure for using the available code space without
+  assigning factors to positions;
+- measure injectivity, validation composition and new-reader induction;
+- rerun the ECP-6 architecture as the frozen positive control.
 
-Do not simultaneously introduce natural images, variable-length messages and negotiation. Those changes would make a negative result uninterpretable.
+Do not combine entropy pressure, architectural resizing, longer training,
+variable-length messages or negotiation in one batch. That would make any
+change from Batch 1 uninterpretable.
 
 ## 7. Definition of done for any contribution
 

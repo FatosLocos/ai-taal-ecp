@@ -1,0 +1,65 @@
+extends: ecp6-development.yaml
+
+experiment:
+  id: ecp7
+  title: ECP-7 shared sealed development base
+  status: development_test_sealed
+  frozen_at_utc: null
+  parent_experiment: ecp6
+  arm: shared_sealed_base
+  objective: >-
+    Test whether exact compositional communication survives when the explicit
+    one-factor-per-slot architecture is removed while the 14-bit payload,
+    population, world, and training budget remain fixed.
+
+reproducibility:
+  dataset_seed: 18072047
+
+dataset:
+  split_strategy: dual_explicit_unused_color_shape_matchings
+  train_meanings: 14336
+  validation_meanings: 1024
+  compositional_test_meanings: 1024
+  holdout_factors: [color, shape]
+  held_out_factor_pairs: 16
+  validation_held_out_factor_pairs: 16
+  variants_per_held_out_pair: 64
+  excluded_factor_pairs: []
+  explicit_validation_factor_pairs:
+    - {color: 0, shape: 10}
+    - {color: 1, shape: 11}
+    - {color: 2, shape: 12}
+    - {color: 3, shape: 13}
+    - {color: 4, shape: 14}
+    - {color: 5, shape: 15}
+    - {color: 6, shape: 0}
+    - {color: 7, shape: 1}
+    - {color: 8, shape: 2}
+    - {color: 9, shape: 3}
+    - {color: 10, shape: 4}
+    - {color: 11, shape: 5}
+    - {color: 12, shape: 6}
+    - {color: 13, shape: 7}
+    - {color: 14, shape: 8}
+    - {color: 15, shape: 9}
+  explicit_test_factor_pairs:
+    - {color: 0, shape: 11}
+    - {color: 1, shape: 12}
+    - {color: 2, shape: 13}
+    - {color: 3, shape: 14}
+    - {color: 4, shape: 15}
+    - {color: 5, shape: 0}
+    - {color: 6, shape: 1}
+    - {color: 7, shape: 2}
+    - {color: 8, shape: 3}
+    - {color: 9, shape: 4}
+    - {color: 10, shape: 5}
+    - {color: 11, shape: 6}
+    - {color: 12, shape: 7}
+    - {color: 13, shape: 8}
+    - {color: 14, shape: 9}
+    - {color: 15, shape: 10}
+
+outcome_thresholds:
+  compositional_mean_reference: 0.99
+  paired_control_required: true

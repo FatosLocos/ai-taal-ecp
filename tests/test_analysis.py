@@ -1,6 +1,10 @@
 import json
 
-from ai_taal.analysis import _paired_sign_flip_test, _population_episode_matrices
+from ai_taal.analysis import (
+    _factor_local_channel_audit,
+    _paired_sign_flip_test,
+    _population_episode_matrices,
+)
 
 
 def test_population_episode_matrices_count_all_rows_and_deduplicate_receivers(tmp_path):
@@ -42,3 +46,52 @@ def test_paired_sign_flip_test_enumerates_exact_null():
     assert result["null_combinations"] == 32
     assert result["observed_mean_difference"] == 0.3
     assert result["exact_one_sided_p"] == 1 / 32
+
+
+def test_slot_local_channel_audit_checks_each_position_capacity(tmp_path):
+    episode = {
+        "message": {
+            "sender_id": "sender-0",
+            "channel_bits": 14,
+            "symbols": [15, 15, 7, 7],
+        }
+    }
+    path = tmp_path / "episodes.jsonl"
+    path.write_text(json.dumps(episode) + "\n", encoding="utf-8")
+    config = {
+        "channel": {
+            "type": "slot_local_discrete_fixed_length",
+            "bits_per_message": 14,
+            "slot_alphabet_sizes": [16, 16, 8, 8],
+        }
+    }
+
+    audit = _factor_local_channel_audit(path, {}, config)
+
+    assert audit["applicable"] is True
+    assert audit["valid"] is True
+    assert audit["checked_episode_messages"] == 1
+
+
+def test_slot_local_channel_audit_rejects_a_symbol_outside_its_slot(tmp_path):
+    episode = {
+        "message": {
+            "sender_id": "sender-0",
+            "channel_bits": 14,
+            "symbols": [15, 15, 8, 7],
+        }
+    }
+    path = tmp_path / "episodes.jsonl"
+    path.write_text(json.dumps(episode) + "\n", encoding="utf-8")
+    config = {
+        "channel": {
+            "type": "slot_local_discrete_fixed_length",
+            "bits_per_message": 14,
+            "slot_alphabet_sizes": [16, 16, 8, 8],
+        }
+    }
+
+    audit = _factor_local_channel_audit(path, {}, config)
+
+    assert audit["valid"] is False
+    assert audit["violations"][0]["slot"] == 2
