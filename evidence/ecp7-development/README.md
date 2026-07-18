@@ -151,6 +151,13 @@ rose from 2,967 to 3,262, confirming that route cycling redistributes errors
 without fixing sender collisions. Exact identities and hashes are in
 `batch26-manifest.json`.
 
+Batch 27 added a late bounded direct penalty on globally mined sender
+collisions. It reduced unordered collision-pair multiplicity and increased
+message entropy, but produced exactly the same unique-message counts as Batch
+25 while worst-link validation fell to 82.13%. The existing collision loss
+therefore reshapes occupied codes without creating new ones. Exact identities
+and hashes are in `batch27-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

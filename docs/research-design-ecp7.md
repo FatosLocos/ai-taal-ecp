@@ -1147,3 +1147,61 @@ train and injectivity gates without accessing the confirmatory split.
 This completes the registered replay-routing family. Further route cycling or
 horizon extension is disallowed as an unsupported repetition; any later
 development batch must preregister a direct sender-capacity intervention.
+
+## Batch 27 preregistration — Late bounded sender-collision pulse
+
+Status: **completed sealed development; valid negative**<br>
+Preregistered: July 18, 2026 at 18:05:30 UTC<br>
+Configuration: `config/ecp7-b27-development.yaml`<br>
+Raw configuration SHA-256: `d44df83436f5ca81a2a51229b8ffe1a6fd6832d28dff4c7ab2ead3ace8efc9bd`<br>
+Effective configuration SHA-256: `649ddca4a285fbbb00b29c1cab82678e42ab8d6810f89f2131766cd82496c463`
+
+Batch 25 establishes the strongest stable receiver-saturated base. Batch 26
+shows that ordinary-task route cycling cannot add sender code capacity. Batch
+27 therefore changes the objective rather than the route: it directly
+penalizes each sender's globally mined hard-message collisions only after the
+complete Batch 25 trajectory through step 30,000.
+
+ECP7-B27-I inherits the full Batch 25 configuration and implementation. The
+sole addition is the existing factor-agnostic global collision-pair mechanism
+with this fixed schedule:
+
+1. weight zero through step 30,000;
+2. linear warmup to `0.1` at step 35,000;
+3. linear decay to zero at step 40,000;
+4. weight zero through the 45,000-step ceiling.
+
+Pairs are mined independently for every sender from hard messages over training
+meanings only, refreshed every 200 steps and sampled as 32 pairs per sender
+with replacement. Their relaxed full-message collision probability is measured
+at temperature `1.0`. The coefficient is reused from Batch 18; the 5,000-step
+rise and decay durations are reused from Batch 19. The unchanged hard-meaning
+replay branch stays receiver-only after step 20,000, and the ordinary task
+continues to update both sides.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B27-I with the late bounded sender-collision pulse.
+
+All existing validity and development gates remain unchanged. Additionally,
+the direct-capacity claim requires the selected minimum unique-message count to
+exceed Batch 25's 12,720 while worst-link validation is at least Batch 25's
+82.7148%. No alternative coefficient, pulse boundary, pair sampler, replay
+route, hard-meaning predicate, architecture, base loss, optimizer, horizon,
+data, translator or seed may be tried inside Batch 27. Failure is recorded
+without confirmatory test access.
+
+### Batch 27 outcome
+
+The registered seed-11 intervention reached 85.38% mean train and validation,
+82.15% worst-link train, 82.13% worst-link validation and 85.35% universal-
+translator validation. Its global collision-pair banks became substantially
+smaller and message entropy increased, but sender codebooks still contained
+exactly 13,440, 12,960, 12,720 and 13,440 unique messages—the same capacities
+as Batch 25. It failed the unchanged train and injectivity gates and the added
+minimum-capacity/worst-link criterion without accessing the confirmatory split.
+
+This closes coefficient and timing development for the existing relaxed
+collision-pair loss. Any later batch must preregister a distinct sender
+representation or occupancy-creation mechanism.

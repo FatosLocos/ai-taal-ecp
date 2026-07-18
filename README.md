@@ -58,8 +58,11 @@ now nearly reaches the mathematical ceiling of the non-injective sender
 codebooks, so another horizon-only extension is not justified. Batch 26 added
 one sender/receiver route cycle and reached 85.38% validation, but did not add
 a single net unique code: shared errors became link-specific errors instead.
-The replay-routing family is therefore closed; future work must target sender
-capacity directly. See
+Batch 27 directly penalized globally mined sender collisions after step 30,000.
+It reduced collision multiplicity and reached 85.38% validation, but unique
+code counts again remained unchanged and worst-link validation regressed to
+82.13%. Both replay routing and the existing collision-loss schedule are now
+closed; future work must change sender representation or code occupancy. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -126,6 +129,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b24-development.yaml`](config/ecp7-b24-development.yaml) — Batch 23 routing with sender messages detached for receiver-only replay after step 20,000.
 - [`config/ecp7-b25-development.yaml`](config/ecp7-b25-development.yaml) — Batch 24 receiver-only catch-up with an isolated 45,000-step maximum horizon.
 - [`config/ecp7-b26-development.yaml`](config/ecp7-b26-development.yaml) — Batch 25 with one preregistered sender/receiver replay-route cycle.
+- [`config/ecp7-b27-development.yaml`](config/ecp7-b27-development.yaml) — Batch 25 plus one late bounded direct sender-collision pulse.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.
