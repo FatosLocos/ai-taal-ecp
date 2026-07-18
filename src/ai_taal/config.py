@@ -297,6 +297,9 @@ def validate_config(config: dict[str, Any]) -> None:
         receiver_gradient_switch_step = hard_replay.get(
             "enable_receiver_parameter_gradients_after_step"
         )
+        sender_gradient_switch_step = hard_replay.get(
+            "disable_sender_message_gradients_after_step"
+        )
         if not isinstance(receiver_parameter_gradients, bool):
             raise ConfigError(
                 "Global hard-meaning replay receiver parameter gradients must be boolean."
@@ -307,6 +310,13 @@ def validate_config(config: dict[str, Any]) -> None:
         ):
             raise ConfigError(
                 "Global hard-meaning replay receiver gradient switch must be an integer."
+            )
+        if sender_gradient_switch_step is not None and (
+            isinstance(sender_gradient_switch_step, bool)
+            or not isinstance(sender_gradient_switch_step, int)
+        ):
+            raise ConfigError(
+                "Global hard-meaning replay sender gradient switch must be an integer."
             )
         for value, label in (
             (start_step, "start"),
@@ -343,6 +353,19 @@ def validate_config(config: dict[str, Any]) -> None:
             ):
                 raise ConfigError(
                     "Global hard-meaning replay receiver gradient switch must follow warmup and precede max_steps."
+                )
+        if sender_gradient_switch_step is not None:
+            if not (
+                start_step + warmup_steps
+                <= sender_gradient_switch_step
+                < training["max_steps"]
+            ):
+                raise ConfigError(
+                    "Global hard-meaning replay sender gradient switch must follow warmup and precede max_steps."
+                )
+            if sender_gradient_switch_step != receiver_gradient_switch_step:
+                raise ConfigError(
+                    "Global hard-meaning replay sender and receiver gradient switches must match."
                 )
         if batch_size < 1:
             raise ConfigError(

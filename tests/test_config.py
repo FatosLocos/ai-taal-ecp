@@ -812,3 +812,52 @@ def test_hard_replay_receiver_gradient_switch_must_follow_warmup(
     ] = 30000
     with pytest.raises(ConfigError, match="must follow warmup"):
         validate_config(invalid_end)
+
+
+def test_ecp7_b24_changes_only_hard_replay_sender_gradient_schedule(
+    ecp7_b23_config, ecp7_b24_config
+):
+    assert ecp7_b24_config["world"] == ecp7_b23_config["world"]
+    assert ecp7_b24_config["dataset"] == ecp7_b23_config["dataset"]
+    assert ecp7_b24_config["channel"] == ecp7_b23_config["channel"]
+    assert ecp7_b24_config["agents"] == ecp7_b23_config["agents"]
+    b23_training = deepcopy(ecp7_b23_config["training"])
+    b24_training = deepcopy(ecp7_b24_config["training"])
+    assert b24_training["global_hard_meaning_replay"].pop(
+        "disable_sender_message_gradients_after_step"
+    ) == 20000
+    assert b24_training == b23_training
+
+
+def test_hard_replay_sender_gradient_switch_is_bounded_and_synchronized(
+    ecp7_b24_config,
+):
+    invalid_type = deepcopy(ecp7_b24_config)
+    invalid_type["training"]["global_hard_meaning_replay"][
+        "disable_sender_message_gradients_after_step"
+    ] = False
+    with pytest.raises(
+        ConfigError, match="sender gradient switch must be an integer"
+    ):
+        validate_config(invalid_type)
+
+    invalid_start = deepcopy(ecp7_b24_config)
+    invalid_start["training"]["global_hard_meaning_replay"][
+        "disable_sender_message_gradients_after_step"
+    ] = 19999
+    with pytest.raises(ConfigError, match="must follow warmup"):
+        validate_config(invalid_start)
+
+    invalid_end = deepcopy(ecp7_b24_config)
+    invalid_end["training"]["global_hard_meaning_replay"][
+        "disable_sender_message_gradients_after_step"
+    ] = 30000
+    with pytest.raises(ConfigError, match="must follow warmup"):
+        validate_config(invalid_end)
+
+    invalid_mismatch = deepcopy(ecp7_b24_config)
+    invalid_mismatch["training"]["global_hard_meaning_replay"][
+        "disable_sender_message_gradients_after_step"
+    ] = 20200
+    with pytest.raises(ConfigError, match="gradient switches must match"):
+        validate_config(invalid_mismatch)

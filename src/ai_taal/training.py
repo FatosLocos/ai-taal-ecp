@@ -460,6 +460,11 @@ def train_population_system(
                 hard_meaning_replay_config, step
             )
         )
+        hard_meaning_replay_sender_message_gradients = (
+            _hard_replay_sender_message_gradients(
+                hard_meaning_replay_config, step
+            )
+        )
         if hard_meaning_replay_enabled:
             hard_meaning_replay_weight = (
                 _scheduled_hard_meaning_replay_weight(
@@ -495,6 +500,9 @@ def train_population_system(
                         hard_batch,
                         receiver_parameter_gradients=(
                             hard_meaning_replay_receiver_parameter_gradients
+                        ),
+                        sender_message_gradients=(
+                            hard_meaning_replay_sender_message_gradients
                         ),
                     )
                 )
@@ -604,6 +612,9 @@ def train_population_system(
                 ),
                 "global_hard_meaning_replay_receiver_parameter_gradients": (
                     hard_meaning_replay_receiver_parameter_gradients
+                ),
+                "global_hard_meaning_replay_sender_message_gradients": (
+                    hard_meaning_replay_sender_message_gradients
                 ),
                 "sender_message_consensus_loss": float(
                     sender_consensus_loss.detach().cpu()
@@ -903,8 +914,9 @@ def routed_population_reconstruction_loss(
     targets: Tensor,
     *,
     receiver_parameter_gradients: bool,
+    sender_message_gradients: bool = True,
 ) -> Tensor:
-    """Compute all-link task loss with optional fixed receiver parameters."""
+    """Compute all-link task loss with independently routed parameter gradients."""
     if len(messages) != len(population.senders):
         raise ValueError("Replay messages must match the sender population.")
     receiver_parameters = list(population.receivers.parameters())
@@ -915,9 +927,14 @@ def routed_population_reconstruction_loss(
         for parameter in receiver_parameters:
             parameter.requires_grad_(False)
     try:
+        routed_messages = (
+            messages
+            if sender_message_gradients
+            else [message.detach() for message in messages]
+        )
         receiver_logits = [
             receiver(message)
-            for message in messages
+            for message in routed_messages
             for receiver in population.receivers
         ]
         return torch.stack(
@@ -1390,3 +1407,13 @@ def _hard_replay_receiver_parameter_gradients(
     return initially_enabled or (
         switch_step is not None and step > int(switch_step)
     )
+
+
+def _hard_replay_sender_message_gradients(
+    hard_replay_config: dict[str, Any], step: int
+) -> bool:
+    """Return whether the replay branch backpropagates into sender messages."""
+    switch_step = hard_replay_config.get(
+        "disable_sender_message_gradients_after_step"
+    )
+    return switch_step is None or step <= int(switch_step)

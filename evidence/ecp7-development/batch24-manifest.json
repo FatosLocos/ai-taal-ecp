@@ -1,0 +1,57 @@
+{
+  "batch": "ECP7-B24",
+  "confirmatory_test_unsealed": false,
+  "config_effective_sha256": "a01f184249b32859074909039ba86d495854a3c5f063c19f5519e2739135cb9e",
+  "config_raw_sha256": "27e737c1eaa3c191253469fb863171c9875e1e9433c2b00b7a578e15609155dc",
+  "control": {
+    "artifact_hashes": {
+      "effective_config.yaml": "4bfb976293f117d3ae35f790e4fd6371628be95d91febb334bc275dc5d6b66d4",
+      "posthoc-analysis.json": "96465d897fca90afcd7a28064310baab1465a62f67dc23075d47fecc74fc59c2",
+      "seed-11/metrics.json": "c8969782494c561f0794da1504b8b547a9b93ca38dbbe3c56302175a8011a65c",
+      "summary.json": "130753e1292e12d7a5caefe244561d6ad7be6694c8c638679187e4067eb8712e"
+    },
+    "development_gate_passed": true,
+    "population_train_mean_exact_match": 1.0,
+    "population_validation_mean_exact_match": 1.0,
+    "run_id": "20260718T171239Z-ecp7-development",
+    "universal_translator_validation_exact_match": 1.0,
+    "unique_messages_per_sender": [15360, 15360, 15360, 15360]
+  },
+  "intervention": {
+    "artifact_hashes": {
+      "effective_config.yaml": "aaa9b5c3edbac3001ef2da641eaddd504b9c5dffc57853894b978cff65f5b844",
+      "posthoc-analysis.json": "1adb0303f512cb655cfccab0ff133e7df2dcb4171ec713b3123da6ce9a97a2b0",
+      "seed-11/metrics.json": "7c55fb95dfbfca40843f05da17f703a70b6f3b7df666cea8780f2ca7163d184c",
+      "summary.json": "3b3d41640c8da70e58a66bf619882b14027f16dbc3b2cd966d43c97da44230dc"
+    },
+    "best_code_utilization_loss": -0.7537469863891602,
+    "best_global_hard_meaning_replay_loss": 0.13131733238697052,
+    "best_global_hard_meaning_replay_pool_size": 1690,
+    "best_global_hard_meaning_replay_weight": 0.25,
+    "best_step": 29400,
+    "collision_meanings_per_sender": [2146, 2405, 2640, 1920],
+    "development_gate_passed": false,
+    "exact_sender_message_agreement": 0.9150282118055556,
+    "final_hard_meaning_replay_pool_size": 1710,
+    "final_step": 30000,
+    "initial_hard_meaning_replay_pool_size": 1745,
+    "message_entropy_bits_per_sender": [13.609770836443227, 13.576046878109892, 13.539550361165908, 13.63919791977656],
+    "minimum_hard_meaning_replay_pool_size": 1414,
+    "minimum_hard_meaning_replay_pool_step": 18200,
+    "population_train_mean_exact_match": 0.8468540736607142,
+    "population_train_worst_link_exact_match": 0.8256138392857143,
+    "population_validation_factor_accuracy": [0.99981689453125, 0.99871826171875, 0.984375, 0.8616943359375],
+    "population_validation_mean_exact_match": 0.8448486328125,
+    "population_validation_worst_link_exact_match": 0.822265625,
+    "receiver_only_replay_after_step": 20000,
+    "run_id": "20260718T171239Z-ecp7-development",
+    "selected_all_links_wrong_meaning_count": 1690,
+    "selected_any_link_wrong_meaning_count": 3142,
+    "selected_mean_incorrect_links_per_hard_meaning": 11.180140495300293,
+    "universal_translator_validation_exact_match": 0.845458984375,
+    "unique_messages_per_sender": [13214, 12955, 12720, 13440]
+  },
+  "seed": 11,
+  "split_artifact_sha256": "676195997ee0c77d5c9565bae045dbb938b432a2e4e74b666233b0a41f924718",
+  "split_sha256": "4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd"
+}

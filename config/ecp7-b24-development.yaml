@@ -1,0 +1,13 @@
+extends: ecp7-b23-development.yaml
+
+experiment:
+  title: ECP-7 receiver-only hard-replay catch-up
+  arm: receiver_only_hard_replay_catchup
+  objective: >-
+    Test whether a sender-only replay warmup followed by receiver-only replay
+    can preserve separated sender codes while allowing receivers to catch up
+    without joint replay coadaptation.
+
+training:
+  global_hard_meaning_replay:
+    disable_sender_message_gradients_after_step: 20000

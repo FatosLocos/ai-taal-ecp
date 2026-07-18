@@ -26,7 +26,7 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first twenty-three sealed batches are valid
+one-factor-per-slot architecture. Its first twenty-four sealed batches are valid
 development results but none passes the full gate. Batch 15 established the
 strong position-aware base: at 30,000 optimization steps it reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
@@ -48,7 +48,10 @@ confirmatory test remains sealed. Batch 22 routed shared-error replay only into
 senders; this reduced shared errors but increased cross-link fragmentation and
 regressed validation to 83.51%. Batch 23 restored joint replay after the
 sender-only warmup. Validation remained 83.50%; total fragmented errors fell,
-but the shared-error pool immediately regrew and injectivity still failed. See
+but the shared-error pool immediately regrew and injectivity still failed.
+Batch 24 made the second phase receiver-only. It established new-best means of
+84.69% train, 84.48% validation and 84.55% translator validation, but the
+worst-link and injectivity gates still failed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
 ## Build on this work
@@ -112,6 +115,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b21-development.yaml`](config/ecp7-b21-development.yaml) — Batch 20 replay restricted to meanings failed by all 16 population links.
 - [`config/ecp7-b22-development.yaml`](config/ecp7-b22-development.yaml) — Batch 21 replay with receiver-parameter gradients disabled only on the replay branch.
 - [`config/ecp7-b23-development.yaml`](config/ecp7-b23-development.yaml) — Batch 22 sender-only replay through step 20,000 followed by restored joint replay gradients.
+- [`config/ecp7-b24-development.yaml`](config/ecp7-b24-development.yaml) — Batch 23 routing with sender messages detached for receiver-only replay after step 20,000.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

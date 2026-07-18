@@ -130,6 +130,12 @@ reached 2,085 at selection. The any-link pool improved to 2,660, but validation
 remained 83.50% and injectivity still failed. Exact identities and hashes are in
 `batch23-manifest.json`.
 
+Batch 24 changed the second replay phase from joint to receiver-only. It reached
+new-best means of 84.69% train, 84.48% validation and 84.55% translator
+validation. The selected error pool contains 1,690 shared failures and 3,142
+any-link failures, so worst-link accuracy and injectivity still fail. Exact
+identities and hashes are in `batch24-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
