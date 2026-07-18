@@ -237,3 +237,45 @@ The batch contains exactly two seed-11 runs:
 All existing validity and development gates remain unchanged. Failure is
 recorded without confirmatory test access. No alternative collision weight,
 batch size, architecture or duration may be tried inside Batch 4.
+
+## Batch 5 preregistration — Straight-through sender consensus
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026<br>
+Configuration: `config/ecp7-b5-development.yaml`<br>
+Raw configuration SHA-256: `3333e3e150e242b0984e79a2923ffe94d68cee7d004ae51f4914097917503db7`<br>
+Effective configuration SHA-256: `4c2648efa2719d1cd3e0bdf96a2cbea21ea697280b74bbce82ba45371bbc0ed9`
+
+Batch 4 regressed relative to Batch 3, so Batch 5 returns to the stronger
+ECP7-B3-I base and does not retain the joint-collision loss. Batch 3's four
+senders used substantially more of the hard code space than earlier batches,
+but their complete-message agreement on the accessible meanings was only
+approximately 2.47%. Batch 5 asks whether one shared factor-agnostic convention
+helps generic receivers learn the protocol.
+
+For the same training minibatch, the new objective compares each unordered
+pair of senders. It averages their straight-through one-hot symbol disagreement
+over inputs and message slots, then averages over all sender pairs:
+
+`L_sender = mean_(a<b,x,s) [1 - <m_a(x,s), m_b(x,s)>]`
+
+The forward value is zero when two senders emit the same hard symbol and one
+when they differ. Gradients flow through the straight-through Gumbel estimator.
+The objective receives no factor labels, factor identities, target slots,
+desired symbols or privileged codebook. Per-sender hard utilization from Batch
+3 remains active to oppose agreement through collapse.
+
+The sender-consensus weight is fixed at `1.0` with a 400-step linear warmup.
+This is the only Batch 5 addition. Architecture, task loss, Batch 3 hard
+utilization, population, split, 14-bit channel, 5,000-step limit, early
+stopping and translator remain unchanged. The rejected Batch 4 collision loss
+is absent.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B5-I with straight-through sender consensus on the Batch 3 base.
+
+All existing validity and development gates remain unchanged. Failure is
+recorded without confirmatory test access. No alternative consensus weight,
+warmup, reduction, architecture or duration may be tried inside Batch 5.

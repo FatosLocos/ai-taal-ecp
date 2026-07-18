@@ -151,6 +151,13 @@ def validate_config(config: dict[str, Any]) -> None:
         if joint_collision.get("warmup_steps", 0) < 1:
             raise ConfigError("Joint-collision warmup must be positive.")
 
+    sender_consensus = training.get("sender_message_consensus", {})
+    if sender_consensus.get("enabled", False):
+        if sender_consensus.get("weight", -1) < 0:
+            raise ConfigError("Sender-message consensus weight cannot be negative.")
+        if sender_consensus.get("warmup_steps", 0) < 1:
+            raise ConfigError("Sender-message consensus warmup must be positive.")
+
 
 def file_sha256(path: str | Path) -> str:
     digest = hashlib.sha256()

@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 58 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 62 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,19 +71,21 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 4
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 5
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
 but still reached only 1.92% validation. ECP7-B4-I added direct minibatch
-collision pressure and regressed to 426–579 messages and 0.42% validation. All
-paired ECP-6 positive controls stayed perfect. The confirmatory ECP-7 test is
-still sealed.
+collision pressure and regressed to 426–579 messages and 0.42% validation.
+ECP7-B5-I raised exact inter-sender agreement from 2.47% to 44.02%, but did so
+through a shared collapse to 169–231 messages and 0.48% validation. All paired
+ECP-6 positive controls stayed perfect. The confirmatory ECP-7 test is still
+sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B5 intervention and its failure criterion.
+2. Define exactly one ECP7-B6 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -96,22 +98,24 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 3 remains the strongest weak-structure variant; Batch 4 showed that sparse
-minibatch collision pressure is not a useful proxy for global occupancy. The
-four B3 senders also agreed on only 2.47% of complete messages. The most
-informative next step is one factor-agnostic sender-consensus loss. A clean
-ECP7-B5 progression is:
+Batch 3 remains the strongest weak-structure variant. Batch 4 showed that sparse
+minibatch collision pressure is not a useful proxy for global occupancy, while
+Batch 5 showed that agreement pressure creates a shared collapse. Across these
+batches, color and especially shape remain weak while size and texture are much
+easier. The most informative next step is one minimax factor-reconstruction
+objective. A clean ECP7-B6 progression is:
 
 - keep the same world and bit budget;
 - keep the joint autoregressive sender and generic isolated receiver;
-- return to Batch 3 and add one straight-through loss that aligns sender
-  symbols for the same input without assigning factors to slots;
+- return to Batch 3 and add one fixed objective that emphasizes the currently
+  worst factor-level cross-entropy without assigning factors to slots;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not retain the Batch 4 collision term or combine consensus with architectural
-resizing, longer training, variable-length messages or negotiation. That would
-make the sender-consensus effect uninterpretable.
+Do not retain the Batch 4 collision or Batch 5 consensus terms, and do not
+combine factor balancing with architectural resizing, longer training,
+variable-length messages or negotiation. That would make its effect
+uninterpretable.
 
 ## 7. Definition of done for any contribution
 

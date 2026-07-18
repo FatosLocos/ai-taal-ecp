@@ -17,6 +17,7 @@ from ai_taal.training import (
     factor_agnostic_code_utilization_loss,
     slot_binding_consensus_loss,
     straight_through_joint_collision_loss,
+    straight_through_sender_consensus_loss,
     train_communication_system,
 )
 from ai_taal.world import build_splits, enumerate_world
@@ -224,6 +225,45 @@ def test_joint_collision_loss_backpropagates_through_hard_messages(ecp7_b4_confi
 
     assert torch.isfinite(loss)
     assert any(parameter.grad is not None for parameter in sender.parameters())
+
+
+def test_sender_consensus_loss_measures_pairwise_symbol_disagreement():
+    left_symbols = torch.tensor([[0, 0], [1, 1]])
+    right_symbols = torch.tensor([[0, 0], [0, 1]])
+    left = torch.nn.functional.one_hot(left_symbols, num_classes=2).to(torch.float32)
+    right = torch.nn.functional.one_hot(right_symbols, num_classes=2).to(
+        torch.float32
+    )
+
+    identical_loss = straight_through_sender_consensus_loss([left, left])
+    disagreement_loss = straight_through_sender_consensus_loss([left, right])
+
+    assert abs(float(identical_loss)) < 1e-6
+    assert abs(float(disagreement_loss) - 0.25) < 1e-6
+
+
+def test_sender_consensus_loss_backpropagates_through_hard_messages(
+    ecp7_b5_config,
+):
+    meanings = torch.tensor(
+        [[0, 0, 0, 0], [1, 2, 3, 4], [15, 15, 7, 7]], dtype=torch.long
+    )
+    senders = [
+        BoundedAutoregressiveSender(ModelSpec.from_config(ecp7_b5_config))
+        for _ in range(2)
+    ]
+    messages = [
+        sender(meanings, temperature=1.0, sample=True)[0] for sender in senders
+    ]
+
+    loss = straight_through_sender_consensus_loss(messages)
+    loss.backward()
+
+    assert torch.isfinite(loss)
+    assert all(
+        any(parameter.grad is not None for parameter in sender.parameters())
+        for sender in senders
+    )
 
 
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):

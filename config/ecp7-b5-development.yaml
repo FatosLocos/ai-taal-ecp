@@ -1,0 +1,15 @@
+extends: ecp7-b3-development.yaml
+
+experiment:
+  title: ECP-7 straight-through sender-consensus development
+  arm: straight_through_sender_consensus
+  objective: >-
+    Test whether factor-agnostic pairwise agreement between independent senders
+    creates one shared hard-message convention while the Batch 3 utilization
+    objective preserves codebook diversity.
+
+training:
+  sender_message_consensus:
+    enabled: true
+    weight: 1.0
+    warmup_steps: 400
