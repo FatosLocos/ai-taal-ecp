@@ -479,3 +479,35 @@ def test_ecp7_b13_changes_only_the_shared_sender_depth(
     assert ecp7_b13_config["agents"]["sender"] == {
         "family": "deep_bounded_parallel_sender"
     }
+
+
+def test_ecp7_b14_changes_only_the_learning_rate_schedule(
+    ecp7_b10_config, ecp7_b14_config
+):
+    assert ecp7_b14_config["world"] == ecp7_b10_config["world"]
+    assert ecp7_b14_config["dataset"] == ecp7_b10_config["dataset"]
+    assert ecp7_b14_config["channel"] == ecp7_b10_config["channel"]
+    assert ecp7_b14_config["agents"] == ecp7_b10_config["agents"]
+    b10_training = deepcopy(ecp7_b10_config["training"])
+    b14_training = deepcopy(ecp7_b14_config["training"])
+    assert b14_training.pop("learning_rate_decay") == {
+        "enabled": True,
+        "start_step": 5000,
+        "end_step": 15000,
+        "final_learning_rate": 0.0001,
+    }
+    assert b14_training == b10_training
+
+
+def test_learning_rate_decay_must_be_bounded(ecp7_b14_config):
+    invalid_end = deepcopy(ecp7_b14_config)
+    invalid_end["training"]["learning_rate_decay"]["end_step"] = 15001
+    with pytest.raises(ConfigError, match="fit max_steps"):
+        validate_config(invalid_end)
+
+    invalid_final = deepcopy(ecp7_b14_config)
+    invalid_final["training"]["learning_rate_decay"][
+        "final_learning_rate"
+    ] = 0.001
+    with pytest.raises(ConfigError, match="below its initial value"):
+        validate_config(invalid_final)

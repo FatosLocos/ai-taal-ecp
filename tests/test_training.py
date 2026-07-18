@@ -12,6 +12,7 @@ from ai_taal.models import (
 )
 from ai_taal.training import (
     _scheduled_code_utilization_weight,
+    _scheduled_learning_rate,
     _scheduled_temperature,
     algebraic_consistency_loss,
     atom_code_consensus_loss,
@@ -69,6 +70,15 @@ def test_utilization_weight_holds_then_decays_linearly(ecp7_b11_config):
     assert _scheduled_code_utilization_weight(utilization, 10000) == 0.55
     assert _scheduled_code_utilization_weight(utilization, 15000) == 0.1
     assert _scheduled_code_utilization_weight(utilization, 16000) == 0.1
+
+
+def test_learning_rate_holds_then_decays_linearly(ecp7_b14_config):
+    training = ecp7_b14_config["training"]
+    assert _scheduled_learning_rate(training, 1) == 0.001
+    assert _scheduled_learning_rate(training, 5000) == 0.001
+    assert _scheduled_learning_rate(training, 10000) == 0.00055
+    assert _scheduled_learning_rate(training, 15000) == 0.0001
+    assert _scheduled_learning_rate(training, 16000) == 0.0001
 
 
 def test_algebraic_quadruples_use_only_training_meanings_and_same_transition(

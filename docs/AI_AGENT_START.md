@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 85 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 88 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 13
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 14
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -99,12 +99,14 @@ the strongest base. ECP7-B12-I added one shared decoder layer and regressed
 further to 71.53% train, 47.98% validation and 63.04% translator validation.
 ECP7-B13-I added the symmetric sender layer and collapsed to 1.32% train, 0.32%
 validation and 0.61% translator validation. The confirmatory ECP-7 test is still
-sealed.
+sealed. ECP7-B14-I decayed late learning rate and regressed to 79.13% train,
+65.49% validation and 71.02% translator validation. B10 remains the strongest
+base.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B14 intervention and its failure criterion.
+2. Define exactly one ECP7-B15 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -119,21 +121,23 @@ Continue with this sequence:
 
 Batch 10 is the strongest weak-structure result. Batch 11 ruled out reduced late
 utilization pressure, while Batches 12 and 13 ruled out extra generic decoder
-and sender depth. B10 improved late but fluctuated around its validation plateau
-at the unchanged learning rate `0.001`. The most informative next step is one
-optimization-stability schedule. A clean ECP7-B14 progression is:
+and sender depth. Batch 14 showed that reducing late learning rate is also
+harmful, while B10 selected its final 15,000-step checkpoint. The most
+informative next step is one final duration-only extension. A clean ECP7-B15
+progression is:
 
 - keep the same world and bit budget;
 - return to the complete B10 training and loss schedule;
-- keep learning rate `0.001` through step 5,000;
-- decay only that rate linearly to `0.0001` at step 15,000;
+- keep constant learning rate `0.001` and the temperature endpoint `0.8`;
+- extend only maximum population steps to 30,000, minimum selection to 15,000
+  and patience to 5,000;
 - measure injectivity, validation composition and new-reader induction;
 - rerun the ECP-6 architecture as the frozen positive control.
 
-Do not change architecture, loss weights, optimizer type, data, temperature,
-duration, validation cadence or development thresholds, and do not combine the
-learning-rate schedule with variable-length messages or negotiation. That would
-make its effect uninterpretable.
+Do not change architecture, loss weights, optimizer, data, temperature,
+validation cadence or development thresholds, and do not combine the longer
+horizon with variable-length messages or negotiation. That would make its
+effect uninterpretable.
 
 ## 7. Definition of done for any contribution
 
