@@ -1,0 +1,17 @@
+extends: ecp7-b18-development.yaml
+
+experiment:
+  title: ECP-7 bounded global collision-replay pulse
+  arm: bounded_global_collision_replay_pulse
+  objective: >-
+    Test whether decaying the Batch 18 replay coefficient after its early
+    collision-reduction phase preserves code-use gains while restoring an
+    unperturbed final semantic-refinement phase.
+
+training:
+  global_collision_replay:
+    weight_decay:
+      enabled: true
+      start_step: 20000
+      end_step: 25000
+      final_weight: 0.0

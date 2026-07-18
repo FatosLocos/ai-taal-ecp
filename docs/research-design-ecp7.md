@@ -796,3 +796,45 @@ sealed-test requirement fails. No alternative coefficient, schedule, mining
 source, pair sampler, refresh, temperature, architecture, duration, optimizer,
 data, translator or seed may be tried inside Batch 18. Failure is recorded
 without confirmatory test access.
+
+## Batch 19 preregistration — Bounded collision-replay pulse
+
+Status: **preregistered for sealed development**<br>
+Preregistered: July 18, 2026 at 15:15:36 UTC<br>
+Configuration: `config/ecp7-b19-development.yaml`<br>
+Raw configuration SHA-256: `dab2cd0dadbadb47a10e2c45a720611dc91d140d3783f0ca1a537e4e8a8549c0`<br>
+Effective configuration SHA-256: `cbd144a5fce451315a7d5fb322a11f2f29c32514fc22fbe06f46285aef677d13`
+
+Batch 18 confirmed that replay at task-loss scale avoids B17's early collapse,
+but validation peaked at step 22,400 and then regressed while weight `0.1`
+remained active. Batch 19 tests whether replay is useful as a bounded codebook
+diversification pulse rather than a permanent late objective.
+
+ECP7-B19-I inherits the complete Batch 18 architecture, training-only mining,
+seed-derived pair sampler, 32-pair sender batches, 200-step refresh interval,
+relaxed temperature, base losses, optimizer, data, duration, selection,
+translator and thresholds. It is identical to B18 through step 20,000. The sole
+change is a coefficient decay:
+
+- replay weight remains `0` through step `15,000`;
+- replay weight rises linearly to `0.1` at step `20,000`;
+- replay weight falls linearly to `0` over steps `20,000–25,000`;
+- replay weight remains `0` through step `30,000`.
+
+Training-codebook collision mining continues at evaluation boundaries after
+step 25,000 for diagnostics, but contributes no gradient and consumes no replay
+sampler draws. The final optimization phase therefore contains only the B15
+task and utilization objectives. The complete trajectory through step 20,000
+must match B18 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B19-I with one bounded global collision-replay pulse.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative decay, endpoint, mining, pair
+sampler, architecture, base loss, optimizer, duration, data, translator or seed
+may be tried inside Batch 19. Failure is recorded without confirmatory test
+access.

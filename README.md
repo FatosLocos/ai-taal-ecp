@@ -26,7 +26,7 @@ The protocol uses no words or alphabet, but four meaning-free local symbols. For
 See [`docs/results-ecp6.md`](docs/results-ecp6.md) for the conclusion, [`docs/protocol-specification-ecp6.md`](docs/protocol-specification-ecp6.md) for the wire format and [`evidence/ecp6/report.md`](evidence/ecp6/report.md) for the compact confirmatory evidence.
 
 ECP-7 development now tests how much of that result depends on the explicit
-one-factor-per-slot architecture. Its first eighteen sealed batches are valid
+one-factor-per-slot architecture. Its first nineteen sealed batches are valid
 development results but none passes the full gate. Batch 15 remains strongest:
 the position-aware design at 30,000 optimization steps reaches 83.46% train
 exactness, 82.59% validation and 83.37% translator validation while using
@@ -36,7 +36,9 @@ added late worst-factor pressure and regressed to 76.46% validation. Batch 17
 replayed globally mined training collisions and modestly improved code use, but
 still regressed to 77.09% validation. Batch 18 reduced replay to task-loss scale,
 recovering 80.71% validation and a new-best 84.06% translator score, but train
-exactness and injectivity still failed. The ECP-6 positive controls remain
+exactness and injectivity still failed. Batch 19 bounded replay to a pulse and
+reached 82.04% validation plus a new-best 80.57% worst-link validation, but
+again failed train exactness and injectivity. The ECP-6 positive controls remain
 perfect and the ECP-7 confirmatory test remains sealed. See
 [`docs/development-log-ecp7.md`](docs/development-log-ecp7.md).
 
@@ -96,6 +98,7 @@ Do not translate those artifacts in place. New experiment configurations and all
 - [`config/ecp7-b16-development.yaml`](config/ecp7-b16-development.yaml) — late normalized factor-minimax pressure on the Batch 15 base.
 - [`config/ecp7-b17-development.yaml`](config/ecp7-b17-development.yaml) — late training-only global collision-pair replay on the Batch 15 base.
 - [`config/ecp7-b18-development.yaml`](config/ecp7-b18-development.yaml) — the Batch 17 replay mechanism with final weight reduced to 0.1.
+- [`config/ecp7-b19-development.yaml`](config/ecp7-b19-development.yaml) — the Batch 18 replay mechanism decayed back to zero after step 20,000.
 - [`config/ecp7-positive-control-development.yaml`](config/ecp7-positive-control-development.yaml) — ECP-6 positive control on the ECP-7 split.
 - [`config/ecp0.yaml`](config/ecp0.yaml) — machine-readable configuration from step 1.
 - [`config/ecp1.yaml`](config/ecp1.yaml) — frozen configuration of the population trial.

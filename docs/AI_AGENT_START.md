@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 .venv/bin/ecp6 --config config/ecp6.yaml validate
 ```
 
-Expected baseline: 102 passing tests and split sizes `14336/1024/1024`.
+Expected baseline: 105 passing tests and split sizes `14336/1024/1024`.
 
 ## 4. Reproduce ECP-6
 
@@ -71,7 +71,7 @@ This reruns a known experiment. It must not be presented as a new independent co
 
 ## 5. Continue ECP-7 scientifically
 
-Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 18
+Do not modify ECP-0 through ECP-6 or the completed ECP-7 Batch 1 through Batch 19
 configs. ECP7-B1-I collapsed to 130–139 hard messages. ECP7-B2-I improved its
 soft objective but collapsed further to 85–104 hard messages. ECP7-B3-I applied
 that loss to straight-through hard messages and improved to 585–972 messages,
@@ -114,11 +114,16 @@ ECP7-B18-I reduced replay weight to `0.1` and recovered 84.08% train, 80.71%
 validation and a new-best 84.06% translator validation. Validation and
 translator gates pass, but train and injectivity do not. Batch 15 retains the
 best validation result, and the confirmatory ECP-7 test remains sealed.
+ECP7-B19-I decayed replay back to zero from steps 20,000–25,000. It reached
+83.74% train, 82.04% validation, a new-best 80.57% worst-link validation and
+83.50% translator validation. The bounded pulse improved cross-link balance but
+still failed train thresholds and injectivity. Batch 15 retains the best mean
+validation result, and the confirmatory ECP-7 test remains sealed.
 
 Continue with this sequence:
 
 1. Read `docs/research-design-ecp7.md` and `docs/development-log-ecp7.md`.
-2. Define exactly one ECP7-B19 intervention and its failure criterion.
+2. Define exactly one ECP7-B20 intervention and its failure criterion.
 3. Register the variant and immutable configuration hashes before training.
 4. Add tests for every new invariant.
 5. Use only `smoke` and `develop`; keep the ECP-7 test split sealed.
@@ -131,26 +136,27 @@ Continue with this sequence:
 
 ## 6. Recommended next experiment
 
-Batch 18 shows that replay at task-loss scale avoids B17's early collapse and
-improves train and translator scores, but validation peaks at step 22,400 and
-then declines while replay remains active. The clean next question is whether a
-bounded replay pulse can preserve early collision reduction and then return to
-unperturbed semantic refinement. A clean ECP7-B19 progression is:
+Batches 17–19 show that collision-pair replay changes code use but does not
+stably separate the remaining collisions. Batch 19 improves validation only
+after replay is removed, while known-meaning train exactness remains near 84%.
+The clean next question is whether the residual error is concentrated in a
+sparse set of hard training meanings that uniform task batches do not repair.
+A clean ECP7-B20 progression is:
 
-- keep the same world and bit budget;
-- keep the complete B15 architecture, horizon and base losses;
-- keep the complete B17 training-only collision mining, replay batch,
-  temperature and refresh mechanism;
-- keep replay weight `0` through step 15,000, warm only to `0.1` at step 20,000,
-  then decay linearly to `0` at step 25,000 and hold;
-- measure injectivity, validation composition and new-reader induction;
-- rerun the ECP-6 architecture as the frozen positive control.
+- keep the same world, bit budget, Batch 15 architecture and 30,000-step horizon;
+- do not enable collision replay or factor reweighting;
+- periodically evaluate only the training codebook and deterministically mine
+  meanings reconstructed incorrectly by the current population;
+- add ordinary reconstruction updates on one fixed, registered number of mined
+  meanings after step 15,000, using a separate seed-derived sampler;
+- keep the ordinary random task batch and all base objectives unchanged;
+- measure train exactness, injectivity, validation composition and new-reader
+  induction, and rerun the frozen ECP-6 positive control.
 
-Continue to use training meanings only for pair mining. Do not change the
-mining source, pair sampler, architecture, base utilization, optimizer, data,
-temperature, duration, validation cadence or development thresholds, and do
-not combine the schedule change with factor reweighting, variable-length
-messages or negotiation.
+Preregister the mining score, refresh interval, replay batch size, coefficient
+and schedule before training. Do not combine hard-meaning replay with collision
+pressure, a new architecture, factor-specific weights, optimizer changes,
+longer training, variable-length messages or negotiation.
 
 ## 7. Definition of done for any contribution
 

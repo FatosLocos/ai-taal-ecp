@@ -629,3 +629,46 @@ def test_ecp7_b18_changes_only_the_collision_replay_weight(
     assert b17_training["global_collision_replay"].pop("weight") == 1.0
     assert b18_training["global_collision_replay"].pop("weight") == 0.1
     assert b18_training == b17_training
+
+
+def test_ecp7_b19_changes_only_the_collision_replay_decay(
+    ecp7_b18_config, ecp7_b19_config
+):
+    assert ecp7_b19_config["world"] == ecp7_b18_config["world"]
+    assert ecp7_b19_config["dataset"] == ecp7_b18_config["dataset"]
+    assert ecp7_b19_config["channel"] == ecp7_b18_config["channel"]
+    assert ecp7_b19_config["agents"] == ecp7_b18_config["agents"]
+    b18_training = deepcopy(ecp7_b18_config["training"])
+    b19_training = deepcopy(ecp7_b19_config["training"])
+    assert b19_training["global_collision_replay"].pop("weight_decay") == {
+        "enabled": True,
+        "start_step": 20000,
+        "end_step": 25000,
+        "final_weight": 0.0,
+    }
+    assert b19_training == b18_training
+
+
+def test_collision_replay_decay_must_follow_warmup_and_fit_horizon(
+    ecp7_b19_config,
+):
+    invalid_start = deepcopy(ecp7_b19_config)
+    invalid_start["training"]["global_collision_replay"]["weight_decay"][
+        "start_step"
+    ] = 19999
+    with pytest.raises(ConfigError, match="cannot start before warmup"):
+        validate_config(invalid_start)
+
+    invalid_end = deepcopy(ecp7_b19_config)
+    invalid_end["training"]["global_collision_replay"]["weight_decay"][
+        "end_step"
+    ] = 30001
+    with pytest.raises(ConfigError, match="fit max_steps"):
+        validate_config(invalid_end)
+
+    invalid_final = deepcopy(ecp7_b19_config)
+    invalid_final["training"]["global_collision_replay"]["weight_decay"][
+        "final_weight"
+    ] = 0.1
+    with pytest.raises(ConfigError, match="below its initial weight"):
+        validate_config(invalid_final)

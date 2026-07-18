@@ -98,6 +98,12 @@ exactness, 80.71% validation and a new-best 84.06% translator validation, but
 still failed train thresholds and injectivity. Exact identities and hashes are
 in `batch18-manifest.json`.
 
+Batch 19 decayed that replay weight back to zero after step 20,000. It reached
+83.74% train exactness, 82.04% validation, a new-best 80.57% worst-link
+validation and 83.50% translator validation. The bounded pulse improved
+cross-link balance but still failed train thresholds and injectivity. Exact
+identities and hashes are in `batch19-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash

@@ -1193,4 +1193,18 @@ def _scheduled_collision_replay_weight(
         return 0.0
     warmup_steps = int(collision_replay_config["warmup_steps"])
     progress = min((step - start_step) / warmup_steps, 1.0)
-    return float(collision_replay_config["weight"]) * progress
+    initial_weight = float(collision_replay_config["weight"])
+    weight = initial_weight * progress
+    decay = collision_replay_config.get("weight_decay", {})
+    if not decay.get("enabled", False):
+        return weight
+
+    decay_start = int(decay["start_step"])
+    if step <= decay_start:
+        return weight
+    decay_end = int(decay["end_step"])
+    final_weight = float(decay["final_weight"])
+    if step >= decay_end:
+        return final_weight
+    decay_progress = (step - decay_start) / (decay_end - decay_start)
+    return initial_weight + (final_weight - initial_weight) * decay_progress
