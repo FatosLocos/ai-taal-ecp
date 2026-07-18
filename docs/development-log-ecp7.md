@@ -33,6 +33,7 @@ this log.
 | ECP7-B23-I | Intervention | B22 sender-only replay warmup followed by restored joint replay gradients | Position-aware MLP | valid negative; joint phase recreates shared errors without improving accuracy |
 | ECP7-B24-I | Intervention | B23 sender-only warmup followed by receiver-only replay catch-up | Position-aware MLP | valid negative; new-best means but link-specific errors and injectivity fail |
 | ECP7-B25-I | Intervention | B24 receiver-only catch-up with a 45,000-step maximum horizon | Position-aware MLP | valid negative; new-best means reach the non-injective code-cap |
+| ECP7-B26-I | Intervention | B25 with a second sender-only pulse and final receiver-only catch-up | Position-aware MLP | valid negative; route cycle changes error sharing but not code capacity |
 
 ## Batch 1 preregistration
 
@@ -2088,3 +2089,98 @@ receiver-only through 30,000, a second sender-only separation pulse through
 registered 5,000-step duration and directly tests whether saturated receivers
 provide a better fixed target for breaking remaining sender collisions. No
 other setting may change.
+
+## Batch 26 preregistration
+
+Preregistered: July 18, 2026 at 17:46:02 UTC<br>
+Seed: `11`<br>
+Maximum population steps: `45,000`<br>
+Minimum selection steps: `15,000`<br>
+Early-stopping patience: `5,000` steps<br>
+Hard-meaning predicate: all `16` current population links have an incorrect factor<br>
+Replay route through step 20,000: **sender-only**<br>
+Replay route steps 20,001–30,000: **receiver-only**<br>
+Replay route steps 30,001–35,000: **sender-only**<br>
+Replay route steps 35,001–45,000: **receiver-only**<br>
+Ordinary-task sender and receiver gradients: **enabled throughout**<br>
+Replay weight: `0` through step `15,000`, linear to `0.25` at step `20,000`, then hold<br>
+Replay batch size: `64` meanings, uniform with replacement<br>
+Training-only pool refresh interval: `200` steps<br>
+Replay sampler seed offset: `+1211`<br>
+Raw configuration SHA-256: `9721d3af452b72788568f7fc5262056aa770e443c0a3bc35112183a08c2badb7`<br>
+Effective configuration SHA-256: `be1310f79b4b7a72134393292480244eeba123d4828b3c94dbf32787dd6a4e3b`<br>
+Split-SHA-256: `4947058c75ab07cb43a87eb82776b12cb2a7e2eeba7114de110d3b852cbc64cd`<br>
+Test unsealed: **no**
+
+ECP7-B26-I inherits Batch 25 and changes only the replay gradient-route
+schedule. The complete trajectory through step 30,000 remains identical. A
+second 5,000-step sender-only pulse then uses the saturated receivers as fixed
+targets, followed by 10,000 steps of receiver-only catch-up. The ordinary task
+remains joint throughout. Exact phase-boundary and one-sided-gradient
+invariants are tested. The positive control is rerun, and no alternative cycle
+or accompanying intervention is admitted into this batch.
+
+## Batch 26 results
+
+Positive-control run: `runs/ecp7-batch26-control-development/20260718T174733Z-ecp7-development`<br>
+Intervention run: `runs/ecp7-batch26-intervention-development/20260718T174733Z-ecp7-development`<br>
+Test unsealed: **no**
+
+| Metric | Positive control | ECP7-B26-I |
+|---|---:|---:|
+| Population train, mean | 100% | **85.3725%** |
+| Population train, worst link | 100% | 82.7427% |
+| Population validation, mean | 100% | **85.3760%** |
+| Population validation, worst link | 100% | 82.7148% |
+| Universal translator, validation | 100% | **85.3760%** |
+| Exact sender-message agreement | 100% | 92.38% |
+| Unique messages per sender | 15,360 | 12,720–13,440 |
+| Collision meanings per sender | 0 | 1,920–2,640 |
+| Message entropy | 13.91 bits | 13.54–13.64 bits |
+| Development gate | pass | **fail** |
+
+The positive control passed every gate at 100%. ECP7-B26-I sets small new
+ECP-7 bests for mean train, mean validation, translator validation and sender
+agreement. It still fails both train thresholds and sender injectivity; the
+worst validation link merely ties Batch 25. The joint gate fails and
+confirmatory access remains unauthorized.
+
+All 151 optimization records through step 30,000 match Batch 25 exactly. At the
+second sender-only boundary the all-link pool drops from 1,710 at step 30,000
+to 1,264 at step 30,200 and reaches its minimum of 1,209 at step 30,800. The
+selected checkpoint occurs at step 34,200, during this sender-only pulse, with
+1,330 shared failures. The final receiver-only phase begins with 1,648 shared
+failures at step 35,200 and early stopping terminates at step 39,200, 5,000
+steps after selection. Receiver catch-up therefore does not improve on the
+sender-only checkpoint.
+
+The selected diagnostic finds 1,330 meanings failed by all links and 3,262
+failed by at least one link, with 10.29 mean failed links per erroneous
+meaning. Relative to Batch 25, the extra sender pulse removes 347 shared
+failures but creates 295 additional any-link failures. This reproduces the
+sender-only tradeoff observed in Batch 22: common errors become link-specific
+rather than disappearing.
+
+Selected sender codebooks contain 13,438, 12,960, 12,720 and 13,440 unique
+messages, with 1,922, 2,400, 2,640 and 1,920 collision meanings. Batch 25 used
+13,440, 12,960, 12,720 and 13,440 unique messages. The second sender pulse thus
+adds no code capacity and regresses sender 0 by two meanings. Population and
+universal-translator validation factor accuracies are both
+`[100%, 100%, 98.44%, 86.94%]`. The stable size and texture collisions remain
+the limiting structure.
+
+Both sealed analyses report 65 matching artifact hashes, 16,384
+validation-only episodes, no confirmatory-test keys, valid local alphabets,
+and exactly 14 declared bits for every logged message.
+
+## Batch 26 decision
+
+ECP7-B26-I is a valid negative result. Its very small mean improvements come
+from redistributing reader errors, not from making the sender codebooks more
+injective. Repeating or extending one-sided ordinary-task replay is therefore
+not justified: receiver-only training is already code-capacity-limited, while
+sender-only training reduces shared errors by fragmenting them across links.
+
+The ECP-7 confirmatory split remains sealed. Any future batch must change the
+sender collision objective or sender representation directly, rather than add
+another route phase, route boundary or horizon extension.

@@ -1398,6 +1398,11 @@ def _hard_replay_receiver_parameter_gradients(
     hard_replay_config: dict[str, Any], step: int
 ) -> bool:
     """Return whether the replay branch updates receiver parameters at this step."""
+    phased_route = _hard_replay_phased_gradient_route(
+        hard_replay_config, step
+    )
+    if phased_route is not None:
+        return phased_route[1]
     initially_enabled = bool(
         hard_replay_config.get("receiver_parameter_gradients", True)
     )
@@ -1413,7 +1418,32 @@ def _hard_replay_sender_message_gradients(
     hard_replay_config: dict[str, Any], step: int
 ) -> bool:
     """Return whether the replay branch backpropagates into sender messages."""
+    phased_route = _hard_replay_phased_gradient_route(
+        hard_replay_config, step
+    )
+    if phased_route is not None:
+        return phased_route[0]
     switch_step = hard_replay_config.get(
         "disable_sender_message_gradients_after_step"
     )
     return switch_step is None or step <= int(switch_step)
+
+
+def _hard_replay_phased_gradient_route(
+    hard_replay_config: dict[str, Any], step: int
+) -> tuple[bool, bool] | None:
+    """Return an explicit sender/receiver route when phases are configured."""
+    phases = hard_replay_config.get("gradient_route_phases")
+    if not phases:
+        return None
+    for phase in phases:
+        if step <= int(phase["end_step"]):
+            return (
+                bool(phase["sender_message_gradients"]),
+                bool(phase["receiver_parameter_gradients"]),
+            )
+    final_phase = phases[-1]
+    return (
+        bool(final_phase["sender_message_gradients"]),
+        bool(final_phase["receiver_parameter_gradients"]),
+    )

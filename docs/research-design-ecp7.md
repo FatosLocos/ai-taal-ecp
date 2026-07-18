@@ -1091,3 +1091,59 @@ sealed-test requirement fails. No alternative horizon, gradient route,
 predicate, coefficient, replay batch, refresh, architecture, base loss,
 optimizer, data, translator or seed may be tried inside Batch 25. Failure is
 recorded without confirmatory test access.
+
+## Batch 26 preregistration — Coordinate-descent replay cycle
+
+Status: **completed sealed development; valid negative**<br>
+Preregistered: July 18, 2026 at 17:46:02 UTC<br>
+Configuration: `config/ecp7-b26-development.yaml`<br>
+Raw configuration SHA-256: `9721d3af452b72788568f7fc5262056aa770e443c0a3bc35112183a08c2badb7`<br>
+Effective configuration SHA-256: `be1310f79b4b7a72134393292480244eeba123d4828b3c94dbf32787dd6a4e3b`
+
+Batch 25 shows that receiver-only catch-up nearly saturates the mathematical
+capacity of the learned sender codebooks. The worst train link exactly matches
+its sender's 82.81% unique-code ceiling. Batch 26 tests whether one additional
+sender-only separation pulse against those saturated receivers can break
+collisions before a final decoder catch-up phase.
+
+ECP7-B26-I inherits the complete Batch 25 implementation, 45,000-step ceiling,
+hard-meaning predicate, replay mechanism, architecture, ordinary task batch,
+utilization objective, optimizer, data, temperature schedule, coefficient,
+replay batch, sampler, refresh, warmup, selection, translator and thresholds.
+The sole change is the explicit one-sided replay schedule:
+
+1. sender-only through step 20,000;
+2. receiver-only through step 30,000;
+3. sender-only through step 35,000;
+4. receiver-only through step 45,000.
+
+Each boundary is inclusive, so the next route begins on the following step.
+The ordinary base task updates both senders and receivers at every step. Mining
+still uses hard training predictions only. The complete optimization trajectory
+through step 30,000 must match Batch 25 and Batch 24 exactly.
+
+The batch contains exactly two seed-11 runs:
+
+1. the unchanged ECP-6 positive control;
+2. ECP7-B26-I with the coordinate-descent replay cycle.
+
+All existing validity and development gates remain unchanged. The intervention
+fails if any train, validation, translator, injectivity, channel-integrity or
+sealed-test requirement fails. No alternative phase boundary, gradient route,
+predicate, coefficient, replay batch, refresh, architecture, base loss,
+optimizer, horizon, data, translator or seed may be tried inside Batch 26.
+Failure is recorded without confirmatory test access.
+
+### Batch 26 outcome
+
+The registered seed-11 intervention reached 85.37% mean train, 82.74%
+worst-link train, 85.38% mean validation, 82.71% worst-link validation and
+85.38% universal-translator validation. Its sender codebooks used 13,438,
+12,960, 12,720 and 13,440 unique messages, effectively unchanged from Batch
+25. The second sender-only pulse reduced shared errors but increased meanings
+failed by at least one population link. It therefore failed the unchanged
+train and injectivity gates without accessing the confirmatory split.
+
+This completes the registered replay-routing family. Further route cycling or
+horizon extension is disallowed as an unsupported repetition; any later
+development batch must preregister a direct sender-capacity intervention.

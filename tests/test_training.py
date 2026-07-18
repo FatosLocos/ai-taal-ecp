@@ -705,6 +705,32 @@ def test_hard_replay_sender_gradients_switch_after_registered_step(
     assert not _hard_replay_sender_message_gradients(schedule, 30000)
 
 
+def test_hard_replay_coordinate_route_follows_registered_phases(
+    ecp7_b26_config,
+):
+    schedule = ecp7_b26_config["training"]["global_hard_meaning_replay"]
+    expected = {
+        15000: (True, False),
+        20000: (True, False),
+        20001: (False, True),
+        30000: (False, True),
+        30001: (True, False),
+        35000: (True, False),
+        35001: (False, True),
+        45000: (False, True),
+    }
+
+    for step, (sender_gradients, receiver_gradients) in expected.items():
+        assert (
+            _hard_replay_sender_message_gradients(schedule, step)
+            is sender_gradients
+        )
+        assert (
+            _hard_replay_receiver_parameter_gradients(schedule, step)
+            is receiver_gradients
+        )
+
+
 def test_receiver_binding_calibration_recovers_exact_permutation(ecp4_config):
     receiver = FactorizedPermutationSlotReceiver(ModelSpec.from_config(ecp4_config))
     meanings = torch.tensor(

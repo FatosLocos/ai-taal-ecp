@@ -143,6 +143,14 @@ validation, but the observed worst train link exactly reached its sender's
 receiver training time. Exact identities and hashes are in
 `batch25-manifest.json`.
 
+Batch 26 inserted one second sender-only pulse followed by receiver-only
+catch-up. It reached small new-best means of 85.37% train and 85.38% validation
+and translator validation, but its unique-message counts were effectively
+unchanged. Shared failures fell from 1,677 to 1,330 while any-link failures
+rose from 2,967 to 3,262, confirming that route cycling redistributes errors
+without fixing sender collisions. Exact identities and hashes are in
+`batch26-manifest.json`.
+
 Reproduce the development arms with:
 
 ```bash
